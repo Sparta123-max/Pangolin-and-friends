@@ -1,0 +1,8 @@
+flask
+torch
+torchvision
+ultralytics
+transformers
+opencv-python
+pillow
+requests
