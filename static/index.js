@@ -106,28 +106,32 @@ function drawDetections() {
   lastDetections.forEach((det) => {
     const [x1, y1, x2, y2] = det.box;
     const conf = det.confidence;
-    const label = det.class;
+    const label = det.label_vi || (det.class === "masked palm civet" ? "Cầy vòi mốc" : det.class === "pangolin" ? "Tê Tê" : det.class);
+    const clsLower = (det.class || "").toLowerCase();
+    const isCivet = clsLower.includes("civet") || clsLower.includes("masked") || clsLower.includes("cầy");
 
-    // Draw box
-    ctx.strokeStyle = "#8bc34a"; // accent-green
+    // Colors: Green for Pangolin, Amber for Masked Palm Civet
+    const strokeColor = isCivet ? "#ffb74d" : "#8bc34a";
+    const bgColor = isCivet ? "rgba(255, 183, 77, 0.85)" : "rgba(139, 195, 74, 0.85)";
+
+    ctx.strokeStyle = strokeColor;
     ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-    // Draw label background
-    const text = label;
+    const text = `${label} (${Math.round(conf * 100)}%)`;
     const textWidth = ctx.measureText(text).width;
-    ctx.fillStyle = "rgba(139, 195, 74, 0.85)";
-    ctx.fillRect(x1 - 1, y1 - 22, textWidth + 10, 22);
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(x1 - 1, Math.max(0, y1 - 24), textWidth + 10, 22);
 
-    // Draw text
     ctx.fillStyle = "#0b1a03";
-    ctx.fillText(text, x1 + 4, y1 - 18);
+    ctx.fillText(text, x1 + 4, Math.max(4, y1 - 20));
   });
 }
 
+let dangPhatCivet = false;
+
 function processDetections(detections) {
-  // Check for any detection with class matching pangolin/tete/class 0
   const teteDets = detections.filter((d) => {
-    const cls = d.class.toLowerCase();
+    const cls = (d.class || "").toLowerCase();
     return (
       cls.includes("tete") ||
       cls.includes("te_te") ||
@@ -138,20 +142,40 @@ function processDetections(detections) {
     );
   });
 
+  const civetDets = detections.filter((d) => {
+    const cls = (d.class || "").toLowerCase();
+    return (
+      cls.includes("civet") ||
+      cls.includes("masked") ||
+      cls.includes("cầy") ||
+      cls.includes("cay_voi_moc")
+    );
+  });
+
   const labelContainer = document.getElementById("label-container");
   if (!labelContainer) return;
 
+  let htmlParts = [];
+
   if (teteDets.length > 0) {
     const maxConf = Math.max(...teteDets.map((d) => d.confidence));
-
-    labelContainer.innerHTML = `<span style="color: var(--accent-green); font-size: 20px; text-shadow: 0 0 10px rgba(139, 195, 74, 0.5);">🌿 Phát hiện Tê Tê</span>`;
-
+    htmlParts.push(`<span style="color: var(--accent-green); font-size: 18px; margin-right: 15px; text-shadow: 0 0 10px rgba(139, 195, 74, 0.5);">🌿 Phát hiện Tê Tê (${Math.round(maxConf * 100)}%)</span>`);
     playAudioOnce("tete");
     maybeCaptureAndUploadEvent("TeTe", maxConf);
   } else {
-    labelContainer.innerHTML = "";
     dangPhatTeTe = false;
   }
+
+  if (civetDets.length > 0) {
+    const maxConf = Math.max(...civetDets.map((d) => d.confidence));
+    htmlParts.push(`<span style="color: #ffb74d; font-size: 18px; text-shadow: 0 0 10px rgba(255, 183, 77, 0.5);">🦡 Phát hiện Cầy Vòi Mốc (${Math.round(maxConf * 100)}%)</span>`);
+    playAudioOnce("civet");
+    maybeCaptureAndUploadEvent("CayVoiMoc", maxConf);
+  } else {
+    dangPhatCivet = false;
+  }
+
+  labelContainer.innerHTML = htmlParts.join("");
 }
 
 function playAudioOnce(type) {
@@ -160,6 +184,12 @@ function playAudioOnce(type) {
     amThanhTeTe.play().catch(() => {});
     amThanhTeTe.onended = () => {
       dangPhatTeTe = false;
+    };
+  } else if (type === "civet" && !dangPhatCivet) {
+    dangPhatCivet = true;
+    amThanhTeTe.play().catch(() => {});
+    amThanhTeTe.onended = () => {
+      dangPhatCivet = false;
     };
   }
 }

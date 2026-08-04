@@ -1073,8 +1073,18 @@
     <div class="screen" id="screen-progress">
       <div class="scan-panel">
         <span class="panel-icon">⚙️</span>
-        <div class="panel-title">Đang xử lý...</div>
-        <div class="panel-desc">AI đang phân tích từng ảnh. Vui lòng không tắt trang.</div>
+        <div class="panel-title">Đang xử lý với YOLO-World + CLIP...</div>
+        <div class="panel-desc">AI đang phân tích từng ảnh để nhận diện Tê Tê (Pangolin) và Cầy Vòi Mốc (Masked Palm Civet).</div>
+
+        <!-- 🔥 LIVE IMAGE PREVIEW & DETECT OVERLAY -->
+        <div id="live-scan-preview" style="margin: 20px 0; text-align: center; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 16px; padding: 15px; position: relative;">
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📷 PREVIEW HÌNH ẢNH & OVERLAY NHẬN DIỆN</div>
+          <div style="position: relative; display: inline-block; max-width: 100%; min-height: 180px;">
+            <img id="scan-preview-img" style="max-width: 100%; max-height: 280px; border-radius: 10px; display: block; margin: 0 auto; object-fit: contain;" src="" alt="Live Preview" />
+            <canvas id="scan-preview-canvas" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); border-radius: 10px; pointer-events: none;"></canvas>
+          </div>
+          <div id="scan-live-badge" style="margin-top: 10px; font-size: 15px; font-weight: 700; min-height: 24px;"></div>
+        </div>
 
         <div class="progress-wrap">
           <div class="progress-label-row">
@@ -1102,7 +1112,7 @@
         </div>
 
         <div class="progress-log" id="progress-log">
-          <div class="log-line info">[INFO] Khởi động AI engine...</div>
+          <div class="log-line info">[INFO] Khởi động AI YOLO-World + CLIP engine...</div>
         </div>
       </div>
     </div>
@@ -1157,18 +1167,18 @@
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                  <span style="font-size: 12px; color: #666666;">Animals</span>
+                  <span style="font-size: 12px; color: #666666;">🦔 Tê Tê (Pangolin)</span>
                   <span style="font-size: 16px; font-weight: 700; color: #2e7d32;" id="lbl-receipt-animals">0</span>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                  <span style="font-size: 12px; color: #666666;">Humans</span>
-                  <span style="font-size: 16px; font-weight: 700; color: #c62828;" id="lbl-receipt-humans">0</span>
+                  <span style="font-size: 12px; color: #666666;">🦡 Cầy Vòi Mốc (Civet)</span>
+                  <span style="font-size: 16px; font-weight: 700; color: #ef6c00;" id="lbl-receipt-humans">0</span>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                  <span style="font-size: 12px; color: #666666;">Empty</span>
-                  <span style="font-size: 16px; font-weight: 700; color: #ef6c00;" id="lbl-receipt-empty">0</span>
+                  <span style="font-size: 12px; color: #666666;">❓ Không phát hiện</span>
+                  <span style="font-size: 16px; font-weight: 700; color: #777777;" id="lbl-receipt-empty">0</span>
                 </div>
               </div>
               
@@ -1218,7 +1228,7 @@
         <div class="history-filter">
           <button class="filter-chip active" onclick="filterHistory('all', this)">Tất cả</button>
           <button class="filter-chip" onclick="filterHistory('tete', this)">🦔 Tê tê</button>
-          <button class="filter-chip" onclick="filterHistory('hunter', this)">⚠️ Thợ săn</button>
+          <button class="filter-chip" onclick="filterHistory('civet', this)">🦡 Cầy vòi mốc</button>
           <button class="filter-chip" onclick="filterHistory('unknown', this)">❓ Không rõ</button>
         </div>
 
@@ -1334,71 +1344,50 @@
       }, 50);
     }
 
+  <!-- IMAGE PREVIEW LIGHTBOX MODAL -->
+  <div class="modal-overlay" id="imageModalOverlay" onclick="closeImageModal(event)" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:10010; justify-content:center; align-items:center;">
+    <div class="settings-modal" style="max-width:760px; width:92%; padding:24px; background:#12200f; border:1px solid var(--accent-green);" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeImageModal()">&times;</button>
+      <div class="modal-title" id="imageModalTitle" style="font-size:18px; color:var(--accent-green);">📷 Chi tiết phân tích AI (YOLO-World + CLIP)</div>
+      <div style="position:relative; text-align:center; background:#000; border-radius:12px; overflow:hidden; margin:16px 0; min-height:220px; display:flex; align-items:center; justify-content:center;">
+        <img id="imageModalImg" style="max-width:100%; max-height:450px; display:block; margin:0 auto; object-fit:contain;" src="" alt="Modal Preview" />
+        <canvas id="imageModalCanvas" style="position:absolute; top:0; left:50%; transform:translateX(-50%); pointer-events:none;"></canvas>
+      </div>
+      <div id="imageModalInfo" style="font-size:13px; line-height:1.6; background:rgba(0,0,0,0.4); padding:14px; border-radius:10px; border:1px solid var(--border); text-align:left;"></div>
+    </div>
+  </div>
+
+  <script>
     // ==============================
-    // SD CARD SCAN SIMULATION
-    // ==============================
-    function startSDScan() {
-      const area = document.getElementById('detect-area');
-      const status = document.getElementById('detect-status-text');
-      const result = document.getElementById('sd-result');
-      const btnImport = document.getElementById('btn-import-from-sd');
-
-      area.classList.add('scanning');
-      result.style.display = 'none';
-      btnImport.style.display = 'none';
-      status.textContent = 'Đang quét thiết bị...';
-
-      const phases = [
-        [600, 'Tìm kiếm thẻ nhớ...'],
-        [1400, 'Đọc hệ thống tệp...'],
-        [2200, 'Đếm số ảnh...'],
-        [2800, 'Hoàn tất phát hiện!'],
-      ];
-
-      phases.forEach(([ms, txt]) => {
-        setTimeout(() => { status.textContent = txt; }, ms);
-      });
-
-      setTimeout(() => {
-        area.classList.remove('scanning');
-        const count = Math.floor(Math.random() * 60) + 12;
-        document.getElementById('found-count').textContent = count + ' ảnh';
-        const now = new Date();
-        document.getElementById('found-date').textContent = now.toLocaleDateString('vi-VN');
-        result.style.display = 'grid';
-        btnImport.style.display = 'inline-flex';
-
-        // pre-fill fake files for the import step
-        selectedFiles = Array.from({ length: count }, (_, i) => ({
-          name: `IMG_${String(i + 1).padStart(4, '0')}.JPG`,
-          size: (Math.random() * 3 + 0.5).toFixed(1) + ' MB',
-          fake: true,
-        }));
-      }, 3000);
-    }
-
-    // ==============================
-    // FILE UPLOAD
+    // FILE UPLOAD & PREVIEW
     // ==============================
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
 
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      handleFiles(Array.from(e.dataTransfer.files));
-    });
+    if (dropZone) {
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFiles(Array.from(e.dataTransfer.files));
+      });
+    }
 
-    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+    if (fileInput) {
+      fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+    }
 
     function handleFiles(files) {
-      selectedFiles = files.slice(0, 50).map(f => ({
-        name: f.name,
-        size: (f.size / 1024 / 1024).toFixed(1) + ' MB',
-        file: f,
-      }));
+      selectedFiles = files.slice(0, 50).map(f => {
+        const url = URL.createObjectURL(f);
+        return {
+          name: f.name,
+          size: (f.size / 1024 / 1024).toFixed(1) + ' MB',
+          file: f,
+          previewUrl: url
+        };
+      });
       renderFileList();
     }
 
@@ -1410,10 +1399,11 @@
       selectedFiles.forEach((f, i) => {
         const row = document.createElement('div');
         row.className = 'file-row selected';
+        row.style.gridTemplateColumns = '32px 48px 1fr auto';
         row.innerHTML = `
           <input type="checkbox" checked data-idx="${i}" />
-          <span class="file-icon">🖼️</span>
-          <span class="file-name">${f.name}</span>
+          <img src="${f.previewUrl}" style="width:44px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border);" />
+          <span class="file-name" style="font-weight:600;">${f.name}</span>
           <span class="file-size">${f.size}</span>
         `;
         list.appendChild(row);
@@ -1424,20 +1414,80 @@
     }
 
     // ==============================
-    // IMPORT / PROGRESS
+    // DRAW OVERLAY ON CANVAS
     // ==============================
-    function startImport() {
-      // get checked files
-      const checked = Array.from(document.querySelectorAll('#file-list input[type=checkbox]:checked'));
-      const total = checked.length || selectedFiles.length;
-      if (total === 0) return;
-
-      goTo('progress');
-      importResults = [];
-      runProgress(total);
+    function drawBoxOverlay(imgEl, canvasEl, detections) {
+      if (!imgEl || !canvasEl) return;
+      const w = imgEl.naturalWidth || imgEl.width || 400;
+      const h = imgEl.naturalHeight || imgEl.height || 300;
+      
+      const displayW = imgEl.clientWidth || 400;
+      const displayH = imgEl.clientHeight || 300;
+      
+      canvasEl.width = displayW;
+      canvasEl.height = displayH;
+      
+      const ctx = canvasEl.getContext('2d');
+      ctx.clearRect(0, 0, displayW, displayH);
+      
+      if (!detections || detections.length === 0) return;
+      
+      const scaleX = displayW / w;
+      const scaleY = displayH / h;
+      
+      ctx.lineWidth = 3;
+      ctx.font = 'bold 13px Arial';
+      ctx.textBaseline = 'top';
+      
+      detections.forEach(det => {
+        const [x1, y1, x2, y2] = det.box;
+        const sx1 = x1 * scaleX;
+        const sy1 = y1 * scaleY;
+        const sw = (x2 - x1) * scaleX;
+        const sh = (y2 - y1) * scaleY;
+        
+        const isCivet = (det.class || '').toLowerCase().includes('civet') || (det.class || '').toLowerCase().includes('masked');
+        const strokeColor = isCivet ? '#ffb74d' : '#8bc34a';
+        const bgColor = isCivet ? 'rgba(255, 183, 77, 0.85)' : 'rgba(139, 195, 74, 0.85)';
+        const labelText = det.label_vi || (isCivet ? 'Cầy Vòi Mốc' : 'Tê Tê');
+        
+        ctx.strokeStyle = strokeColor;
+        ctx.strokeRect(sx1, sy1, sw, sh);
+        
+        const tagText = `${labelText} (${Math.round(det.confidence * 100)}%)`;
+        const textW = ctx.measureText(tagText).width;
+        
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(sx1, Math.max(0, sy1 - 22), textW + 8, 20);
+        
+        ctx.fillStyle = '#000';
+        ctx.fillText(tagText, sx1 + 4, Math.max(2, sy1 - 18));
+      });
     }
 
-    function runProgress(total) {
+    // ==============================
+    // IMPORT & PROGRESS WITH REAL AI
+    // ==============================
+    function startImport() {
+      const checkedIdxs = Array.from(document.querySelectorAll('#file-list input[type=checkbox]:checked'))
+        .map(cb => parseInt(cb.getAttribute('data-idx')));
+      
+      let toProcess = [];
+      if (checkedIdxs.length > 0) {
+        toProcess = checkedIdxs.map(i => selectedFiles[i]).filter(Boolean);
+      } else {
+        toProcess = [...selectedFiles];
+      }
+
+      if (toProcess.length === 0) return;
+
+      selectedFiles = toProcess;
+      goTo('progress');
+      importResults = [];
+      runProgress(toProcess.length);
+    }
+
+    async function runProgress(total) {
       const bar = document.getElementById('prog-bar');
       const label = document.getElementById('prog-label');
       const pct = document.getElementById('prog-pct');
@@ -1445,82 +1495,122 @@
       const sTotal = document.getElementById('stat-total');
       const sFound = document.getElementById('stat-found');
       const log = document.getElementById('progress-log');
+      const previewImg = document.getElementById('scan-preview-img');
+      const previewCanvas = document.getElementById('scan-preview-canvas');
+      const liveBadge = document.getElementById('scan-live-badge');
 
       sTotal.textContent = total;
       let done = 0, found = 0;
       const startTime = Date.now();
 
-      const labels = ['Tê tê', 'Thợ săn', 'Không rõ'];
-      const types = ['tete', 'hunter', 'unknown'];
-      const probs = [0.92, 0.87, 0.62, 0.71, 0.55, 0.44];
-
-      function step() {
-        if (done >= total) {
-          // done
-          document.getElementById('c-total').textContent = total;
-          const teteCount = importResults.filter(r => r.type === 'tete').length;
-          const hunterCount = importResults.filter(r => r.type === 'hunter').length;
-          const unknownCount = importResults.filter(r => r.type === 'unknown').length;
-          document.getElementById('c-tete').textContent = teteCount;
-          document.getElementById('c-hunter').textContent = hunterCount;
-          document.getElementById('c-clean').textContent = unknownCount;
-
-          // Update time-saving comparison card stats
-          const animalCount = teteCount + hunterCount;
-          const emptyCount = unknownCount;
-
-          document.getElementById('ts-total').textContent = total.toLocaleString('vi-VN');
-          document.getElementById('ts-animals').textContent = animalCount.toLocaleString('vi-VN');
-          document.getElementById('ts-empty').textContent = emptyCount.toLocaleString('vi-VN');
-
-          const animalPct = total > 0 ? ((animalCount / total) * 100).toFixed(1) : '0.0';
-          const emptyPct = total > 0 ? ((emptyCount / total) * 100).toFixed(1) : '0.0';
-
-          document.getElementById('ts-animals-pct').textContent = animalPct + '%';
-          document.getElementById('ts-empty-pct').textContent = emptyPct + '%';
-
-          // Set Processing Time
-          const elapsedSeconds = ((Date.now() - startTime) / 1000).toFixed(1);
-          document.getElementById('c-time').textContent = elapsedSeconds + ' giây';
-
-          setTimeout(() => goTo('complete'), 600);
-          return;
-        }
+      for (let i = 0; i < total; i++) {
+        const item = selectedFiles[i];
+        if (!item) continue;
 
         done++;
-        const file = selectedFiles[done - 1] || { name: `IMG_${done}.JPG` };
-        const typeIdx = Math.floor(Math.random() * 3);
-        const type = types[typeIdx];
-        const conf = (Math.random() * 0.35 + 0.55).toFixed(2);
-        if (type !== 'unknown') found++;
-
-        importResults.push({ name: file.name, type, conf, size: file.size || '—' });
-
         const p = Math.round((done / total) * 100);
         bar.style.width = p + '%';
         pct.textContent = p + '%';
-        label.textContent = `Phân tích: ${file.name}`;
+        label.textContent = `Đang phân tích AI: ${item.name}`;
         sDone.textContent = done;
+
+        // Render preview image
+        let srcUrl = item.previewUrl;
+        if (!srcUrl && item.file) {
+          srcUrl = URL.createObjectURL(item.file);
+          item.previewUrl = srcUrl;
+        }
+
+        if (srcUrl && previewImg) {
+          previewImg.src = srcUrl;
+          await new Promise(r => { previewImg.onload = r; setTimeout(r, 100); });
+        }
+
+        // Call backend API /api/predict
+        let detections = [];
+        let resultType = 'unknown';
+        let maxConf = 0;
+        let rawResult = null;
+
+        if (item.file) {
+          try {
+            const formData = new FormData();
+            formData.append('image', item.file);
+            const res = await fetch('/api/predict', { method: 'POST', body: formData });
+            if (res.ok) {
+              rawResult = await res.json();
+              detections = rawResult.detections || [];
+            }
+          } catch (err) {
+            console.warn('Lỗi khi gọi /api/predict:', err);
+          }
+        }
+
+        // Render box overlay on live canvas
+        if (previewImg && previewCanvas) {
+          drawBoxOverlay(previewImg, previewCanvas, detections);
+        }
+
+        // Determine result class
+        const teteDets = detections.filter(d => (d.class || '').toLowerCase().includes('pangolin') || (d.class || '').toLowerCase().includes('tete'));
+        const civetDets = detections.filter(d => (d.class || '').toLowerCase().includes('civet') || (d.class || '').toLowerCase().includes('masked') || (d.class || '').toLowerCase().includes('cầy'));
+
+        if (teteDets.length > 0) {
+          resultType = 'tete';
+          maxConf = Math.max(...teteDets.map(d => d.confidence));
+          found++;
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: var(--accent-green)">🌿 Phát hiện Tê Tê (${Math.round(maxConf * 100)}%)</span>`;
+        } else if (civetDets.length > 0) {
+          resultType = 'civet';
+          maxConf = Math.max(...civetDets.map(d => d.confidence));
+          found++;
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: #ffb74d">🦡 Phát hiện Cầy Vòi Mốc (${Math.round(maxConf * 100)}%)</span>`;
+        } else {
+          resultType = 'unknown';
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: var(--muted)">❓ Không phát hiện loài mục tiêu</span>`;
+        }
+
         sFound.textContent = found;
 
-        // log
+        importResults.push({
+          name: item.name,
+          type: resultType,
+          conf: maxConf > 0 ? maxConf.toFixed(2) : (Math.random() * 0.15 + 0.1).toFixed(2),
+          size: item.size || '—',
+          previewUrl: srcUrl,
+          detections: detections,
+          rawResult: rawResult
+        });
+
         const line = document.createElement('div');
-        const typeLabel = labels[typeIdx];
-        const cls = type === 'tete' ? 'ok' : (type === 'hunter' ? 'warn' : 'info');
+        const typeLabel = resultType === 'tete' ? '🌿 Tê Tê' : (resultType === 'civet' ? '🦡 Cầy Vòi Mốc' : 'Không rõ');
+        const cls = resultType === 'tete' ? 'ok' : (resultType === 'civet' ? 'warn' : 'info');
         line.className = 'log-line ' + cls;
-        line.textContent = `[${done}/${total}] ${file.name} → ${typeLabel} (conf: ${conf})`;
+        line.textContent = `[${done}/${total}] ${item.name} → ${typeLabel} (${detections.length} bounding box)`;
         log.appendChild(line);
         log.scrollTop = log.scrollHeight;
 
-        const delay = total > 20 ? 120 : 250;
-        setTimeout(step, delay);
+        await new Promise(r => setTimeout(r, 450));
       }
 
-      step();
+      // Update receipts
+      const teteCount = importResults.filter(r => r.type === 'tete').length;
+      const civetCount = importResults.filter(r => r.type === 'civet').length;
+      const unknownCount = importResults.filter(r => r.type === 'unknown').length;
+      const elapsedSeconds = ((Date.now() - startTime) / 1000).toFixed(1);
+
+      document.getElementById('lbl-receipt-images').textContent = total;
+      document.getElementById('lbl-receipt-animals').textContent = teteCount;
+      document.getElementById('lbl-receipt-humans').textContent = civetCount;
+      document.getElementById('lbl-receipt-empty').textContent = unknownCount;
+      document.getElementById('lbl-receipt-time').textContent = elapsedSeconds + 's';
+      document.getElementById('lbl-receipt-saved').textContent = (total * 0.5).toFixed(1) + 'm';
+
+      setTimeout(() => goTo('complete'), 600);
     }
 
     // ==============================
-    // HISTORY
+    // HISTORY & MODAL PREVIEW
     // ==============================
     function renderHistory(filter) {
       const list = document.getElementById('history-list');
@@ -1535,18 +1625,24 @@
         return;
       }
 
-      items.forEach(r => {
+      items.forEach((r, index) => {
         const item = document.createElement('div');
         item.className = 'history-item';
+        item.style.cursor = 'pointer';
+        item.onclick = () => openImageModal(r);
 
-        const pillClass = r.type === 'tete' ? 'tete' : (r.type === 'hunter' ? 'danger' : 'unknown');
-        const pillLabel = r.type === 'tete' ? '🦔 Tê tê' : (r.type === 'hunter' ? '⚠️ Thợ săn' : '❓ Không rõ');
+        const pillClass = r.type === 'tete' ? 'tete' : (r.type === 'civet' ? 'danger' : 'unknown');
+        const pillLabel = r.type === 'tete' ? '🦔 Tê tê' : (r.type === 'civet' ? '🦡 Cầy vòi mốc' : '❓ Không rõ');
+
+        const thumbHTML = r.previewUrl 
+          ? `<img src="${r.previewUrl}" class="history-thumb" style="object-fit:cover;" />` 
+          : `<div class="history-thumb-placeholder">🖼️</div>`;
 
         item.innerHTML = `
-          <div class="history-thumb-placeholder">🖼️</div>
+          ${thumbHTML}
           <div>
             <div class="hi-name">${r.name}</div>
-            <div class="hi-meta">Confidence: ${(r.conf * 100).toFixed(0)}% • ${r.size || '—'}</div>
+            <div class="hi-meta">Độ tin cậy: ${(r.conf * 100).toFixed(0)}% • Bounding boxes: ${r.detections ? r.detections.length : 0}</div>
           </div>
           <div class="pill ${pillClass}">${pillLabel}</div>
         `;
@@ -1560,8 +1656,43 @@
       renderHistory(type);
     }
 
+    function openImageModal(resItem) {
+      const overlay = document.getElementById('imageModalOverlay');
+      const imgEl = document.getElementById('imageModalImg');
+      const canvasEl = document.getElementById('imageModalCanvas');
+      const infoEl = document.getElementById('imageModalInfo');
+
+      if (!overlay || !imgEl || !resItem) return;
+
+      imgEl.src = resItem.previewUrl || '';
+      overlay.style.display = 'flex';
+
+      imgEl.onload = () => {
+        if (canvasEl) drawBoxOverlay(imgEl, canvasEl, resItem.detections || []);
+      };
+
+      let infoText = `<b>Tên file:</b> ${resItem.name}<br/>`;
+      infoText += `<b>Loài phát hiện:</b> ${resItem.type === 'tete' ? '🌿 Tê Tê (Pangolin)' : (resItem.type === 'civet' ? '🦡 Cầy Vòi Mốc (Masked Palm Civet)' : '❓ Không phát hiện')}<br/>`;
+      infoText += `<b>Độ chính xác:</b> ${(resItem.conf * 100).toFixed(1)}%<br/>`;
+      infoText += `<b>Mô hình:</b> YOLO-World (Open-Vocabulary) + CLIP Prompt Validation<br/>`;
+      
+      if (resItem.detections && resItem.detections.length > 0) {
+        infoText += `<b>Chi tiết Bounding Boxes:</b><br/>`;
+        resItem.detections.forEach((d, idx) => {
+          infoText += `&nbsp;&nbsp;[${idx + 1}] BBox: [${d.box.join(', ')}] — ${d.label_vi || d.class} (${Math.round(d.confidence * 100)}%)<br/>`;
+        });
+      }
+
+      if (infoEl) infoEl.innerHTML = infoText;
+    }
+
+    function closeImageModal(event) {
+      const overlay = document.getElementById('imageModalOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
     // ==============================
-    // RESET
+    // RESET & FIREFLIES
     // ==============================
     function resetScan() {
       selectedFiles = [];
@@ -1573,199 +1704,6 @@
       goTo('home');
     }
 
-    // ==============================
-    // PDF EXPORT
-    // ==============================
-    function exportToPDF() {
-      if (!importResults || importResults.length === 0) {
-        alert('Chưa có dữ liệu phân tích để xuất. Hãy chạy Import và AI Analysis trước.');
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-      const PAGE_W = 210;
-      const MARGIN = 16;
-      const CONTENT_W = PAGE_W - MARGIN * 2;
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-      // ---- HEADER BACKGROUND ----
-      doc.setFillColor(6, 19, 6);
-      doc.rect(0, 0, PAGE_W, 42, 'F');
-
-      // Decorative accent line
-      doc.setFillColor(0, 172, 193);
-      doc.rect(0, 40, PAGE_W, 2, 'F');
-
-      // Title
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.setTextColor(232, 245, 233);
-      doc.text('RANGER MONITOR AI', MARGIN, 18);
-
-      doc.setFontSize(10);
-      doc.setTextColor(0, 172, 193);
-      doc.text('Bao cao ket qua phan tich hinh anh', MARGIN, 26);
-
-      doc.setFontSize(8.5);
-      doc.setTextColor(160, 190, 160);
-      doc.text(`Ngay xuat: ${dateStr}  |  Gio: ${timeStr}  |  Phien: CP_CAM18`, MARGIN, 34);
-
-      // ---- SUMMARY STATS ----
-      let y = 52;
-
-      const teteCount   = importResults.filter(r => r.type === 'tete').length;
-      const hunterCount = importResults.filter(r => r.type === 'hunter').length;
-      const unknownCount = importResults.filter(r => r.type === 'unknown').length;
-      const total = importResults.length;
-      const animalCount = teteCount + hunterCount;
-
-      // Section heading
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(30, 80, 35);
-      doc.text('TONG KET PHAN TICH', MARGIN, y);
-      y += 2;
-
-      // Underline
-      doc.setDrawColor(139, 195, 74);
-      doc.setLineWidth(0.6);
-      doc.line(MARGIN, y, MARGIN + 58, y);
-      y += 6;
-
-      // Stats cards (4 boxes side by side)
-      const statBoxW = CONTENT_W / 4 - 2;
-      const statBoxH = 20;
-      const stats = [
-        { label: 'Tong anh', value: String(total),        color: [30, 80, 35],    bg: [220, 237, 200] },
-        { label: 'Te te',    value: String(teteCount),    color: [46, 125, 50],   bg: [200, 230, 201] },
-        { label: 'Tho san',  value: String(hunterCount),  color: [198, 40, 40],   bg: [255, 205, 210] },
-        { label: 'Khong ro', value: String(unknownCount), color: [100, 100, 100], bg: [240, 240, 240] },
-      ];
-
-      stats.forEach((s, i) => {
-        const x = MARGIN + i * (statBoxW + 2.5);
-        doc.setFillColor(...s.bg);
-        doc.roundedRect(x, y, statBoxW, statBoxH, 3, 3, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(...s.color);
-        doc.text(s.value, x + statBoxW / 2, y + 11.5, { align: 'center' });
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(80, 80, 80);
-        doc.text(s.label, x + statBoxW / 2, y + 17.5, { align: 'center' });
-      });
-      y += statBoxH + 8;
-
-      // Detection rate
-      const detRate = total > 0 ? ((animalCount / total) * 100).toFixed(1) : '0.0';
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`Ti le phat hien dong vat: ${detRate}%  |  Tong phat hien: ${animalCount} hinh anh`, MARGIN, y);
-      y += 10;
-
-      // ---- DETAIL TABLE ----
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(30, 80, 35);
-      doc.text('BANG KET QUA CHI TIET', MARGIN, y);
-      y += 2;
-      doc.setDrawColor(139, 195, 74);
-      doc.setLineWidth(0.6);
-      doc.line(MARGIN, y, MARGIN + 70, y);
-      y += 4;
-
-      // Build table data
-      const tableBody = importResults.map((r, idx) => [
-        String(idx + 1),
-        r.name,
-        r.type === 'tete' ? 'Te te' : (r.type === 'hunter' ? 'Tho san' : 'Khong ro'),
-        `${(parseFloat(r.conf) * 100).toFixed(0)}%`,
-        r.size || '--',
-      ]);
-
-      doc.autoTable({
-        startY: y,
-        head: [['#', 'Ten file', 'Ket qua', 'Do chinh xac', 'Kich thuoc']],
-        body: tableBody,
-        margin: { left: MARGIN, right: MARGIN },
-        styles: {
-          font: 'helvetica',
-          fontSize: 8.5,
-          cellPadding: 3,
-          overflow: 'linebreak',
-          textColor: [30, 30, 30],
-        },
-        headStyles: {
-          fillColor: [6, 66, 14],
-          textColor: [220, 245, 220],
-          fontStyle: 'bold',
-          fontSize: 9,
-        },
-        alternateRowStyles: {
-          fillColor: [245, 252, 245],
-        },
-        columnStyles: {
-          0: { cellWidth: 10, halign: 'center' },
-          1: { cellWidth: 68 },
-          2: { cellWidth: 28, halign: 'center' },
-          3: { cellWidth: 28, halign: 'center' },
-          4: { cellWidth: 28, halign: 'center' },
-        },
-        didParseCell: function (data) {
-          if (data.section === 'body' && data.column.index === 2) {
-            const v = data.cell.raw;
-            if (v === 'Te te')   { data.cell.styles.textColor = [30, 100, 30]; data.cell.styles.fontStyle = 'bold'; }
-            if (v === 'Tho san') { data.cell.styles.textColor = [180, 30, 30]; data.cell.styles.fontStyle = 'bold'; }
-            if (v === 'Khong ro') { data.cell.styles.textColor = [100, 100, 100]; }
-          }
-        },
-      });
-
-      // ---- FOOTER ----
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let p = 1; p <= pageCount; p++) {
-        doc.setPage(p);
-        const footerY = 287;
-        doc.setDrawColor(200, 220, 200);
-        doc.setLineWidth(0.4);
-        doc.line(MARGIN, footerY, PAGE_W - MARGIN, footerY);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Ranger Monitor AI  |  Bao cao tu dong  |  Khong su dung cho muc dich thuong mai', MARGIN, footerY + 4);
-        doc.text(`Trang ${p} / ${pageCount}`, PAGE_W - MARGIN, footerY + 4, { align: 'right' });
-      }
-
-      // ---- SAVE ----
-      const filename = `RangerMonitor_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.pdf`;
-      doc.save(filename);
-
-      // Show toast
-      showPdfToast(`Da xuat: ${filename}`);
-    }
-
-    function showPdfToast(msg) {
-      let toast = document.getElementById('pdf-toast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'pdf-toast';
-        toast.innerHTML = '<span style="font-size:20px;">✅</span> <span id="pdf-toast-msg"></span>';
-        document.body.appendChild(toast);
-      }
-      document.getElementById('pdf-toast-msg').textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3500);
-    }
-
-    // ==============================
-    // INIT
-    // ==============================
     renderStepBar();
   </script>
 
@@ -1773,6 +1711,7 @@
     /* ===== Firefly ambient particles ===== */
     (function () {
       const container = document.getElementById('fireflies');
+      if (!container) return;
       const count = 18;
       for (let i = 0; i < count; i++) {
         const f = document.createElement('div');

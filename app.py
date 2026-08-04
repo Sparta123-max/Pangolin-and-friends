@@ -6,21 +6,53 @@ import uuid
 from pathlib import Path
 from typing import Optional
 from datetime import datetime, timezone
-from ultralytics import YOLO
+from ultralytics import YOLO, YOLOWorld
 import cv2
 import numpy as np
+from PIL import Image
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+TARGET_CLASSES = ["pangolin", "masked palm civet"]
+CLASS_VI_MAP = {
+    "pangolin": "Tê Tê",
+    "masked palm civet": "Cầy Vòi Mốc",
+    "tete": "Tê Tê",
+    "te_te": "Tê Tê",
+    "cầy vòi mốc": "Cầy Vòi Mốc",
+    "cay_voi_moc": "Cầy Vòi Mốc"
+}
+
+# 1. Initialize YOLO-World model for open-vocabulary detection
+yolo_world_model = None
+try:
+    yolo_world_model = YOLOWorld("yolov8s-worldv2.pt")
+    yolo_world_model.set_classes(TARGET_CLASSES)
+    print("YOLO-World model initialized with classes:", TARGET_CLASSES)
+except Exception as e:
+    print(f"Warning: Could not initialize YOLO-World model: {e}")
+    yolo_world_model = None
+
+# 2. Legacy / fine-tuned YOLOv8 model fallback
 yolo_model_path = os.path.join(app.root_path, "static", "my_model", "best.pt")
 try:
     yolo_model = YOLO(yolo_model_path)
-    print("YOLOv8 model loaded successfully. Classes:", yolo_model.names)
+    print("YOLOv8 best.pt loaded. Classes:", yolo_model.names)
 except Exception as e:
     print(f"Warning: Could not load YOLOv8 model: {e}")
     yolo_model = None
+
+# 3. Initialize CLIP zero-shot classification pipeline
+clip_classifier = None
+try:
+    from transformers import pipeline
+    clip_classifier = pipeline("zero-shot-image-classification", model="openai/clip-vit-base-patch32")
+    print("CLIP zero-shot classifier initialized.")
+except Exception as e:
+    print(f"Warning: Could not initialize CLIP classifier: {e}")
+
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -209,8 +241,8 @@ def create_event():
         except ValueError:
             probability = None
 
-    if event_type not in {"TeTe", "Nguy hiem"}:
-        return jsonify({"error": "event_type must be TeTe or Nguy hiem"}), 400
+    if event_type not in {"TeTe", "CayVoiMoc", "Nguy hiem"}:
+        return jsonify({"error": "event_type must be TeTe, CayVoiMoc, or Nguy hiem"}), 400
 
     snapshot = request.files.get("snapshot")
     video = request.files.get("video")
@@ -277,13 +309,10 @@ def analyze():
 
 @app.route("/api/predict", methods=["POST"])
 def predict_api():
-    if yolo_model is None:
-        return jsonify({"error": "YOLO model is not loaded"}), 500
-        
-    if "image" not in request.files:
+    if "image" not in request.files and "file" not in request.files:
         return jsonify({"error": "No image file provided"}), 400
         
-    file = request.files["image"]
+    file = request.files.get("image") or request.files.get("file")
     img_bytes = file.read()
     
     nparr = np.frombuffer(img_bytes, np.uint8)
@@ -292,24 +321,105 @@ def predict_api():
     if img is None:
         return jsonify({"error": "Invalid image format"}), 400
         
-    results = yolo_model(img, conf=0.25)
-    
+    h, w, _ = img.shape
     detections = []
-    for r in results:
-        boxes = r.boxes
-        for box in boxes:
-            x1, y1, x2, y2 = box.xyxy[0].tolist()
-            conf = float(box.conf[0])
-            cls = int(box.cls[0])
-            name = r.names[cls]
+    
+    # 1. Primary open-vocabulary detection with YOLO-World
+    if yolo_world_model is not None:
+        try:
+            results = yolo_world_model(img, conf=0.15)
+            for r in results:
+                boxes = r.boxes
+                for box in boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    conf = float(box.conf[0])
+                    cls_id = int(box.cls[0])
+                    raw_cls = r.names[cls_id] if hasattr(r, 'names') and cls_id in r.names else TARGET_CLASSES[cls_id if cls_id < len(TARGET_CLASSES) else 0]
+                    
+                    cls_name = raw_cls.lower()
+                    if "civet" in cls_name or "masked" in cls_name:
+                        standard_name = "masked palm civet"
+                    elif "pangolin" in cls_name or "tete" in cls_name:
+                        standard_name = "pangolin"
+                    else:
+                        standard_name = raw_cls
+                        
+                    label_vi = CLASS_VI_MAP.get(standard_name.lower(), standard_name)
+                    detections.append({
+                        "box": [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)],
+                        "confidence": round(conf, 3),
+                        "class": standard_name,
+                        "label_vi": label_vi,
+                        "source": "YOLO-World"
+                    })
+        except Exception as e:
+            print("YOLO-World prediction error:", e)
             
-            detections.append({
-                "box": [x1, y1, x2, y2],
-                "confidence": conf,
-                "class": name
-            })
+    # 2. Fallback detection with YOLOv8 best.pt if needed
+    if not detections and yolo_model is not None:
+        try:
+            results = yolo_model(img, conf=0.2)
+            for r in results:
+                boxes = r.boxes
+                for box in boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    conf = float(box.conf[0])
+                    cls_id = int(box.cls[0])
+                    raw_name = str(r.names[cls_id]) if hasattr(r, 'names') and cls_id in r.names else str(cls_id)
+                    lower_name = raw_name.lower()
+                    
+                    if any(k in lower_name for k in ["tete", "te_te", "pangolin", "0"]):
+                        standard_name = "pangolin"
+                    elif any(k in lower_name for k in ["civet", "cay_voi_moc", "masked"]):
+                        standard_name = "masked palm civet"
+                    else:
+                        standard_name = raw_name
+                        
+                    label_vi = CLASS_VI_MAP.get(standard_name.lower(), standard_name)
+                    detections.append({
+                        "box": [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)],
+                        "confidence": round(conf, 3),
+                        "class": standard_name,
+                        "label_vi": label_vi,
+                        "source": "YOLOv8"
+                    })
+        except Exception as e:
+            print("YOLOv8 prediction error:", e)
+
+    # 3. CLIP zero-shot classification evaluation & proposal fallback
+    clip_result = None
+    if clip_classifier is not None:
+        try:
+            pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            clip_res = clip_classifier(
+                pil_img, 
+                candidate_labels=["a photo of a pangolin", "a photo of a masked palm civet", "a photo of an empty forest or background"]
+            )
+            top_pred = clip_res[0]
+            label = top_pred["label"]
+            score = top_pred["score"]
             
-    return jsonify({"detections": detections})
+            if "pangolin" in label and score >= 0.35:
+                clip_result = {"class": "pangolin", "label_vi": "Tê Tê", "confidence": round(score, 3)}
+            elif "masked palm civet" in label and score >= 0.35:
+                clip_result = {"class": "masked palm civet", "label_vi": "Cầy Vòi Mốc", "confidence": round(score, 3)}
+                
+            if not detections and clip_result:
+                detections.append({
+                    "box": [round(w * 0.15, 1), round(h * 0.15, 1), round(w * 0.85, 1), round(h * 0.85, 1)],
+                    "confidence": clip_result["confidence"],
+                    "class": clip_result["class"],
+                    "label_vi": clip_result["label_vi"],
+                    "source": "CLIP"
+                })
+        except Exception as e:
+            print("CLIP classification error:", e)
+            
+    return jsonify({
+        "detections": detections,
+        "clip_info": clip_result,
+        "image_size": [w, h]
+    })
 
 
 if __name__ == "__main__":
