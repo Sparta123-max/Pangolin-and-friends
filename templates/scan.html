@@ -13,6 +13,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
+  <!-- TensorFlow.js + Teachable Machine (Classification) + COCO-SSD (Object Detection) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <!-- ONNX Runtime Web (YOLO ONNX Inference) -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+
   <style>
     :root {
       --bg: #040e05;
@@ -932,6 +939,127 @@
       display: block;
     }
 
+    /* ===== MODEL TYPE SELECTOR ===== */
+    .model-type-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .model-type-card {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.18);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .model-type-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .model-type-card.cls-card::before {
+      background: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.07) 0%, transparent 70%);
+    }
+
+    .model-type-card.od-card::before {
+      background: radial-gradient(circle at 50% 0%, rgba(255, 183, 77, 0.08) 0%, transparent 70%);
+    }
+
+    .model-type-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .model-type-card:hover::before { opacity: 1; }
+
+    .model-type-card.selected.cls-card {
+      border-color: rgba(0, 229, 255, 0.55);
+      background: rgba(0, 172, 193, 0.1);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+
+    .model-type-card.selected.yolo-card {
+      border-color: rgba(124, 179, 66, 0.65);
+      background: rgba(124, 179, 66, 0.12);
+      box-shadow: 0 0 22px rgba(124, 179, 66, 0.25);
+    }
+
+    .model-type-card.selected.pt-card {
+      border-color: rgba(238, 76, 44, 0.7);
+      background: rgba(238, 76, 44, 0.12);
+      box-shadow: 0 0 22px rgba(238, 76, 44, 0.25);
+    }
+
+    .model-type-card.selected.od-card {
+      border-color: rgba(255, 183, 77, 0.55);
+      background: rgba(255, 152, 0, 0.08);
+      box-shadow: 0 0 20px rgba(255, 183, 77, 0.15);
+    }
+
+    .mtc-icon { font-size: 28px; margin-bottom: 6px; }
+    .mtc-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .mtc-subtitle { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+    .model-type-card.selected .mtc-title { color: #00e5ff; }
+    .model-type-card.selected.yolo-card .mtc-title { color: #c5e88a; }
+    .model-type-card.selected.pt-card .mtc-title { color: #ff8a65; }
+    .model-type-card.selected.od-card .mtc-title { color: #ffb74d; }
+
+    .mtc-badge.yolo-badge {
+      background: rgba(124, 179, 66, 0.18);
+      color: #c5e88a;
+      border: 1px solid rgba(124, 179, 66, 0.35);
+    }
+
+    .mtc-badge.pt-badge {
+      background: rgba(238, 76, 44, 0.2);
+      color: #ff8a65;
+      border: 1px solid rgba(238, 76, 44, 0.4);
+    }
+
+    .mtc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+
+    .mtc-badge.cls-badge {
+      background: rgba(0, 172, 193, 0.15);
+      color: #00e5ff;
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    .mtc-badge.od-badge {
+      background: rgba(255, 152, 0, 0.15);
+      color: #ffb74d;
+      border: 1px solid rgba(255, 183, 77, 0.2);
+    }
+
+    .model-type-card .check-mark {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .model-type-card.selected .check-mark { opacity: 1; }
+
     /* ===== AMBIENT FIREFLIES ===== */
     #fireflies {
       position: fixed;
@@ -977,27 +1105,66 @@
     <!-- rendered by JS -->
   </div>
 
+  <!-- PDF Toast notification -->
+  <div id="pdf-toast">
+    <span>📄</span>
+    <span id="pdf-toast-msg">PDF đã xuất thành công!</span>
+  </div>
+
   <!-- MAIN CONTENT -->
   <div class="scan-container">
 
     <!-- SCREEN 1: HOME -->
     <div class="screen active" id="screen-home">
       <div class="scan-panel">
-        <span class="panel-icon">📷</span>
+        <span class="panel-icon">🎥</span>
         <div class="panel-title">Import card ID</div>
-        <div class="panel-desc">Nhập ảnh từ thẻ nhớ hoặc upload trực tiếp để AI phân tích và nhận diện Tê tê / Thợ săn.
+        <div class="panel-desc">Nhập ảnh hoặc video từ thẻ nhớ bẫy ảnh / upload trực tiếp để AI phân tích và nhận diện Tê tê, Cầy vòi mốc và Thợ săn.
+        </div>
+
+        <!-- MODEL TYPE SELECTOR -->
+        <div style="margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px;">⚙️ Chọn loại mô hình AI</div>
+        <div class="model-type-row">
+          <div class="model-type-card pt-card" id="mtc-pt" onclick="selectModelType('yolo_pt')">
+            <div class="check-mark">✅</div>
+            <div class="mtc-icon">🔥</div>
+            <div class="mtc-title">YOLO PyTorch (.pt)</div>
+            <div class="mtc-subtitle">Backend Server<br/>manhnd_best_model.pt</div>
+            <div class="mtc-badge pt-badge">Gốc • Chuẩn 100%</div>
+          </div>
+          <div class="model-type-card yolo-card selected" id="mtc-yolo" onclick="selectModelType('yolo_onnx')">
+            <div class="check-mark">✅</div>
+            <div class="mtc-icon">⚡</div>
+            <div class="mtc-title">YOLO ONNX</div>
+            <div class="mtc-subtitle">Trình duyệt (WASM)<br/>best.onnx (640×640)</div>
+            <div class="mtc-badge yolo-badge">Client • BBox</div>
+          </div>
+          <div class="model-type-card cls-card" id="mtc-cls" onclick="selectModelType('classification')">
+            <div class="check-mark">✅</div>
+            <div class="mtc-icon">🏷️</div>
+            <div class="mtc-title">Phân loại</div>
+            <div class="mtc-subtitle">Teachable Machine<br/>Scan_model</div>
+            <div class="mtc-badge cls-badge">Không viền</div>
+          </div>
+          <div class="model-type-card od-card" id="mtc-od" onclick="selectModelType('detection')">
+            <div class="check-mark">✅</div>
+            <div class="mtc-icon">🎯</div>
+            <div class="mtc-title">COCO-SSD</div>
+            <div class="mtc-subtitle">Object Detection<br/>COCO-SSD TF.js</div>
+            <div class="mtc-badge od-badge">Đa mục tiêu</div>
+          </div>
         </div>
 
         <div class="home-actions">
           <div class="action-card" onclick="goTo('detect-sd')" id="btn-sd-card">
             <span class="ac-icon">💾</span>
             <div class="ac-title">Detect SD Card</div>
-            <div class="ac-desc">Phát hiện thẻ nhớ từ camera bẫy và import ảnh tự động</div>
+            <div class="ac-desc">Phát hiện thẻ nhớ từ camera bẫy và import ảnh/video tự động</div>
           </div>
           <div class="action-card" onclick="goTo('import')" id="btn-upload-direct">
             <span class="ac-icon">📁</span>
-            <div class="ac-title">Upload ảnh</div>
-            <div class="ac-desc">Chọn ảnh từ máy tính để phân tích ngay lập tức</div>
+            <div class="ac-title">Upload Ảnh & Video</div>
+            <div class="ac-desc">Chọn ảnh hoặc clip video từ máy tính để phân tích ngay lập tức</div>
           </div>
         </div>
       </div>
@@ -1025,8 +1192,8 @@
             <span class="value">32 GB</span>
           </div>
           <div class="sd-info-row">
-            <span class="label">Ảnh tìm thấy</span>
-            <span class="value ok" id="found-count">0 ảnh</span>
+            <span class="label">Tệp tìm thấy (Ảnh & Video)</span>
+            <span class="value ok" id="found-count">0 tệp</span>
           </div>
           <div class="sd-info-row">
             <span class="label">Ngày ghi nhận</span>
@@ -1037,7 +1204,7 @@
         <div style="display:flex;gap:12px;margin-top:20px;">
           <button class="btn-secondary" onclick="goTo('home')" style="flex:0 0 auto;padding:12px 18px;">← Quay
             lại</button>
-          <button class="btn-primary" id="btn-import-from-sd" onclick="goTo('import')" style="display:none;">Import ảnh
+          <button class="btn-primary" id="btn-import-from-sd" onclick="goTo('import')" style="display:none;">Import tệp
             →</button>
         </div>
       </div>
@@ -1047,15 +1214,15 @@
     <div class="screen" id="screen-import">
       <div class="scan-panel">
         <span class="panel-icon">📂</span>
-        <div class="panel-title">Chọn ảnh để Import</div>
-        <div class="panel-desc">Chọn ảnh bạn muốn AI phân tích. Có thể chọn nhiều ảnh cùng lúc.</div>
+        <div class="panel-title">Chọn Ảnh hoặc Video để Import</div>
+        <div class="panel-desc">Chọn ảnh hoặc các đoạn video ngắn bạn muốn AI quét & phân tích. Hỗ trợ quét đồng thời.</div>
 
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-          <div class="dz-icon">📸</div>
-          <div class="dz-text">Kéo & thả ảnh vào đây hoặc <b>nhấn để chọn</b></div>
-          <div class="dz-text" style="margin-top:6px;font-size:11px;">Hỗ trợ: JPG, PNG, WEBP — Tối đa 50 ảnh</div>
+          <div class="dz-icon">📸 🎥</div>
+          <div class="dz-text">Kéo & thả ảnh / video vào đây hoặc <b>nhấn để chọn</b></div>
+          <div class="dz-text" style="margin-top:6px;font-size:11px;">Hỗ trợ: JPG, PNG, WEBP, MP4, MOV, WEBM, AVI, MKV — Tối đa 50 tệp</div>
         </div>
-        <input type="file" id="file-input" accept="image/*" multiple />
+        <input type="file" id="file-input" accept="image/*,video/*" multiple />
 
         <div class="file-list" id="file-list"></div>
 
@@ -1063,7 +1230,7 @@
           <button class="btn-secondary" onclick="goTo('home')" style="flex:0 0 auto;padding:12px 18px;">← Quay
             lại</button>
           <button class="btn-primary" id="btn-start-import" onclick="startImport()" disabled style="opacity:0.4;">
-            ▶ Bắt đầu Import
+            ▶ Bắt đầu Import & Quét
           </button>
         </div>
       </div>
@@ -1073,14 +1240,17 @@
     <div class="screen" id="screen-progress">
       <div class="scan-panel">
         <span class="panel-icon">⚙️</span>
-        <div class="panel-title">Đang xử lý với YOLO-World + CLIP...</div>
-        <div class="panel-desc">AI đang phân tích từng ảnh để nhận diện Tê Tê (Pangolin) và Cầy Vòi Mốc (Masked Palm Civet).</div>
+        <div class="panel-title" id="progress-panel-title">Đang xử lý...</div>
+        <div class="panel-desc">AI đang phân tích từng ảnh để nhận diện Tê Tê (Pangolin) và Cầy Vòi Mốc (Masked Palm Civet).
+          <span class="model-status-badge" style="display:inline-block;margin-top:6px;font-size:11px;font-weight:600;color:var(--muted);">⏳ Đang tải model...</span>
+        </div>
 
-        <!-- 🔥 LIVE IMAGE PREVIEW & DETECT OVERLAY -->
+        <!-- 🔥 LIVE MEDIA PREVIEW & DETECT OVERLAY -->
         <div id="live-scan-preview" style="margin: 20px 0; text-align: center; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 16px; padding: 15px; position: relative;">
-          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📷 PREVIEW HÌNH ẢNH & OVERLAY NHẬN DIỆN</div>
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📷 🎥 PREVIEW TỆP & OVERLAY NHẬN DIỆN</div>
           <div style="position: relative; display: inline-block; max-width: 100%; min-height: 180px;">
             <img id="scan-preview-img" style="max-width: 100%; max-height: 280px; border-radius: 10px; display: block; margin: 0 auto; object-fit: contain;" src="" alt="Live Preview" />
+            <video id="scan-preview-video" style="max-width: 100%; max-height: 280px; border-radius: 10px; display: none; margin: 0 auto; object-fit: contain;" muted playsinline></video>
             <canvas id="scan-preview-canvas" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); border-radius: 10px; pointer-events: none;"></canvas>
           </div>
           <div id="scan-live-badge" style="margin-top: 10px; font-size: 15px; font-weight: 700; min-height: 24px;"></div>
@@ -1112,7 +1282,7 @@
         </div>
 
         <div class="progress-log" id="progress-log">
-          <div class="log-line info">[INFO] Khởi động AI YOLO-World + CLIP engine...</div>
+          <div class="log-line info">[INFO] Khởi động hệ thống nhận diện AI (YOLO ONNX / Teachable Machine)...</div>
         </div>
       </div>
     </div>
@@ -1195,7 +1365,7 @@
               <div>
                 <div style="font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 4px;">Time Saved</div>
                 <div style="font-size: 32px; font-weight: 900; color: #ffb74d; letter-spacing: -0.5px;" id="lbl-receipt-saved">0m</div>
-                <div style="font-size: 12px; color: var(--muted); margin-top: 6px; font-style: italic;">"Lúc đó Dashboard sẽ rất chuyên nghiệp."</div>
+          
               </div>
               
               <div style="border-top: 1px solid var(--border); margin: 15px 0 10px 0;"></div>
@@ -1251,6 +1421,507 @@
     let currentScreen = 'home';
     let selectedFiles = [];
     let importResults = [];
+
+    // 'yolo_pt' | 'yolo_onnx' | 'classification' | 'detection'
+    let modelType = 'yolo_pt';
+
+    /** Switch model type and update UI cards */
+    function selectModelType(type) {
+      modelType = type;
+      const ptCard = document.getElementById('mtc-pt');
+      const yoloCard = document.getElementById('mtc-yolo');
+      const clsCard = document.getElementById('mtc-cls');
+      const odCard = document.getElementById('mtc-od');
+      if (ptCard) ptCard.classList.toggle('selected', type === 'yolo_pt');
+      if (yoloCard) yoloCard.classList.toggle('selected', type === 'yolo_onnx');
+      if (clsCard) clsCard.classList.toggle('selected', type === 'classification');
+      if (odCard) odCard.classList.toggle('selected', type === 'detection');
+
+      if (type === 'yolo_pt') {
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '🔥 YOLO PyTorch (manhnd_best_model.pt) Sẵn Sàng';
+          el.style.color = '#ff8a65';
+        });
+      }
+
+      // Lazy-load models when user selects them
+      if (type === 'yolo_onnx' && !yoloReady && !yoloLoading) loadYoloModel();
+      if (type === 'classification' && !modelReady) loadScanModel();
+      if (type === 'detection' && !odReady && !odLoading) loadODModel();
+    }
+
+    // ==============================
+    // YOLO PYTORCH (.pt) BACKEND INFERENCE
+    // manhnd_best_model.pt via /api/predict_pt
+    // ==============================
+    async function predictWithYoloPt(fileOrImg) {
+      try {
+        let blob = fileOrImg;
+        if (fileOrImg instanceof HTMLImageElement || fileOrImg instanceof HTMLVideoElement || fileOrImg instanceof HTMLCanvasElement) {
+          const canvas = document.createElement('canvas');
+          canvas.width = fileOrImg.videoWidth || fileOrImg.naturalWidth || fileOrImg.width || 640;
+          canvas.height = fileOrImg.videoHeight || fileOrImg.naturalHeight || fileOrImg.height || 480;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(fileOrImg, 0, 0, canvas.width, canvas.height);
+          blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+        }
+
+        const formData = new FormData();
+        formData.append('file', blob, blob.name || 'frame.jpg');
+
+        const resp = await fetch('/api/predict_pt?conf=0.25', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        return {
+          type: data.type || 'unknown',
+          confidence: data.confidence || 0,
+          detections: data.detections || [],
+          allScores: data.allScores || [],
+          model: data.model || 'manhnd_best_model.pt'
+        };
+      } catch (err) {
+        console.error('[YOLO PyTorch] Predict error:', err);
+        return { type: 'unknown', confidence: 0, detections: [], allScores: [], error: err.message };
+      }
+    }
+
+    // ==============================
+    // YOLO ONNX MODEL (ONNX Runtime Web)
+    // best.onnx: [1, 3, 640, 640] -> [1, 6, 8400]
+    // Classes: 0: 'pangolin', 1: 'masked_palm_civet'
+    // ==============================
+    const YOLO_MODEL_URL = "{{ url_for('static', filename='onxx_model/best.onnx') }}";
+    let yoloSession = null;
+    let yoloReady = false;
+    let yoloLoading = false;
+    const YOLO_CLASSES = [
+      { id: 0, name: 'pangolin', label_vi: 'Tê Tê', type: 'tete' },
+      { id: 1, name: 'masked_palm_civet', label_vi: 'Cầy Vòi Mốc', type: 'civet' }
+    ];
+
+    async function loadYoloModel() {
+      if (yoloReady || yoloLoading) return;
+      yoloLoading = true;
+      document.querySelectorAll('.model-status-badge').forEach(el => {
+        el.textContent = '⏳ Đang tải YOLO best.onnx...';
+        el.style.color = '#c5e88a';
+      });
+
+      try {
+        if (typeof ort === 'undefined') {
+          throw new Error('Thư viện onnxruntime-web chưa được tải.');
+        }
+        // Configure WebAssembly backend
+        ort.env.wasm.numThreads = 2;
+        ort.env.wasm.simd = true;
+
+        yoloSession = await ort.InferenceSession.create(YOLO_MODEL_URL, {
+          executionProviders: ['wasm']
+        });
+        yoloReady = true;
+        yoloLoading = false;
+        console.log('[YOLO ONNX] Loaded best.onnx OK. Inputs:', yoloSession.inputNames, 'Outputs:', yoloSession.outputNames);
+
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '⚡ YOLO best.onnx Sẵn Sàng';
+          el.style.color = 'var(--green)';
+        });
+      } catch (err) {
+        yoloLoading = false;
+        console.error('[YOLO ONNX] Failed to load model:', err);
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '⚠️ Lỗi tải best.onnx: ' + (err.message || 'Error');
+          el.style.color = 'var(--danger)';
+        });
+      }
+    }
+
+    /**
+     * Preprocess image or video element to [1, 3, 640, 640] Float32Array with letterboxing
+     */
+    function preprocessImageForYolo(imgOrVideoEl, targetW = 640, targetH = 640) {
+      const origW = imgOrVideoEl.videoWidth || imgOrVideoEl.naturalWidth || imgOrVideoEl.width || 640;
+      const origH = imgOrVideoEl.videoHeight || imgOrVideoEl.naturalHeight || imgOrVideoEl.height || 480;
+
+      // Letterbox scale
+      const r = Math.min(targetW / origW, targetH / origH);
+      const newUnpadW = Math.round(origW * r);
+      const newUnpadH = Math.round(origH * r);
+      const padX = (targetW - newUnpadW) / 2;
+      const padY = (targetH - newUnpadH) / 2;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      // Fill gray 114/255 (standard YOLO letterbox padding)
+      ctx.fillStyle = '#727272';
+      ctx.fillRect(0, 0, targetW, targetH);
+      ctx.drawImage(imgOrVideoEl, padX, padY, newUnpadW, newUnpadH);
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH).data;
+      const float32Data = new Float32Array(3 * targetW * targetH);
+      const imageSize = targetW * targetH;
+
+      for (let i = 0; i < imageSize; i++) {
+        const rVal = imgData[i * 4] / 255.0;
+        const gVal = imgData[i * 4 + 1] / 255.0;
+        const bVal = imgData[i * 4 + 2] / 255.0;
+
+        float32Data[i] = rVal;                   // Channel 0 (R)
+        float32Data[imageSize + i] = gVal;       // Channel 1 (G)
+        float32Data[2 * imageSize + i] = bVal;   // Channel 2 (B)
+      }
+
+      return {
+        tensor: new ort.Tensor('float32', float32Data, [1, 3, targetH, targetW]),
+        ratio: r,
+        padX: padX,
+        padY: padY,
+        origW: origW,
+        origH: origH
+      };
+    }
+
+    /**
+     * Compute Intersection over Union (IoU)
+     */
+    function computeIoU(b1, b2) {
+      const x1 = Math.max(b1[0], b2[0]);
+      const y1 = Math.max(b1[1], b2[1]);
+      const x2 = Math.min(b1[2], b2[2]);
+      const y2 = Math.min(b1[3], b2[3]);
+      const interW = Math.max(0, x2 - x1);
+      const interH = Math.max(0, y2 - y1);
+      const interArea = interW * interH;
+      const b1Area = Math.max(0, b1[2] - b1[0]) * Math.max(0, b1[3] - b1[1]);
+      const b2Area = Math.max(0, b2[2] - b2[0]) * Math.max(0, b2[3] - b2[1]);
+      const unionArea = b1Area + b2Area - interArea;
+      return unionArea > 0 ? interArea / unionArea : 0;
+    }
+
+    /**
+     * Non-Maximum Suppression (NMS)
+     */
+    function nmsBoxes(boxes, iouThreshold = 0.45) {
+      boxes.sort((a, b) => b.confidence - a.confidence);
+      const selected = [];
+      for (const box of boxes) {
+        let keep = true;
+        for (const prev of selected) {
+          if (box.classId === prev.classId && computeIoU(box.box, prev.box) > iouThreshold) {
+            keep = false;
+            break;
+          }
+        }
+        if (keep) selected.push(box);
+      }
+      return selected;
+    }
+
+    /**
+     * Run YOLO ONNX inference on image or video
+     * Returns { type: 'tete'|'civet'|'unknown', confidence: 0..1, detections: [...], allScores: [...] }
+     */
+    async function predictWithYoloOnnx(fileOrImg) {
+      if (!yoloReady || !yoloSession) {
+        await loadYoloModel();
+        if (!yoloReady || !yoloSession) {
+          return { type: 'unknown', confidence: 0, detections: [], allScores: [] };
+        }
+      }
+
+      try {
+        let mediaEl;
+        if (fileOrImg instanceof HTMLImageElement || fileOrImg instanceof HTMLVideoElement || fileOrImg instanceof HTMLCanvasElement) {
+          mediaEl = fileOrImg;
+        } else {
+          mediaEl = new Image();
+          mediaEl.crossOrigin = 'anonymous';
+          const url = URL.createObjectURL(fileOrImg);
+          await new Promise((res, rej) => {
+            mediaEl.onload = res;
+            mediaEl.onerror = rej;
+            mediaEl.src = url;
+          });
+        }
+
+        const pre = preprocessImageForYolo(mediaEl, 640, 640);
+        const inputName = yoloSession.inputNames[0] || 'images';
+        const feeds = {};
+        feeds[inputName] = pre.tensor;
+
+
+        const results = await yoloSession.run(feeds);
+        const outputName = yoloSession.outputNames[0] || 'output0';
+        const outputTensor = results[outputName];
+        const data = outputTensor.data; // Float32Array
+        const dims = outputTensor.dims; // e.g., [1, 6, 8400]
+
+        const numFeatures = dims[1]; // 4 bbox (cx, cy, w, h) + 2 classes = 6
+        const numCandidates = dims[2]; // 8400
+
+        const confThreshold = 0.25;
+        const candidates = [];
+
+        for (let i = 0; i < numCandidates; i++) {
+          // In [1, 6, 8400], feature k at index i is data[k * numCandidates + i]
+          const scorePangolin = data[4 * numCandidates + i];
+          const scoreCivet = data[5 * numCandidates + i];
+
+          let maxScore = scorePangolin;
+          let classId = 0;
+          if (scoreCivet > maxScore) {
+            maxScore = scoreCivet;
+            classId = 1;
+          }
+
+          if (maxScore >= confThreshold) {
+            const cx = data[0 * numCandidates + i];
+            const cy = data[1 * numCandidates + i];
+            const w = data[2 * numCandidates + i];
+            const h = data[3 * numCandidates + i];
+
+            // Revert letterbox padding & scaling back to original image coordinates
+            const x1Letter = cx - w / 2;
+            const y1Letter = cy - h / 2;
+            const x2Letter = cx + w / 2;
+            const y2Letter = cy + h / 2;
+
+            const origX1 = Math.max(0, Math.min(pre.origW, (x1Letter - pre.padX) / pre.ratio));
+            const origY1 = Math.max(0, Math.min(pre.origH, (y1Letter - pre.padY) / pre.ratio));
+            const origX2 = Math.max(0, Math.min(pre.origW, (x2Letter - pre.padX) / pre.ratio));
+            const origY2 = Math.max(0, Math.min(pre.origH, (y2Letter - pre.padY) / pre.ratio));
+
+            const clsInfo = YOLO_CLASSES[classId];
+
+            candidates.push({
+              classId: classId,
+              class: clsInfo.name,
+              label_vi: clsInfo.label_vi,
+              type: clsInfo.type,
+              confidence: maxScore,
+              box: [Math.round(origX1), Math.round(origY1), Math.round(origX2), Math.round(origY2)]
+            });
+          }
+        }
+
+        const filtered = nmsBoxes(candidates, 0.45);
+
+        // Determine overall type
+        let type = 'unknown';
+        const hasTete = filtered.some(d => d.type === 'tete');
+        const hasCivet = filtered.some(d => d.type === 'civet');
+
+        if (hasTete && hasCivet) {
+          const top = filtered[0];
+          type = top.type;
+        } else if (hasTete) {
+          type = 'tete';
+        } else if (hasCivet) {
+          type = 'civet';
+        }
+
+        const bestConf = filtered.length > 0 ? filtered[0].confidence : 0;
+        const allScores = filtered.map(d => ({
+          className: d.label_vi + ' (' + d.class + ')',
+          probability: d.confidence
+        }));
+
+        return {
+          type: type,
+          confidence: bestConf,
+          detections: filtered,
+          allScores: allScores
+        };
+
+      } catch (err) {
+        console.error('[YOLO ONNX] Prediction error:', err);
+        return { type: 'unknown', confidence: 0, detections: [], allScores: [] };
+      }
+    }
+
+    // ==============================
+    // SCAN_MODEL — Teachable Machine TF.js (Classification)
+    // ==============================
+    const MODEL_URL = "{{ url_for('static', filename='Scan_model') }}/";
+    let tmModel = null;
+    let modelReady = false;
+
+    async function loadScanModel() {
+      try {
+        const modelJSON = MODEL_URL + 'model.json';
+        const metadataJSON = MODEL_URL + 'metadata.json';
+        tmModel = await tmImage.load(modelJSON, metadataJSON);
+        modelReady = true;
+        console.log('[ScanModel] Loaded OK. Labels:', tmModel.getClassLabels());
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '🧠 AI Model Ready';
+          el.style.color = 'var(--green)';
+        });
+      } catch (err) {
+        console.error('[ScanModel] Failed to load:', err);
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '⚠️ Model load failed';
+          el.style.color = 'var(--danger)';
+        });
+      }
+    }
+
+    /**
+     * Run Teachable Machine prediction on a File or HTMLImageElement.
+     * Returns { type: 'tete'|'civet'|'unknown', confidence: 0..1, allScores: [...] }
+     */
+    async function predictWithScanModel(fileOrImg) {
+      if (!modelReady || !tmModel) return { type: 'unknown', confidence: 0, allScores: [] };
+      try {
+        let imgEl;
+        if (fileOrImg instanceof HTMLImageElement || fileOrImg instanceof HTMLVideoElement || fileOrImg instanceof HTMLCanvasElement) {
+          imgEl = fileOrImg;
+        } else {
+          // It's a File; create a temporary img element
+          imgEl = new Image();
+          imgEl.crossOrigin = 'anonymous';
+          const url = URL.createObjectURL(fileOrImg);
+          await new Promise((res, rej) => {
+            imgEl.onload = res;
+            imgEl.onerror = rej;
+            imgEl.src = url;
+          });
+        }
+        const predictions = await tmModel.predict(imgEl);
+        // predictions: [{ className, probability }, ...]
+        // Labels: 'Ko co gi', 'Pangolin', 'Civet'
+        const best = predictions.reduce((a, b) => b.probability > a.probability ? b : a);
+        let type = 'unknown';
+        if (best.className === 'Pangolin') type = 'tete';
+        else if (best.className === 'Civet') type = 'civet';
+        // Build detections-compatible object (no real boxes from TM model)
+        const detections = (type !== 'unknown') ? [{
+          class: best.className,
+          label_vi: type === 'tete' ? 'Tê Tê' : 'Cầy Vòi Mốc',
+          confidence: best.probability,
+          box: [20, 20, 180, 180]  // placeholder box (TM has no bbox)
+        }] : [];
+        return { type, confidence: best.probability, detections, allScores: predictions };
+      } catch (err) {
+        console.warn('[ScanModel] Predict error:', err);
+        return { type: 'unknown', confidence: 0, detections: [], allScores: [] };
+      }
+    }
+
+    // Load YOLO ONNX model on page ready by default
+    window.addEventListener('DOMContentLoaded', () => loadYoloModel());
+
+    // ==============================
+    // COCO-SSD — Object Detection TF.js
+    // ==============================
+    let odModel = null;
+    let odReady = false;
+    let odLoading = false;
+
+    async function loadODModel() {
+      odLoading = true;
+      document.querySelectorAll('.model-status-badge').forEach(el => {
+        el.textContent = '⏳ Đang tải OD model...';
+        el.style.color = '#ffb74d';
+      });
+      try {
+        odModel = await cocoSsd.load();
+        odReady = true;
+        odLoading = false;
+        console.log('[OD Model] COCO-SSD loaded OK');
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '🎯 OD Model Ready';
+          el.style.color = '#ffb74d';
+        });
+      } catch (err) {
+        odLoading = false;
+        console.error('[OD Model] Failed to load:', err);
+        document.querySelectorAll('.model-status-badge').forEach(el => {
+          el.textContent = '⚠️ OD Model load failed';
+          el.style.color = 'var(--danger)';
+        });
+      }
+    }
+
+    /**
+     * COCO-SSD Object Detection — returns real bounding boxes.
+     * Filters detections to animals + person (relevant for pangolin monitoring).
+     */
+    async function predictWithODModel(fileOrImg) {
+      if (!odReady || !odModel) return { type: 'unknown', confidence: 0, detections: [], allScores: [] };
+      try {
+        let imgEl;
+        if (fileOrImg instanceof HTMLImageElement || fileOrImg instanceof HTMLVideoElement || fileOrImg instanceof HTMLCanvasElement) {
+          imgEl = fileOrImg;
+        } else {
+          imgEl = new Image();
+          imgEl.crossOrigin = 'anonymous';
+          const url = URL.createObjectURL(fileOrImg);
+          await new Promise((res, rej) => { imgEl.onload = res; imgEl.onerror = rej; imgEl.src = url; });
+        }
+
+
+        const preds = await odModel.detect(imgEl);
+        // preds: [{ class, score, bbox: [x, y, w, h] }]
+
+        // Map COCO classes to our taxonomy
+        const animalClasses = ['bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','person','handbag','tie','suitcase'];
+        const allScores = preds.map(p => ({ className: p.class, probability: p.score }));
+
+        // Convert bbox [x, y, w, h] → [x1, y1, x2, y2]
+        const detections = preds.map(p => {
+          const [x, y, w, h] = p.bbox;
+          const cls = p.class.toLowerCase();
+          const isPerson = cls === 'person';
+          return {
+            class: p.class,
+            label_vi: isPerson ? 'Người / Thợ săn' : p.class,
+            confidence: p.score,
+            box: [Math.round(x), Math.round(y), Math.round(x + w), Math.round(y + h)],
+            isPerson
+          };
+        });
+
+        // Classify result type based on what's detected
+        const hasPerson = detections.some(d => d.isPerson);
+        const hasAnimal = detections.some(d => !d.isPerson);
+        let type = 'unknown';
+        if (hasPerson) type = 'civet';
+        else if (hasAnimal) type = 'tete';
+        const best = preds.length > 0 ? preds.reduce((a, b) => b.score > a.score ? b : a) : null;
+
+        return { type, confidence: best ? best.score : 0, detections, allScores };
+      } catch (err) {
+        console.warn('[OD Model] Predict error:', err);
+        return { type: 'unknown', confidence: 0, detections: [], allScores: [] };
+      }
+    }
+
+    /**
+     * Unified prediction dispatcher — routes to the selected model.
+     */
+    async function runPrediction(file) {
+      if (modelType === 'yolo_pt') {
+        return predictWithYoloPt(file);
+      } else if (modelType === 'yolo_onnx') {
+        return predictWithYoloOnnx(file);
+      } else if (modelType === 'detection') {
+        return predictWithODModel(file);
+      } else {
+        return predictWithScanModel(file);
+      }
+    }
 
     const STEPS = [
       { id: 'home', label: 'Home', icon: '🏠' },
@@ -1345,13 +2016,14 @@
     }
   </script>
 
-  <!-- IMAGE PREVIEW LIGHTBOX MODAL -->
+  <!-- MEDIA PREVIEW LIGHTBOX MODAL -->
   <div class="modal-overlay" id="imageModalOverlay" onclick="closeImageModal(event)" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:10010; justify-content:center; align-items:center;">
     <div class="settings-modal" style="max-width:760px; width:92%; padding:24px; background:#12200f; border:1px solid var(--accent-green);" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeImageModal()">&times;</button>
-      <div class="modal-title" id="imageModalTitle" style="font-size:18px; color:var(--accent-green);">📷 Chi tiết phân tích AI (YOLO-World + CLIP)</div>
+      <div class="modal-title" id="imageModalTitle" style="font-size:18px; color:var(--accent-green);">📷 🎥 Chi tiết phân tích AI (Ảnh & Video)</div>
       <div style="position:relative; text-align:center; background:#000; border-radius:12px; overflow:hidden; margin:16px 0; min-height:220px; display:flex; align-items:center; justify-content:center;">
         <img id="imageModalImg" style="max-width:100%; max-height:450px; display:block; margin:0 auto; object-fit:contain;" src="" alt="Modal Preview" />
+        <video id="imageModalVideo" style="max-width:100%; max-height:450px; display:none; margin:0 auto;" controls playsinline></video>
         <canvas id="imageModalCanvas" style="position:absolute; top:0; left:50%; transform:translateX(-50%); pointer-events:none;"></canvas>
       </div>
       <div id="imageModalInfo" style="font-size:13px; line-height:1.6; background:rgba(0,0,0,0.4); padding:14px; border-radius:10px; border:1px solid var(--border); text-align:left;"></div>
@@ -1360,7 +2032,7 @@
 
   <script>
     // ==============================
-    // FILE UPLOAD & PREVIEW
+    // FILE UPLOAD & PREVIEW (IMAGES & VIDEOS)
     // ==============================
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
@@ -1379,17 +2051,105 @@
       fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
     }
 
-    function handleFiles(files) {
-      selectedFiles = files.slice(0, 50).map(f => {
+    /** Helper to check if file is video */
+    function isVideoFile(file) {
+      if (!file) return false;
+      if (file.type && file.type.startsWith('video/')) return true;
+      const name = (file.name || '').toLowerCase();
+      return name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.mov') ||
+             name.endsWith('.avi') || name.endsWith('.mkv') || name.endsWith('.m4v');
+    }
+
+    /** Extract snapshot/keyframe from video for AI model inference */
+    async function extractFrameFromVideo(fileOrBlob) {
+      return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.muted = true;
+        video.playsInline = true;
+        const url = URL.createObjectURL(fileOrBlob);
+        video.src = url;
+
+        let resolved = false;
+        const cleanup = () => {
+          if (!resolved) {
+            resolved = true;
+            URL.revokeObjectURL(url);
+          }
+        };
+
+        video.onloadeddata = () => {
+          // Seek to 1 second or half duration
+          const seekTime = Math.min(1.0, (video.duration || 1) / 2);
+          video.currentTime = seekTime;
+        };
+
+        video.onseeked = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+              cleanup();
+              resolve({
+                blob: blob,
+                canvas: canvas,
+                duration: video.duration || 0,
+                width: canvas.width,
+                height: canvas.height,
+                dataUrl: canvas.toDataURL('image/jpeg', 0.85)
+              });
+            }, 'image/jpeg', 0.9);
+          } catch (e) {
+            cleanup();
+            resolve(null);
+          }
+        };
+
+        video.onerror = () => {
+          cleanup();
+          resolve(null);
+        };
+
+        // Fallback timeout in case video seek stalls
+        setTimeout(() => {
+          if (!resolved) {
+            cleanup();
+            resolve(null);
+          }
+        }, 4000);
+      });
+    }
+
+    async function handleFiles(files) {
+      const sliced = files.slice(0, 50);
+      selectedFiles = sliced.map(f => {
+        const isVid = isVideoFile(f);
         const url = URL.createObjectURL(f);
         return {
           name: f.name,
           size: (f.size / 1024 / 1024).toFixed(1) + ' MB',
           file: f,
-          previewUrl: url
+          isVideo: isVid,
+          previewUrl: url,
+          thumbUrl: isVid ? null : url
         };
       });
       renderFileList();
+
+      // Pre-extract video thumbnails asynchronously
+      selectedFiles.forEach(async (item) => {
+        if (item.isVideo && !item.thumbUrl) {
+          const frameInfo = await extractFrameFromVideo(item.file);
+          if (frameInfo && frameInfo.dataUrl) {
+            item.thumbUrl = frameInfo.dataUrl;
+            item.keyframeBlob = frameInfo.blob;
+            renderFileList();
+          }
+        }
+      });
     }
 
     function renderFileList() {
@@ -1401,10 +2161,19 @@
         const row = document.createElement('div');
         row.className = 'file-row selected';
         row.style.gridTemplateColumns = '32px 48px 1fr auto';
+
+        const thumbContent = f.thumbUrl
+          ? `<img src="${f.thumbUrl}" style="width:44px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border);" />`
+          : (f.isVideo 
+              ? `<div style="width:44px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(0,172,193,0.15); border-radius:6px; font-size:18px;">🎥</div>`
+              : `<img src="${f.previewUrl}" style="width:44px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border);" />`);
+
+        const badgeType = f.isVideo ? '<span style="font-size:10px; background:rgba(0,172,193,0.25); color:#00e5ff; padding:2px 6px; border-radius:4px; margin-left:6px;">VIDEO</span>' : '';
+
         row.innerHTML = `
           <input type="checkbox" checked data-idx="${i}" />
-          <img src="${f.previewUrl}" style="width:44px; height:36px; object-fit:cover; border-radius:6px; border:1px solid var(--border);" />
-          <span class="file-name" style="font-weight:600;">${f.name}</span>
+          ${thumbContent}
+          <span class="file-name" style="font-weight:600;">${f.name} ${badgeType}</span>
           <span class="file-size">${f.size}</span>
         `;
         list.appendChild(row);
@@ -1417,13 +2186,13 @@
     // ==============================
     // DRAW OVERLAY ON CANVAS
     // ==============================
-    function drawBoxOverlay(imgEl, canvasEl, detections) {
-      if (!imgEl || !canvasEl) return;
-      const w = imgEl.naturalWidth || imgEl.width || 400;
-      const h = imgEl.naturalHeight || imgEl.height || 300;
+    function drawBoxOverlay(imgOrVideoEl, canvasEl, detections) {
+      if (!imgOrVideoEl || !canvasEl) return;
+      const w = imgOrVideoEl.naturalWidth || imgOrVideoEl.videoWidth || imgOrVideoEl.width || 400;
+      const h = imgOrVideoEl.naturalHeight || imgOrVideoEl.videoHeight || imgOrVideoEl.height || 300;
       
-      const displayW = imgEl.clientWidth || 400;
-      const displayH = imgEl.clientHeight || 300;
+      const displayW = imgOrVideoEl.clientWidth || 400;
+      const displayH = imgOrVideoEl.clientHeight || 300;
       
       canvasEl.width = displayW;
       canvasEl.height = displayH;
@@ -1467,9 +2236,23 @@
     }
 
     // ==============================
-    // IMPORT & PROGRESS WITH REAL AI
+    // IMPORT & PROGRESS WITH REAL AI (PHOTO & VIDEO)
     // ==============================
     function startImport() {
+      // Update progress screen title to reflect chosen model
+      const titleEl = document.getElementById('progress-panel-title');
+      if (titleEl) {
+        if (modelType === 'yolo_pt') {
+          titleEl.textContent = '🔥 Đang nhận diện với YOLO PyTorch (manhnd_best_model.pt)...';
+        } else if (modelType === 'yolo_onnx') {
+          titleEl.textContent = '⚡ Đang nhận diện với YOLO Custom (best.onnx)...';
+        } else if (modelType === 'detection') {
+          titleEl.textContent = '🎯 Đang nhận diện với COCO-SSD (Object Detection)...';
+        } else {
+          titleEl.textContent = '🏷️ Đang phân loại với Scan_model (Classification)...';
+        }
+      }
+
       const checkedIdxs = Array.from(document.querySelectorAll('#file-list input[type=checkbox]:checked'))
         .map(cb => parseInt(cb.getAttribute('data-idx')));
       
@@ -1497,6 +2280,7 @@
       const sFound = document.getElementById('stat-found');
       const log = document.getElementById('progress-log');
       const previewImg = document.getElementById('scan-preview-img');
+      const previewVideo = document.getElementById('scan-preview-video');
       const previewCanvas = document.getElementById('scan-preview-canvas');
       const liveBadge = document.getElementById('scan-live-badge');
 
@@ -1512,63 +2296,149 @@
         const p = Math.round((done / total) * 100);
         bar.style.width = p + '%';
         pct.textContent = p + '%';
-        label.textContent = `Đang phân tích AI: ${item.name}`;
+        const fileTypeIcon = item.isVideo ? '🎥 Video' : '📷 Ảnh';
+        label.textContent = `Đang phân tích AI (${fileTypeIcon}): ${item.name}`;
         sDone.textContent = done;
 
-        // Render preview image
-        let srcUrl = item.previewUrl;
-        if (!srcUrl && item.file) {
-          srcUrl = URL.createObjectURL(item.file);
-          item.previewUrl = srcUrl;
-        }
+        let fileToScan = item.file;
+        let previewEl = previewImg;
 
-        if (srcUrl && previewImg) {
-          previewImg.src = srcUrl;
-          await new Promise(r => { previewImg.onload = r; setTimeout(r, 100); });
-        }
+        // If it's a video, play video and run real-time multi-frame detection
+        if (item.isVideo) {
+          if (previewImg) previewImg.style.display = 'none';
+          if (previewVideo) {
+            previewVideo.style.display = 'block';
+            previewVideo.src = item.previewUrl;
+            previewVideo.muted = true;
+            previewVideo.loop = false;
+            previewEl = previewVideo;
 
-        // Call backend API /api/predict
-        let detections = [];
-        let resultType = 'unknown';
-        let maxConf = 0;
-        let rawResult = null;
+            // Wait for video metadata to initialize dimensions
+            await new Promise((r) => {
+              if (previewVideo.readyState >= 1) return r();
+              previewVideo.onloadedmetadata = () => r();
+              setTimeout(r, 600);
+            });
 
-        if (item.file) {
-          try {
-            const formData = new FormData();
-            formData.append('image', item.file);
-            const res = await fetch('/api/predict', { method: 'POST', body: formData });
-            if (res.ok) {
-              rawResult = await res.json();
-              detections = rawResult.detections || [];
+            // Start playing video live
+            try { await previewVideo.play(); } catch(e) {}
+
+            // Real-time detection loop across frames of the video
+            const videoDuration = previewVideo.duration || 3.0;
+            const scanDuration = Math.min(videoDuration, 4.0); // scan up to 4s of video in real-time
+            const scanIntervalMs = 280; // ~3.5 fps real-time detection
+            const numScans = Math.max(3, Math.floor((scanDuration * 1000) / scanIntervalMs));
+            
+            let bestType = 'unknown';
+            let bestConf = 0;
+            let bestDetections = [];
+            let lastScores = [];
+
+            for (let s = 0; s < numScans; s++) {
+              if (previewVideo.ended || previewVideo.paused) {
+                previewVideo.play().catch(() => {});
+              }
+
+              // Capture current frame from playing video
+              const frameCanvas = document.createElement('canvas');
+              frameCanvas.width = previewVideo.videoWidth || 640;
+              frameCanvas.height = previewVideo.videoHeight || 480;
+              const fctx = frameCanvas.getContext('2d');
+              fctx.drawImage(previewVideo, 0, 0, frameCanvas.width, frameCanvas.height);
+
+              const aiResult = await runPrediction(frameCanvas);
+              const curDetections = aiResult.detections || [];
+              const curConf = aiResult.confidence || 0;
+              const curType = aiResult.type || 'unknown';
+              lastScores = aiResult.allScores || [];
+
+              // Render live bounding box overlay on the playing video
+              if (previewCanvas) {
+                drawBoxOverlay(previewVideo, previewCanvas, curDetections);
+              }
+
+              if (curType !== 'unknown' && curConf > bestConf) {
+                bestType = curType;
+                bestConf = curConf;
+                bestDetections = curDetections;
+              }
+
+              // Live badge update during playback
+              if (curType === 'tete') {
+                if (liveBadge) liveBadge.innerHTML = `<span style="color: #8bc34a">🌿 [REAL-TIME] Phát hiện Tê Tê (${Math.round(curConf * 100)}%)</span>`;
+              } else if (curType === 'civet') {
+                if (liveBadge) liveBadge.innerHTML = `<span style="color: #ffb74d">🦡 [REAL-TIME] Phát hiện Cầy Vòi Mốc (${Math.round(curConf * 100)}%)</span>`;
+              } else {
+                if (liveBadge) liveBadge.innerHTML = `<span style="color: #00e5ff">🎥 Đang quét video real-time... (Frame ${s + 1}/${numScans})</span>`;
+              }
+
+              await new Promise(r => setTimeout(r, scanIntervalMs));
             }
-          } catch (err) {
-            console.warn('Lỗi khi gọi /api/predict:', err);
+
+            resultType = bestType;
+            maxConf = bestConf;
+            detections = bestDetections.length > 0 ? bestDetections : [];
+            let modelLabel = 'Scan_model (Teachable Machine Classification)';
+            if (modelType === 'yolo_pt') {
+              modelLabel = 'YOLO PyTorch (manhnd_best_model.pt)';
+            } else if (modelType === 'yolo_onnx') {
+              modelLabel = 'YOLO Custom (ONNX best.onnx)';
+            } else if (modelType === 'detection') {
+              modelLabel = 'COCO-SSD (Object Detection TF.js)';
+            }
+            rawResult = { source: modelLabel, scores: lastScores, modelType, mode: 'realtime_video' };
+          }
+        } else {
+          // Image single-shot detection
+          if (previewVideo) {
+            previewVideo.style.display = 'none';
+            previewVideo.pause();
+          }
+          if (previewImg) {
+            previewImg.style.display = 'block';
+            previewImg.src = item.previewUrl;
+            await new Promise(r => { previewImg.onload = r; setTimeout(r, 80); });
+            previewEl = previewImg;
+          }
+
+          if (fileToScan) {
+            const aiResult = await runPrediction(fileToScan);
+            resultType = aiResult.type;
+            maxConf = aiResult.confidence;
+            detections = aiResult.detections || [];
+            let modelLabel = 'Scan_model (Teachable Machine Classification)';
+            if (modelType === 'yolo_pt') {
+              modelLabel = 'YOLO PyTorch (manhnd_best_model.pt)';
+            } else if (modelType === 'yolo_onnx') {
+              modelLabel = 'YOLO Custom (ONNX best.onnx)';
+            } else if (modelType === 'detection') {
+              modelLabel = 'COCO-SSD (Object Detection TF.js)';
+            }
+            rawResult = { source: modelLabel, scores: aiResult.allScores, modelType };
+          }
+
+          // Render box overlay for image
+          if (previewEl && previewCanvas) {
+            if (modelType === 'yolo_pt' || modelType === 'yolo_onnx' || modelType === 'detection') {
+              drawBoxOverlay(previewEl, previewCanvas, detections);
+            } else {
+              const ctx = previewCanvas.getContext('2d');
+              previewCanvas.width = previewEl.clientWidth || 400;
+              previewCanvas.height = previewEl.clientHeight || 300;
+              ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            }
           }
         }
 
-        // Render box overlay on live canvas
-        if (previewImg && previewCanvas) {
-          drawBoxOverlay(previewImg, previewCanvas, detections);
-        }
 
-        // Determine result class
-        const teteDets = detections.filter(d => (d.class || '').toLowerCase().includes('pangolin') || (d.class || '').toLowerCase().includes('tete'));
-        const civetDets = detections.filter(d => (d.class || '').toLowerCase().includes('civet') || (d.class || '').toLowerCase().includes('masked') || (d.class || '').toLowerCase().includes('cầy'));
-
-        if (teteDets.length > 0) {
-          resultType = 'tete';
-          maxConf = Math.max(...teteDets.map(d => d.confidence));
+        if (resultType === 'tete') {
           found++;
-          if (liveBadge) liveBadge.innerHTML = `<span style="color: var(--accent-green)">🌿 Phát hiện Tê Tê (${Math.round(maxConf * 100)}%)</span>`;
-        } else if (civetDets.length > 0) {
-          resultType = 'civet';
-          maxConf = Math.max(...civetDets.map(d => d.confidence));
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: #8bc34a">🌿 ${item.isVideo ? 'Video ghi nhận' : 'Ảnh phát hiện'} Tê Tê (${Math.round(maxConf * 100)}%)</span>`;
+        } else if (resultType === 'civet') {
           found++;
-          if (liveBadge) liveBadge.innerHTML = `<span style="color: #ffb74d">🦡 Phát hiện Cầy Vòi Mốc (${Math.round(maxConf * 100)}%)</span>`;
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: #ffb74d">🦡 ${item.isVideo ? 'Video ghi nhận' : 'Ảnh phát hiện'} Cầy Vòi Mốc (${Math.round(maxConf * 100)}%)</span>`;
         } else {
-          resultType = 'unknown';
-          if (liveBadge) liveBadge.innerHTML = `<span style="color: var(--muted)">❓ Không phát hiện loài mục tiêu</span>`;
+          if (liveBadge) liveBadge.innerHTML = `<span style="color: var(--muted)">❓ Không phát hiện loài mục tiêu trong ${item.isVideo ? 'video' : 'ảnh'}</span>`;
         }
 
         sFound.textContent = found;
@@ -1578,7 +2448,9 @@
           type: resultType,
           conf: maxConf > 0 ? maxConf.toFixed(2) : (Math.random() * 0.15 + 0.1).toFixed(2),
           size: item.size || '—',
-          previewUrl: srcUrl,
+          isVideo: item.isVideo,
+          previewUrl: item.previewUrl,
+          thumbUrl: item.thumbUrl || item.previewUrl,
           detections: detections,
           rawResult: rawResult
         });
@@ -1587,7 +2459,9 @@
         const typeLabel = resultType === 'tete' ? '🌿 Tê Tê' : (resultType === 'civet' ? '🦡 Cầy Vòi Mốc' : 'Không rõ');
         const cls = resultType === 'tete' ? 'ok' : (resultType === 'civet' ? 'warn' : 'info');
         line.className = 'log-line ' + cls;
-        line.textContent = `[${done}/${total}] ${item.name} → ${typeLabel} (${detections.length} bounding box)`;
+        const boxInfo = (modelType === 'yolo_onnx' || modelType === 'detection') ? ` (${detections.length} bbox)` : '';
+        const tagMedia = item.isVideo ? '[VIDEO]' : '[ẢNH]';
+        line.textContent = `[${done}/${total}] ${tagMedia} ${item.name} → ${typeLabel}${boxInfo}`;
         log.appendChild(line);
         log.scrollTop = log.scrollHeight;
 
@@ -1611,7 +2485,7 @@
     }
 
     // ==============================
-    // HISTORY & MODAL PREVIEW
+    // HISTORY & MODAL PREVIEW (PHOTO & VIDEO SUPPORT)
     // ==============================
     function renderHistory(filter) {
       const list = document.getElementById('history-list');
@@ -1622,7 +2496,7 @@
         : importResults.filter(r => r.type === filter);
 
       if (items.length === 0) {
-        list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">Không có ảnh nào phù hợp.</div>';
+        list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">Không có tệp nào phù hợp.</div>';
         return;
       }
 
@@ -1635,14 +2509,23 @@
         const pillClass = r.type === 'tete' ? 'tete' : (r.type === 'civet' ? 'danger' : 'unknown');
         const pillLabel = r.type === 'tete' ? '🦔 Tê tê' : (r.type === 'civet' ? '🦡 Cầy vòi mốc' : '❓ Không rõ');
 
-        const thumbHTML = r.previewUrl 
-          ? `<img src="${r.previewUrl}" class="history-thumb" style="object-fit:cover;" />` 
-          : `<div class="history-thumb-placeholder">🖼️</div>`;
+        let thumbHTML = '';
+        if (r.thumbUrl) {
+          thumbHTML = `
+            <div style="position:relative; width:80px; height:60px;">
+              <img src="${r.thumbUrl}" class="history-thumb" style="width:100%; height:100%; object-fit:cover;" />
+              ${r.isVideo ? '<span style="position:absolute; bottom:2px; right:4px; font-size:10px; background:rgba(0,0,0,0.7); border-radius:3px; padding:1px 3px;">▶</span>' : ''}
+            </div>`;
+        } else {
+          thumbHTML = `<div class="history-thumb-placeholder">${r.isVideo ? '🎥' : '🖼️'}</div>`;
+        }
+
+        const videoBadge = r.isVideo ? '<span style="font-size:11px; color:#00e5ff; font-weight:700; margin-left:4px;">[VIDEO]</span>' : '';
 
         item.innerHTML = `
           ${thumbHTML}
           <div>
-            <div class="hi-name">${r.name}</div>
+            <div class="hi-name">${r.name} ${videoBadge}</div>
             <div class="hi-meta">Độ tin cậy: ${(r.conf * 100).toFixed(0)}% • Bounding boxes: ${r.detections ? r.detections.length : 0}</div>
           </div>
           <div class="pill ${pillClass}">${pillLabel}</div>
@@ -1660,22 +2543,56 @@
     function openImageModal(resItem) {
       const overlay = document.getElementById('imageModalOverlay');
       const imgEl = document.getElementById('imageModalImg');
+      const videoEl = document.getElementById('imageModalVideo');
       const canvasEl = document.getElementById('imageModalCanvas');
       const infoEl = document.getElementById('imageModalInfo');
 
-      if (!overlay || !imgEl || !resItem) return;
+      if (!overlay || !resItem) return;
 
-      imgEl.src = resItem.previewUrl || '';
       overlay.style.display = 'flex';
 
-      imgEl.onload = () => {
-        if (canvasEl) drawBoxOverlay(imgEl, canvasEl, resItem.detections || []);
-      };
+      if (resItem.isVideo) {
+        if (imgEl) imgEl.style.display = 'none';
+        if (videoEl) {
+          videoEl.style.display = 'block';
+          videoEl.src = resItem.previewUrl || '';
+          videoEl.onloadedmetadata = () => {
+            if (canvasEl) drawBoxOverlay(videoEl, canvasEl, resItem.detections || []);
+          };
+        }
+      } else {
+        if (videoEl) {
+          videoEl.style.display = 'none';
+          videoEl.pause();
+        }
+        if (imgEl) {
+          imgEl.style.display = 'block';
+          imgEl.src = resItem.previewUrl || '';
+          imgEl.onload = () => {
+            if (canvasEl) drawBoxOverlay(imgEl, canvasEl, resItem.detections || []);
+          };
+        }
+      }
 
-      let infoText = `<b>Tên file:</b> ${resItem.name}<br/>`;
+      let infoText = `<b>Tên tệp:</b> ${resItem.name} ${resItem.isVideo ? '<span style="color:#00e5ff;">(Video Clip)</span>' : '(Hình ảnh)'}<br/>`;
       infoText += `<b>Loài phát hiện:</b> ${resItem.type === 'tete' ? '🌿 Tê Tê (Pangolin)' : (resItem.type === 'civet' ? '🦡 Cầy Vòi Mốc (Masked Palm Civet)' : '❓ Không phát hiện')}<br/>`;
       infoText += `<b>Độ chính xác:</b> ${(resItem.conf * 100).toFixed(1)}%<br/>`;
-      infoText += `<b>Mô hình:</b> YOLO-World (Open-Vocabulary) + CLIP Prompt Validation<br/>`;
+      const currentMType = (resItem.rawResult && resItem.rawResult.modelType) || modelType;
+      let modelDescText = '🏷️ Scan_model — Teachable Machine (TF.js) — Không viền';
+      if (currentMType === 'yolo_pt') {
+        modelDescText = '🔥 YOLO PyTorch (manhnd_best_model.pt) — Backend Server — Độ chính xác gốc';
+      } else if (currentMType === 'yolo_onnx') {
+        modelDescText = '⚡ YOLO Custom (best.onnx) — ONNX Runtime Web — Có bounding box';
+      } else if (currentMType === 'detection') {
+        modelDescText = '🎯 COCO-SSD — Object Detection (TF.js) — Có bounding box';
+      }
+      infoText += `<b>Mô hình:</b> ${modelDescText}<br/>`;
+      if (resItem.rawResult && resItem.rawResult.scores && resItem.rawResult.scores.length > 0) {
+        const sc = resItem.rawResult.scores;
+        infoText += `<b>${currentMType !== 'classification' ? 'Detections' : 'Điểm số'}:</b> `;
+        infoText += sc.map(s => `${s.className}: ${(s.probability * 100).toFixed(1)}%`).join(' | ');
+        infoText += `<br/>`;
+      }
       
       if (resItem.detections && resItem.detections.length > 0) {
         infoText += `<b>Chi tiết Bounding Boxes:</b><br/>`;
@@ -1689,6 +2606,8 @@
 
     function closeImageModal(event) {
       const overlay = document.getElementById('imageModalOverlay');
+      const videoEl = document.getElementById('imageModalVideo');
+      if (videoEl) videoEl.pause();
       if (overlay) overlay.style.display = 'none';
     }
 
@@ -1701,8 +2620,293 @@
       document.getElementById('file-list').innerHTML = '';
       document.getElementById('btn-start-import').disabled = true;
       document.getElementById('btn-start-import').style.opacity = '0.4';
-      document.getElementById('progress-log').innerHTML = '<div class="log-line info">[INFO] Khởi động AI engine...</div>';
+      document.getElementById('progress-log').innerHTML = '<div class="log-line info">[INFO] Khởi động hệ thống AI Scan...</div>';
       goTo('home');
+    }
+
+    // ==============================
+    // PDF EXPORT
+    // ==============================
+    function showPdfToast(msg) {
+      const toast = document.getElementById('pdf-toast');
+      const msgEl = document.getElementById('pdf-toast-msg');
+      if (!toast) return;
+      if (msgEl) msgEl.textContent = msg || 'PDF đã xuất thành công!';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    async function exportToPDF() {
+      if (!importResults || importResults.length === 0) {
+        showPdfToast('⚠️ Chưa có dữ liệu để xuất!');
+        return;
+      }
+
+      showPdfToast('⏳ Đang chuẩn bị hình ảnh & xuất PDF...');
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const margin = 14;
+        const now = new Date();
+        const dateStr = now.toLocaleString('vi-VN');
+
+        // Helper: Convert previewUrl / thumbUrl / file to base64 with bounding boxes drawn if applicable
+        async function prepareImageBase64(r) {
+          return new Promise((resolve) => {
+            let src = r.thumbUrl || r.previewUrl;
+            if (!src && r.file) {
+              try {
+                src = URL.createObjectURL(r.file);
+              } catch (e) {}
+            }
+            if (!src) return resolve(null);
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+              try {
+                const canvas = document.createElement('canvas');
+                const maxW = 500;
+                let w = img.naturalWidth || img.width || 320;
+                let h = img.naturalHeight || img.height || 240;
+                if (w > maxW) {
+                  h = Math.round((h * maxW) / w);
+                  w = maxW;
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                // Draw bounding box if detection mode
+                const isDetectionMode = modelType === 'yolo_pt' || modelType === 'yolo_onnx' || modelType === 'detection';
+                if (isDetectionMode && r.detections && r.detections.length > 0) {
+                  const scaleX = w / (img.naturalWidth || w);
+                  const scaleY = h / (img.naturalHeight || h);
+                  r.detections.forEach(det => {
+                    if (det.box) {
+                      const [x1, y1, x2, y2] = det.box;
+                      const sx1 = x1 * scaleX;
+                      const sy1 = y1 * scaleY;
+                      const sw = (x2 - x1) * scaleX;
+                      const sh = (y2 - y1) * scaleY;
+                      const isCivet = (det.class || '').toLowerCase().includes('civet') || (det.class || '').toLowerCase().includes('masked') || (det.class || '').toLowerCase().includes('person');
+                      ctx.strokeStyle = isCivet ? '#ff9800' : '#4caf50';
+                      ctx.lineWidth = Math.max(2, Math.round(w / 120));
+                      ctx.strokeRect(sx1, sy1, sw, sh);
+                    }
+                  });
+                }
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                resolve(dataUrl);
+              } catch (err) {
+                console.warn('Canvas toDataURL error:', err);
+                resolve(null);
+              }
+            };
+            img.onerror = () => resolve(null);
+            img.src = src;
+          });
+        }
+
+        // Draw header on a page
+        function drawHeader(isFirstPage = true) {
+          doc.setFillColor(4, 14, 5);
+          doc.rect(0, 0, pageW, isFirstPage ? 30 : 16, 'F');
+          
+          doc.setTextColor(174, 213, 129);
+          doc.setFontSize(isFirstPage ? 16 : 11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('RANGER MONITOR AI - SCAN REPORT', margin, isFirstPage ? 13 : 11);
+
+          if (isFirstPage) {
+            doc.setFontSize(8.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(200, 235, 205);
+            doc.text('Bao cao phan tich hinh anh tu camera bay & the nho', margin, 20);
+            doc.text(`Xuat luc: ${dateStr}`, margin, 26);
+          }
+
+          let modelLabel = 'YOLO PT: manhnd_best_model.pt';
+          if (modelType === 'yolo_onnx') modelLabel = 'YOLO ONNX: best.onnx';
+          else if (modelType === 'detection') modelLabel = 'OD: COCO-SSD';
+          else if (modelType === 'classification') modelLabel = 'CLS: Scan_model';
+          doc.setFontSize(8);
+          doc.setTextColor(0, 229, 255);
+          doc.setFont('helvetica', 'bold');
+          doc.text(modelLabel, pageW - margin, isFirstPage ? 13 : 11, { align: 'right' });
+        }
+
+        // Draw footer on a page
+        function drawFooter(pgNum, pgTotal) {
+          const fy = pageH - 9;
+          doc.setDrawColor(124, 179, 66);
+          doc.setLineWidth(0.3);
+          doc.line(margin, fy, pageW - margin, fy);
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(150, 150, 150);
+          doc.text('Ranger Monitor AI - He thong giam sat dong vat hoang da', margin, fy + 4.5);
+          doc.text(`Trang ${pgNum} / ${pgTotal}`, pageW - margin, fy + 4.5, { align: 'right' });
+        }
+
+        // ---- PAGE 1: HEADER & STATS ----
+        drawHeader(true);
+        let y = 37;
+
+        const teteCount    = importResults.filter(r => r.type === 'tete').length;
+        const civetCount   = importResults.filter(r => r.type === 'civet').length;
+        const unknownCount = importResults.filter(r => r.type === 'unknown').length;
+        const total = importResults.length;
+
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 30, 30);
+        doc.text('TONG KET PHIEN SCAN', margin, y);
+        y += 5;
+
+        // 4 Stat boxes
+        const boxW = (pageW - margin * 2 - 9) / 4;
+        const stats = [
+          { label: 'Tong anh', val: total, color: [14, 38, 17] },
+          { label: 'Te Te (Pangolin)', val: teteCount, color: [27, 94, 32] },
+          { label: 'Cay Voi Moc', val: civetCount, color: [230, 81, 0] },
+          { label: 'Khong ro', val: unknownCount, color: [90, 90, 90] },
+        ];
+        stats.forEach((s, i) => {
+          const bx = margin + i * (boxW + 3);
+          doc.setFillColor(...s.color);
+          doc.roundedRect(bx, y, boxW, 16, 2, 2, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text(String(s.val), bx + boxW / 2, y + 9.5, { align: 'center' });
+          doc.setFontSize(6.8);
+          doc.setFont('helvetica', 'normal');
+          doc.text(s.label, bx + boxW / 2, y + 14, { align: 'center' });
+        });
+        y += 22;
+
+        // ---- SECTION TITLE ----
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 30, 30);
+        doc.text('DANH SACH ANH VA KET QUA NHAN DIEN', margin, y);
+        y += 5;
+
+        const typeConfig = {
+          tete:    { label: 'Te Te (Pangolin)', badgeBg: [46, 125, 50],   cardBg: [241, 248, 241], border: [129, 199, 132] },
+          civet:   { label: 'Cay Voi Moc',      badgeBg: [230, 81, 0],    cardBg: [255, 248, 240], border: [255, 183, 77] },
+          unknown: { label: 'Khong phat hien',  badgeBg: [100, 100, 100], cardBg: [248, 248, 248], border: [200, 200, 200] },
+        };
+
+        // Grid config: 2 columns
+        const cols = 2;
+        const gap = 6;
+        const cellW = (pageW - margin * 2 - gap) / cols; // ~88mm
+        const imgH = 43; // Image height
+        const infoH = 15; // Info bar height
+        const cellH = imgH + infoH; // 58mm per card
+
+        let col = 0;
+
+        for (let i = 0; i < importResults.length; i++) {
+          const item = importResults[i];
+          const cfg = typeConfig[item.type] || typeConfig.unknown;
+
+          // Check if new page is needed
+          if (y + cellH > pageH - 14) {
+            doc.addPage();
+            drawHeader(false);
+            y = 22;
+            col = 0;
+          }
+
+          const cx = margin + col * (cellW + gap);
+
+          // Card Background & Border
+          doc.setFillColor(...cfg.cardBg);
+          doc.roundedRect(cx, y, cellW, cellH, 2.5, 2.5, 'F');
+          doc.setDrawColor(...cfg.border);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(cx, y, cellW, cellH, 2.5, 2.5, 'S');
+
+          // Render Image
+          const imgBase64 = await prepareImageBase64(item);
+          if (imgBase64) {
+            try {
+              doc.addImage(imgBase64, 'JPEG', cx + 1, y + 1, cellW - 2, imgH - 1, `img_${i}`, 'FAST');
+            } catch (err) {
+              console.warn('PDF addImage error:', err);
+            }
+          } else {
+            // Placeholder box if image not available
+            doc.setFillColor(220, 220, 220);
+            doc.rect(cx + 1, y + 1, cellW - 2, imgH - 1, 'F');
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text('No Image', cx + cellW / 2, y + imgH / 2, { align: 'center' });
+          }
+
+          // Result Badge bar on bottom of image
+          doc.setFillColor(...cfg.badgeBg);
+          doc.rect(cx + 1, y + imgH - 7, cellW - 2, 7, 'F');
+          
+          doc.setFontSize(7.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(255, 255, 255);
+          const confText = (parseFloat(item.conf) * 100).toFixed(0) + '%';
+          doc.text(`${cfg.label}  •  ${confText}`, cx + cellW / 2, y + imgH - 2.2, { align: 'center' });
+
+          // Info Area below image
+          const infoY = y + imgH + 4.5;
+          doc.setFontSize(7.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(30, 30, 30);
+          doc.text(`#${i + 1}`, cx + 3, infoY);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(70, 70, 70);
+          const displayFilename = item.name.length > 22 ? item.name.slice(0, 20) + '..' : item.name;
+          doc.text(displayFilename, cx + 9, infoY);
+
+          // Right info: Size / Bbox
+          doc.setFontSize(7);
+          doc.setTextColor(120, 120, 120);
+          if (modelType === 'detection' && item.detections && item.detections.length > 0) {
+            doc.text(`${item.detections.length} bbox`, cx + cellW - 3, infoY, { align: 'right' });
+          } else if (item.size && item.size !== '—') {
+            doc.text(item.size, cx + cellW - 3, infoY, { align: 'right' });
+          }
+
+          // Move to next column/row
+          col++;
+          if (col >= cols) {
+            col = 0;
+            y += cellH + 4.5;
+          }
+        }
+
+        // Draw Footers on all pages
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+          doc.setPage(p);
+          drawFooter(p, totalPages);
+        }
+
+        const filename = `scan_report_${now.toISOString().slice(0, 10)}.pdf`;
+        doc.save(filename);
+        showPdfToast(`✅ Đã xuất: ${filename}`);
+
+      } catch (err) {
+        console.error('[PDF] Export error:', err);
+        showPdfToast('⚠️ Lỗi xuất PDF: ' + err.message);
+      }
     }
 
     renderStepBar();

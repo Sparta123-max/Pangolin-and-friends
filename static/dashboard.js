@@ -10,17 +10,18 @@ function formatTime(iso) {
 }
 
 function eventLabel(eventType, source) {
-  if (eventType === "TeTe") return "Phát hiện TeTe";
+  if (eventType === "TeTe") return "🐾 Ghi nhận Tê Tê";
+  if (eventType === "CayVoiMoc") return "🐾 Ghi nhận Cầy Vòi Mốc";
   if (eventType === "Nguy hiem") {
-    if (source === "Hunter Spot") return "Phát hiện thợ săn";
-    return "Cảnh báo nguy hiểm";
+    if (source === "Hunter Spot") return "⚠️ Phát hiện nguy cơ thợ săn";
+    return "⚠️ Cảnh báo xâm nhập rừng";
   }
-  return eventType || "—";
+  return eventType ? `🌿 ${eventType}` : "—";
 }
 
 function pillClass(eventType) {
   if (eventType === "Nguy hiem") return "pill danger";
-  if (eventType === "TeTe") return "pill ok";
+  if (eventType === "TeTe" || eventType === "CayVoiMoc") return "pill ok";
   return "pill";
 }
 

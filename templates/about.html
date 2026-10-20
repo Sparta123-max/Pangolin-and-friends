@@ -3,202 +3,1159 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Us - TeTe</title>
+    <title>About Us - Dự án Bảo Tồn TeTe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
       :root {
-        --bg: #061306;
-        --panel: #0f2312;
-        --panel2: #132b16;
-        --text: #e8f5e9;
-        --muted: rgba(232, 245, 233, 0.7);
-        --green: #8bc34a;
-        --border: rgba(255, 255, 255, 0.08);
+        --bg-deep: #030a04;
+        --bg-forest: #07190b;
+        --panel: rgba(12, 33, 16, 0.75);
+        --panel-hover: rgba(17, 46, 23, 0.85);
+        --panel-border: rgba(129, 199, 132, 0.18);
+        --panel-border-hover: rgba(165, 214, 167, 0.4);
+        --leaf-green: #81c784;
+        --moss-green: #4caf50;
+        --emerald: #2e7d32;
+        --earth-gold: #e6c687;
+        --glow-green: rgba(129, 199, 132, 0.35);
+        --text-primary: #edf7ee;
+        --text-secondary: #c2ddc4;
+        --text-muted: #8fae92;
+        --font-serif: "Playfair Display", Georgia, serif;
+        --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
-        color: var(--text);
+        font-family: var(--font-sans);
+        background: var(--bg-deep);
+        color: var(--text-primary);
         min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+        line-height: 1.6;
       }
 
+      /* Nature Ambient Background Gradient & Leaf Silhouettes */
+      .nature-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 15% 20%, rgba(46, 125, 50, 0.28) 0%, transparent 45%),
+          radial-gradient(circle at 85% 15%, rgba(27, 94, 32, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 50% 85%, rgba(13, 51, 21, 0.35) 0%, transparent 60%),
+          linear-gradient(180deg, #061608 0%, #030904 100%);
+      }
+
+      .nature-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(129, 199, 132, 0.08) 1px, transparent 1px);
+        background-size: 32px 32px;
+        opacity: 0.6;
+      }
+
+      /* Floating Fireflies */
+      #fireflies {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+      }
+
+      .firefly {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #dcfce7 0%, #86efac 45%, transparent 100%);
+        box-shadow: 0 0 8px 3px rgba(134, 239, 172, 0.7);
+        animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
+      }
+
+      @keyframes flyFloat {
+        0% {
+          transform: translate(0, 0) scale(0.6);
+          opacity: 0;
+        }
+        20% {
+          opacity: 0.9;
+        }
+        50% {
+          transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2);
+          opacity: 1;
+        }
+        80% {
+          opacity: 0.7;
+        }
+        100% {
+          transform: translate(var(--tx2, -30px), var(--ty2, -120px)) scale(0.5);
+          opacity: 0;
+        }
+      }
+
+      /* Header */
       header {
         position: sticky;
         top: 0;
-        z-index: 10;
-        background: linear-gradient(to right, #194e22, #0b1a0f);
-        border-bottom: 1px solid var(--border);
-        padding: 14px 16px;
+        z-index: 100;
+        background: linear-gradient(to right, rgba(10, 31, 14, 0.92), rgba(4, 15, 6, 0.92));
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--panel-border);
+        padding: 12px 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
       }
 
-      .title {
-        font-size: 16px;
-        font-weight: 800;
-        letter-spacing: 0.2px;
+      header::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(129, 199, 132, 0.2) 20%,
+          rgba(129, 199, 132, 0.7) 50%,
+          rgba(129, 199, 132, 0.2) 80%,
+          transparent 100%
+        );
+      }
+
+      .logo-link {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        text-decoration: none;
       }
 
-      .title small {
-        color: var(--muted);
-        font-weight: 700;
+      .brand-logo {
+        height: 48px;
+        width: auto;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 14px rgba(129, 199, 132, 0.25));
+        transition: transform 0.3s ease;
+      }
+
+      .logo-link:hover .brand-logo {
+        transform: scale(1.05) rotate(-2deg);
+      }
+
+      .brand-title {
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: var(--text-primary);
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+
+      .brand-title small {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--leaf-green);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 3px;
       }
 
       .actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
+        flex-wrap: wrap;
       }
 
       .btn {
-        padding: 9px 14px;
+        padding: 9px 16px;
         border-radius: 12px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text);
+        border: 1px solid var(--panel-border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-primary);
         font-weight: 600;
+        font-size: 13px;
+        font-family: inherit;
         cursor: pointer;
-        transition: 0.2s;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
       }
 
       .btn:hover {
-        transform: translateY(-1px);
-        border-color: rgba(139, 195, 74, 0.35);
+        background: rgba(129, 199, 132, 0.12);
+        border-color: var(--panel-border-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
       }
 
       .btn.primary {
-        background: linear-gradient(180deg, rgba(46, 125, 50, 0.95), rgba(27, 94, 32, 0.85));
-        border-color: rgba(139, 195, 74, 0.25);
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border-color: rgba(165, 214, 167, 0.3);
+        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.35);
       }
 
+      .btn.primary:hover {
+        background: linear-gradient(135deg, #388e3c, #2e7d32);
+        border-color: rgba(200, 230, 201, 0.5);
+        box-shadow: 0 6px 22px rgba(76, 175, 80, 0.45);
+      }
+
+      /* Main container */
       main {
-        padding: 18px;
-        display: grid;
-        gap: 14px;
-        max-width: 980px;
+        position: relative;
+        z-index: 2;
+        padding: 36px 20px 60px;
+        max-width: 1040px;
         margin: 0 auto;
-      }
-
-      .card {
-        background: linear-gradient(180deg, var(--panel), var(--panel2));
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 14px;
-      }
-
-      h1 {
-        margin: 0 0 6px 0;
-        font-size: 22px;
-      }
-
-      h2 {
-        margin: 0 0 10px 0;
-        font-size: 16px;
-      }
-
-      p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.55;
-      }
-
-      .grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
+        gap: 24px;
       }
 
-      @media (max-width: 900px) {
-        .grid {
+      /* Hero Botanical Card */
+      .hero-card {
+        background: linear-gradient(145deg, rgba(16, 46, 22, 0.8), rgba(8, 26, 12, 0.9));
+        border: 1px solid var(--panel-border);
+        border-radius: 24px;
+        padding: 38px 36px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .hero-card::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(129, 199, 132, 0.18) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(129, 199, 132, 0.12);
+        border: 1px solid rgba(129, 199, 132, 0.3);
+        color: var(--leaf-green);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        margin-bottom: 16px;
+      }
+
+      .hero-badge span {
+        animation: pulseLeaf 2s infinite ease-in-out;
+      }
+
+      @keyframes pulseLeaf {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.25); }
+      }
+
+      .hero-title {
+        font-family: var(--font-serif);
+        font-size: 38px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin: 0 0 14px;
+        background: linear-gradient(135deg, #ffffff 40%, #c8e6c9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .hero-desc {
+        color: var(--text-secondary);
+        font-size: 16px;
+        line-height: 1.7;
+        max-width: 800px;
+        margin: 0 0 24px;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .nature-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 14px;
+        background: rgba(10, 30, 15, 0.6);
+        border: 1px solid var(--panel-border);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.25s ease;
+      }
+
+      .nature-tag:hover {
+        background: rgba(46, 125, 50, 0.3);
+        border-color: var(--leaf-green);
+        color: #ffffff;
+        transform: translateY(-2px);
+      }
+
+      .nature-tag i {
+        font-style: normal;
+        font-size: 15px;
+      }
+
+      /* Stats Highlight Bar */
+      .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      @media (max-width: 720px) {
+        .stats-bar {
           grid-template-columns: 1fr;
         }
       }
 
-      ul {
-        margin: 10px 0 0 18px;
-        color: var(--muted);
-        line-height: 1.6;
+      .stat-card {
+        background: linear-gradient(180deg, rgba(14, 39, 19, 0.7), rgba(9, 25, 12, 0.85));
+        border: 1px solid var(--panel-border);
+        border-radius: 20px;
+        padding: 20px 22px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.25s, border-color 0.25s;
       }
 
-      .tag {
-        display: inline-flex;
+      .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--panel-border-hover);
+      }
+
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(129, 199, 132, 0.18), rgba(46, 125, 50, 0.35));
+        border: 1px solid rgba(129, 199, 132, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+
+      .stat-info .num {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--earth-gold);
+        line-height: 1.2;
+      }
+
+      .stat-info .lbl {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      /* Grid 2-column cards */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 860px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--panel-border);
+        border-radius: 22px;
+        padding: 28px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card:hover {
+        background: var(--panel-hover);
+        border-color: var(--panel-border-hover);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px var(--glow-green);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .card-icon {
+        font-size: 24px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(129, 199, 132, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(129, 199, 132, 0.2);
+      }
+
+      h2 {
+        font-family: var(--font-serif);
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 14.5px;
+        line-height: 1.7;
+      }
+
+      /* Nature list */
+      .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 18px 0 0;
+        display: grid;
+        gap: 12px;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(6, 20, 9, 0.45);
+        border: 1px solid rgba(129, 199, 132, 0.1);
+        font-size: 14px;
+        color: var(--text-secondary);
+        transition: background 0.2s;
+      }
+
+      .feature-item:hover {
+        background: rgba(22, 58, 29, 0.4);
+      }
+
+      .feature-bullet {
+        color: var(--leaf-green);
+        font-size: 16px;
+        line-height: 1.2;
+        flex-shrink: 0;
+      }
+
+      /* Contact Card Special */
+      .contact-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .contact-links {
+        margin-top: 20px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(8, 25, 12, 0.6);
+        border: 1px solid var(--panel-border);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .contact-item:hover {
+        background: rgba(46, 125, 50, 0.25);
+        border-color: var(--leaf-green);
+        color: #ffffff;
+        transform: translateX(4px);
+      }
+
+      .contact-item i {
+        font-size: 18px;
+        font-style: normal;
+      }
+
+      .nature-quote {
+        margin-top: 20px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(230, 198, 135, 0.08);
+        border-left: 3px solid var(--earth-gold);
+        font-size: 13px;
+        font-style: italic;
+        color: #f0dfb8;
+      }
+
+      /* Comment & Feedback Section */
+      .comment-section {
+        margin-top: 10px;
+      }
+
+      .comment-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .comment-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .comment-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 540px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        background: rgba(4, 15, 7, 0.7);
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        padding: 10px 14px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 13.5px;
+        outline: none;
+        transition: all 0.2s;
+      }
+
+      .form-group select {
+        cursor: pointer;
+      }
+
+      .form-group select option {
+        background: #08200f;
+        color: var(--text-primary);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: var(--leaf-green);
+        box-shadow: 0 0 12px rgba(129, 199, 132, 0.25);
+        background: rgba(7, 24, 11, 0.85);
+      }
+
+      .submit-btn {
+        padding: 10px 22px;
+        font-size: 14px;
+      }
+
+      .form-status {
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .form-status.success {
+        color: #81c784;
+      }
+
+      .form-status.error {
+        color: #ef5350;
+      }
+
+      /* Comments Wall */
+      .comments-wall {
+        background: rgba(6, 20, 9, 0.5);
+        border: 1px solid var(--panel-border);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        max-height: 380px;
+      }
+
+      .wall-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(129, 199, 132, 0.12);
+        margin-bottom: 12px;
+      }
+
+      .wall-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .wall-badge {
+        font-size: 11.5px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: rgba(129, 199, 132, 0.15);
+        border: 1px solid rgba(129, 199, 132, 0.25);
+        color: var(--leaf-green);
+        font-weight: 600;
+      }
+
+      .comments-list {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-right: 4px;
+      }
+
+      .comments-list::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .comments-list::-webkit-scrollbar-thumb {
+        background: rgba(129, 199, 132, 0.25);
+        border-radius: 10px;
+      }
+
+      .comment-item {
+        background: rgba(10, 31, 14, 0.6);
+        border: 1px solid rgba(129, 199, 132, 0.1);
+        border-radius: 12px;
+        padding: 12px 14px;
+        transition: transform 0.2s, border-color 0.2s;
+      }
+
+      .comment-item:hover {
+        border-color: rgba(129, 199, 132, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .comment-author-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .comment-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(129, 199, 132, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .comment-author {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+
+      .comment-role {
+        font-size: 11px;
+        color: var(--leaf-green);
+      }
+
+      .comment-time {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .comment-body {
+        font-size: 13.5px;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .empty-comments {
+        text-align: center;
+        padding: 30px 10px;
+        color: var(--text-muted);
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
         align-items: center;
         gap: 8px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 700;
       }
 
-      .tag b {
-        color: var(--text);
+      .empty-comments i {
+        font-style: normal;
+        font-size: 26px;
       }
 
-      a {
-        color: #c5e1a5;
+      /* Footer */
+      footer {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 24px;
+        color: var(--text-muted);
+        font-size: 13px;
+        border-top: 1px solid rgba(129, 199, 132, 0.1);
+        background: rgba(3, 10, 4, 0.6);
+      }
+
+      footer a {
+        color: var(--leaf-green);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
 
   <body>
+    <!-- Nature ambient backdrop & fireflies -->
+    <div class="nature-bg"></div>
+    <div id="fireflies"></div>
+
     <header>
-      <div class="title">
-        TeTe <small>Ranger Monitor AI</small>
-      </div>
+      <a href="/" class="logo-link">
+        <img
+          class="brand-logo"
+          src="{{ url_for('static', filename='images/tete-logo.png') }}"
+          alt="TeTe Logo"
+        />
+        <div class="brand-title">
+          <span>TeTe</span>
+          <small>🌿 Ranger Monitor AI</small>
+        </div>
+      </a>
       <div class="actions">
-        <button class="btn" onclick="location.href='/'">Dashboard</button>
-        <button class="btn" onclick="location.href='/game'">Game</button>
-        <button class="btn primary" onclick="location.href='/map'">CCTV</button>
+        <a class="btn" href="/">📊 Dashboard</a>
+        <a class="btn" href="/game">🎮 Mini Game</a>
+        <a class="btn primary" href="/map">🗺️ Animal Spot</a>
+        <a class="btn" href="/hunter_spot">⚠️ Hunter Spot</a>
       </div>
     </header>
 
     <main>
-      <section class="card">
-        <h1>About Us</h1>
-        <p>
-          TeTe là một dự án theo dõi/giám sát hỗ trợ ranger (kiểm lâm) với dashboard + CCTV + AI phát hiện sự kiện, kết hợp
-          một mini-game để tăng tương tác/nhận diện dự án.
+      <!-- Hero Forest Card -->
+      <section class="hero-card">
+        <div class="hero-badge">
+          <span>🌱</span> Đồng hành cùng lực lượng Kiểm lâm & Động vật hoang dã
+        </div>
+        <h1 class="hero-title">Bảo tồn sinh cảnh & Vì một tương lai xanh</h1>
+        <p class="hero-desc">
+          <strong>TeTe (Ranger Monitor AI)</strong> là giải pháp công nghệ tuần tra và giám sát sinh thái thông minh.
+          Hệ thống kết hợp mạng lưới CCTV tầm xa, trí tuệ nhân tạo nhận diện cá thể đặc hữu (Tê Tê, Cầy Vòi Mốc) và
+          cảnh báo thợ săn tức thời – tiếp sức cho những người gác rừng gìn giữ hơi thở của đại ngàn.
         </p>
-        <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
-          <div class="tag"><b>AI</b> Detection</div>
-          <div class="tag"><b>CCTV</b> Monitoring</div>
-          <div class="tag"><b>Map</b> Visualization</div>
-          <div class="tag"><b>Game</b> Experience</div>
+      </section>
+
+      <!-- Highlights / Stats Bar -->
+      <section class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-icon">🍃</div>
+          <div class="stat-info">
+            <div class="num">Bảo tồn 24/7</div>
+            <div class="lbl">Giám sát liên tục ngày & đêm dưới tán rừng</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-info">
+            <div class="num">&lt; Nhanh nhất có thể</div>
+            <div class="lbl">Tốc độ cảnh báo khi phát hiện nguy cơ xâm nhập</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🌲</div>
+          <div class="stat-info">
+            <div class="num">Hệ sinh thái</div>
+            <div class="lbl">Khoanh vùng an toàn cho các loài quý hiếm</div>
+          </div>
         </div>
       </section>
 
-      <section class="grid">
+      <!-- Detailed Info Grid -->
+      <section class="grid-2">
+        <!-- Mission Section -->
         <section class="card">
-          <h2>Mission</h2>
-          <p>Giúp theo dõi khu vực nhanh hơn và giảm tải cho người vận hành bằng cách tổng hợp dữ liệu theo thời gian thực.</p>
-          <ul>
-            <li>Giảm thời gian phản ứng khi có cảnh báo</li>
-            <li>Ghi nhận lịch sử sự kiện (ảnh/video)</li>
-            <li>Trực quan vị trí camera trên bản đồ</li>
+          <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <h2>Sứ mệnh của tôi</h2>
+          </div>
+          <p>
+            Giúp lực lượng kiểm lâm và tình nguyện viên quan trắc rừng nhanh hơn, giảm tải tuần tra hiểm trở và phản ứng kịp thời trước các mối nguy đe dọa động vật hoang dã.
+          </p>
+
+          <ul class="feature-list">
+            <li class="feature-item">
+              <span class="feature-bullet">🌿</span>
+              <span><strong>Tự động nhận diện động vật:</strong> AI phân tích luồng camera để nhận biết Tê Tê và Cầy Vòi Mốc với độ chính xác cao.</span>
+            </li>
+            <li class="feature-item">
+              <span class="feature-bullet">⚠️</span>
+              <span><strong>Cảnh báo bẫy & thợ săn:</strong> Tức tốc định vị điểm nóng trên bản đồ khi phát hiện người khả nghi hoặc tiếng ồn lạ.</span>
+            </li>
+            <li class="feature-item">
+              <span class="feature-bullet">🎞️</span>
+              <span><strong>Lưu trữ bằng chứng số:</strong> Ghi nhận tự động ảnh và clip ngắn phục vụ công tác nghiên cứu và pháp lý bảo tồn.</span>
+            </li>
+            <li class="feature-item">
+              <span class="feature-bullet">🤝</span>
+              <span><strong>Nâng cao nhận thức cộng đồng:</strong> Tích hợp trò chơi tương tác giáo dục bảo vệ loài Tê Tê quý hiếm.</span>
+            </li>
           </ul>
         </section>
 
-        <section class="card">
-          <h2>Contact</h2>
-          <p>
-            Bạn có thể thay nội dung phần này bằng thông tin nhóm (email/số điện thoại/link mạng xã hội).
-          </p>
-          <ul>
-            <li>Email: <a href="mailto:contact@example.com">trancongvinh601@gmail.com</a></li>
-          </ul>
+        <!-- Contact Section -->
+        <section class="card contact-card">
+          <div>
+            <div class="card-header">
+              <div class="card-icon">📬</div>
+              <h2>Liên hệ & Hợp tác</h2>
+            </div>
+            <p>
+              Chúng tôi luôn chào đón mọi sự hợp tác từ các tổ chức bảo tồn động vật hoang dã, các bạn sinh viên và chuyên gia công nghệ xanh.
+            </p>
+
+            <div class="contact-links">
+              <a class="contact-item" href="mailto:trancongvinh601@gmail.com">
+                <i>✉️</i>
+                <span>trancongvinh601@gmail.com</span>
+              </a>
+              <div class="contact-item">
+                <i>📍</i>
+                <span>Việt Nam • Vì Rừng Xanh Bền Vững</span>
+              </div>
+            </div>
+          </div>
         </section>
       </section>
+
+      <!-- Feedback & Comments for Developers Section -->
+      <section class="card comment-section">
+        <div class="card-header">
+          <div class="card-icon">💬</div>
+          <div>
+            <h2>Gửi lời nhắn & Bình luận cho Nhà phát triển</h2>
+            <p style="margin-top: 4px; font-size: 13.5px; color: var(--text-muted)">
+              Chia sẻ ý kiến đóng góp, báo lỗi hoặc gửi lời động viên tới đội ngũ phát triển dự án TeTe.
+            </p>
+          </div>
+        </div>
+
+        <div class="comment-grid">
+          <!-- Form input -->
+          <form id="feedback-form" class="comment-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fb-name">Họ và tên / Biệt danh <span style="color: #ef5350">*</span></label>
+                <input
+                  type="text"
+                  id="fb-name"
+                  placeholder="Ví dụ: Hưng, SV Sinh học..."
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fb-email">Email (tùy chọn)</label>
+                <input
+                  type="email"
+                  id="fb-email"
+                  placeholder="email@example.com để nhận phản hồi"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="fb-role">Bạn là</label>
+              <select id="fb-role">
+                <option value="Người yêu thiên nhiên 🌿">🌿 Người yêu thiên nhiên & bảo tồn</option>
+                <option value="Kiểm lâm / Cán bộ bảo tồn 🌲">🌲 Kiểm lâm / Cán bộ bảo tồn</option>
+                <option value="Nhà nghiên cứu / Sinh viên 📚">📚 Nhà nghiên cứu / Sinh viên</option>
+                <option value="Lập trình viên / Kỹ sư AI 💻">💻 Lập trình viên / Kỹ sư AI</option>
+                <option value="Khách tham quan 🎒">🎒 Khách tham quan website</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="fb-message">Nội dung lời nhắn <span style="color: #ef5350">*</span></label>
+              <textarea
+                id="fb-message"
+                rows="4"
+                placeholder="Nhập nhận xét, gợi ý tính năng hoặc lời nhắn gửi tới nhóm phát triển..."
+                required
+              ></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <button type="submit" class="btn primary submit-btn" id="fb-submit-btn">
+                <span>🍃 Gửi lời nhắn</span>
+              </button>
+              <div id="fb-status" class="form-status"></div>
+            </div>
+          </form>
+
+          <!-- Comment list / Wall -->
+          <div class="comments-wall">
+            <div class="wall-header">
+              <span class="wall-title">🌱 Lời nhắn từ cộng đồng</span>
+              <span class="wall-badge" id="comment-count">0 lời nhắn</span>
+            </div>
+            <div id="comments-list" class="comments-list">
+              <div class="empty-comments">
+                <i>🍃</i>
+                <div>Chưa có lời nhắn nào. Hãy là người đầu tiên gửi ý kiến cho nhóm nhé!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
+
+    <footer>
+      <div>🌿 Dự án TeTe - Ranger Monitor AI © 2026. Chung tay bảo tồn thiên nhiên & động vật hoang dã.</div>
+    </footer>
+
+    <!-- Firefly ambient generation script & Feedback handlers -->
+    <script>
+      (function () {
+        const container = document.getElementById("fireflies");
+        const count = 28;
+        for (let i = 0; i < count; i++) {
+          const f = document.createElement("div");
+          f.className = "firefly";
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          const dur = 10 + Math.random() * 14;
+          const delay = -(Math.random() * dur);
+          const tx = (Math.random() - 0.5) * 140;
+          const ty = -(30 + Math.random() * 90);
+          const tx2 = (Math.random() - 0.5) * 100;
+          const ty2 = -(70 + Math.random() * 140);
+          const size = 2.5 + Math.random() * 3.5;
+          f.style.cssText = [
+            `left:${x}%`,
+            `top:${y}%`,
+            `--dur:${dur.toFixed(1)}s`,
+            `--delay:${delay.toFixed(1)}s`,
+            `--tx:${tx.toFixed(0)}px`,
+            `--ty:${ty.toFixed(0)}px`,
+            `--tx2:${tx2.toFixed(0)}px`,
+            `--ty2:${ty2.toFixed(0)}px`,
+            `width:${size.toFixed(1)}px`,
+            `height:${size.toFixed(1)}px`,
+            `animation-duration:${dur.toFixed(1)}s`,
+            `animation-delay:${delay.toFixed(1)}s`,
+          ].join(";");
+          container.appendChild(f);
+        }
+      })();
+
+      // ===== FEEDBACK & COMMENT SYSTEM =====
+      const fbForm = document.getElementById("feedback-form");
+      const fbSubmitBtn = document.getElementById("fb-submit-btn");
+      const fbStatus = document.getElementById("fb-status");
+      const commentsList = document.getElementById("comments-list");
+      const commentCount = document.getElementById("comment-count");
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatTime(isoStr) {
+        try {
+          const d = new Date(isoStr);
+          if (isNaN(d.getTime())) return "Vừa xong";
+          return d.toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch (e) {
+          return "Vừa xong";
+        }
+      }
+
+      function renderComments(feedbacks) {
+        if (!feedbacks || feedbacks.length === 0) {
+          commentsList.innerHTML = `
+            <div class="empty-comments">
+              <i>🍃</i>
+              <div>Chưa có lời nhắn nào. Hãy là người đầu tiên gửi ý kiến cho nhóm nhé!</div>
+            </div>`;
+          commentCount.textContent = "0 lời nhắn";
+          return;
+        }
+
+        commentCount.textContent = `${feedbacks.length} lời nhắn`;
+        commentsList.innerHTML = feedbacks
+          .map((fb) => `
+            <div class="comment-item">
+              <div class="comment-author-bar">
+                <div class="comment-avatar">🌿</div>
+                <div>
+                  <div class="comment-author">${escapeHtml(fb.name)}</div>
+                  <div class="comment-role">${escapeHtml(fb.role || "Cộng tác viên")}</div>
+                </div>
+                <div class="comment-time">${formatTime(fb.created_at)}</div>
+              </div>
+              <div class="comment-body">${escapeHtml(fb.message)}</div>
+            </div>
+          `)
+          .join("");
+      }
+
+      async function loadComments() {
+        try {
+          const res = await fetch("/api/feedback");
+          if (!res.ok) return;
+          const data = await res.json();
+          renderComments(data.feedbacks || []);
+        } catch (e) {
+          console.error("Không thể tải bình luận:", e);
+        }
+      }
+
+      fbForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("fb-name").value.trim();
+        const email = document.getElementById("fb-email").value.trim();
+        const role = document.getElementById("fb-role").value;
+        const message = document.getElementById("fb-message").value.trim();
+
+        if (!name || !message) {
+          fbStatus.className = "form-status error";
+          fbStatus.textContent = "Vui lòng nhập tên và lời nhắn!";
+          return;
+        }
+
+        fbSubmitBtn.disabled = true;
+        fbSubmitBtn.innerHTML = `<span>⏳ Đang gửi...</span>`;
+        fbStatus.className = "form-status";
+        fbStatus.textContent = "";
+
+        try {
+          const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, role, message }),
+          });
+          const result = await res.json();
+
+          if (res.ok && result.success) {
+            fbStatus.className = "form-status success";
+            fbStatus.textContent = "🌱 " + result.message;
+            fbForm.reset();
+            loadComments();
+            setTimeout(() => {
+              fbStatus.textContent = "";
+            }, 6000);
+          } else {
+            fbStatus.className = "form-status error";
+            fbStatus.textContent = result.error || "Gửi thất bại, vui lòng thử lại!";
+          }
+        } catch (err) {
+          fbStatus.className = "form-status error";
+          fbStatus.textContent = "Lỗi kết nối máy chủ!";
+        } finally {
+          fbSubmitBtn.disabled = false;
+          fbSubmitBtn.innerHTML = `<span>🍃 Gửi lời nhắn</span>`;
+        }
+      });
+
+      // Load on start
+      loadComments();
+    </script>
   </body>
 </html>
+
 

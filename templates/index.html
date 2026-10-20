@@ -4,26 +4,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranger Monitor AI - Dashboard</title>
+  <title>Ranger Monitor AI - Hệ Thống Quan Trắc Sinh Thái</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
     :root {
-      --bg: #040e05;
-      --panel: #0a1f0d;
-      --panel2: #0e2611;
-      --text: #e8f5e9;
-      --muted: rgba(200, 235, 205, 0.65);
-      --green: #7cb342;
-      --green-glow: rgba(124, 179, 66, 0.35);
-      --green2: #2e7d32;
-      --green-bright: #aed581;
+      --bg: #030a04;
+      --panel: rgba(12, 33, 16, 0.78);
+      --panel2: rgba(8, 24, 11, 0.88);
+      --text: #edf7ee;
+      --muted: rgba(200, 235, 205, 0.7);
+      --leaf-green: #81c784;
+      --moss-green: #4caf50;
+      --emerald: #2e7d32;
+      --earth-gold: #e6c687;
       --danger: #ef5350;
-      --border: rgba(124, 179, 66, 0.12);
-      --border-hover: rgba(124, 179, 66, 0.35);
-      --leaf-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      --border: rgba(129, 199, 132, 0.16);
+      --border-hover: rgba(165, 214, 167, 0.4);
+      --green-glow: rgba(129, 199, 132, 0.35);
+      --font-serif: "Playfair Display", Georgia, serif;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     *, *::before, *::after {
@@ -32,15 +37,34 @@
 
     body {
       margin: 0;
-      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      font-family: var(--font-sans);
       background: var(--bg);
-      background-image:
-        radial-gradient(ellipse 120% 60% at 20% -10%, #0d3315 0%, transparent 55%),
-        radial-gradient(ellipse 80% 50% at 80% 110%, #071a09 0%, transparent 50%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238bc34a' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Nature Deep Woods Background */
+    .nature-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 15%, rgba(46, 125, 50, 0.3) 0%, transparent 48%),
+        radial-gradient(circle at 82% 20%, rgba(27, 94, 32, 0.38) 0%, transparent 52%),
+        radial-gradient(circle at 50% 90%, rgba(13, 51, 21, 0.4) 0%, transparent 60%),
+        linear-gradient(180deg, #061608 0%, #030a04 100%);
+    }
+
+    .nature-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(129, 199, 132, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0.6;
     }
 
     /* ===== AMBIENT FIREFLIES ===== */
@@ -48,7 +72,7 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 0;
+      z-index: 1;
       overflow: hidden;
     }
 
@@ -57,37 +81,37 @@
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: radial-gradient(circle, #c5e88a 0%, rgba(139,195,74,0.4) 60%, transparent 100%);
+      background: radial-gradient(circle, #dcfce7 0%, #86efac 45%, transparent 100%);
+      box-shadow: 0 0 8px 3px rgba(134, 239, 172, 0.7);
       animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
-      box-shadow: 0 0 6px 2px rgba(139,195,74,0.5);
     }
 
     @keyframes flyFloat {
-      0%   { transform: translate(0, 0) scale(0.8); opacity: 0; }
-      15%  { opacity: 1; }
-      50%  { transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2); opacity: 0.9; }
-      85%  { opacity: 0.6; }
-      100% { transform: translate(var(--tx2, -20px), var(--ty2, -120px)) scale(0.6); opacity: 0; }
+      0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+      18%  { opacity: 0.95; }
+      50%  { transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2); opacity: 1; }
+      82%  { opacity: 0.7; }
+      100% { transform: translate(var(--tx2, -25px), var(--ty2, -120px)) scale(0.5); opacity: 0; }
     }
 
     /* ===== HEADER ===== */
     .header {
       position: sticky;
       top: 0;
-      z-index: 10;
-      background: linear-gradient(to right, rgba(15, 52, 20, 0.98), rgba(6, 19, 8, 0.98));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
+      background: linear-gradient(to right, rgba(10, 31, 14, 0.92), rgba(4, 15, 6, 0.92));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(139,195,74,0.08);
+      gap: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
     }
 
-    /* Leaf vine decoration on header bottom */
+    /* Leaf vine glow decoration on header bottom */
     .header::after {
       content: '';
       position: absolute;
@@ -97,31 +121,50 @@
       height: 2px;
       background: linear-gradient(90deg,
         transparent 0%,
-        rgba(139,195,74,0.3) 20%,
-        rgba(124,179,66,0.6) 50%,
-        rgba(139,195,74,0.3) 80%,
+        rgba(129, 199, 132, 0.2) 20%,
+        rgba(129, 199, 132, 0.7) 50%,
+        rgba(129, 199, 132, 0.2) 80%,
         transparent 100%);
     }
 
     .title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      text-decoration: none;
     }
 
     .brand-logo {
-      height: 110px;
+      height: 52px;
       width: auto;
       display: block;
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 20px rgba(139,195,74,0.15));
-      transition: filter 0.3s;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 16px rgba(129, 199, 132, 0.25));
+      transition: transform 0.3s ease;
     }
 
     .brand-logo:hover {
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 30px rgba(139,195,74,0.3));
+      transform: scale(1.05) rotate(-2deg);
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-title-wrap .main-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .brand-title-wrap .sub-name {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--leaf-green);
     }
 
     .actions {
@@ -130,6 +173,7 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
 
     .btn {
       padding: 8px 14px;
@@ -191,11 +235,102 @@
 
     /* ===== CONTENT ===== */
     .container {
-      padding: 20px;
+      padding: 24px 24px 60px;
+      max-width: 1360px;
+      margin: 0 auto;
       display: grid;
-      gap: 16px;
+      gap: 20px;
       position: relative;
-      z-index: 1;
+      z-index: 2;
+    }
+
+    /* Nature Guardian Welcome Banner */
+    .nature-banner {
+      background: linear-gradient(135deg, rgba(16, 46, 22, 0.85), rgba(8, 26, 12, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 26px 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .nature-banner::after {
+      content: '🌿';
+      position: absolute;
+      right: 20px;
+      top: -15px;
+      font-size: 110px;
+      opacity: 0.06;
+      pointer-events: none;
+      transform: rotate(15deg);
+    }
+
+    .banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(129, 199, 132, 0.12);
+      border: 1px solid rgba(129, 199, 132, 0.3);
+      color: var(--leaf-green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .banner-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .banner-title {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      background: linear-gradient(135deg, #ffffff 40%, #c8e6c9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    .banner-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(46, 125, 50, 0.25);
+      border: 1px solid rgba(129, 199, 132, 0.35);
+      color: #c8e6c9;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .pulse-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #81c784;
+      box-shadow: 0 0 8px #81c784;
+      animation: beacon-pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes beacon-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.6); opacity: 0.5; }
     }
 
     .grid {
@@ -215,12 +350,35 @@
     .card {
       background: linear-gradient(145deg, var(--panel), var(--panel2));
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
+      border-radius: 20px;
+      padding: 22px;
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
     }
+
+    .stat-metric-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-top-icon {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      font-size: 22px;
+      opacity: 0.35;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .card:hover .card-top-icon {
+      opacity: 0.85;
+      transform: scale(1.15) rotate(6deg);
+    }
+
 
     /* organic leaf corner decoration */
     .card::before {
@@ -442,43 +600,46 @@
     /* ===== TABS ===== */
     .tabs-container {
       display: flex;
-      gap: 6px;
+      gap: 10px;
       margin-top: 16px;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
+      padding-bottom: 14px;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
-      padding: 8px 18px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      background: rgba(255, 255, 255, 0.04);
+      padding: 9px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(6, 20, 9, 0.5);
       color: var(--muted);
       font-weight: 600;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 13.5px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .tab-btn:hover {
-      background: rgba(139,195,74,0.08);
+      background: rgba(129, 199, 132, 0.12);
       color: var(--text);
-      border-color: rgba(139,195,74,0.15);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
     }
 
     .tab-btn.active {
-      background: linear-gradient(135deg, rgba(46, 125, 50, 0.9), rgba(27, 94, 32, 0.8));
-      border-color: rgba(139, 195, 74, 0.3);
-      color: var(--text);
-      box-shadow: 0 0 12px rgba(139, 195, 74, 0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+      background: linear-gradient(135deg, #2e7d32, #1b5e20);
+      border-color: rgba(165, 214, 167, 0.45);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(46, 125, 50, 0.35);
     }
 
     /* ===== SECTION CARD (events panel) ===== */
-    section.card {
-      border-left: 3px solid rgba(124,179,66,0.4);
+    .events-section-card {
+      border-left: 4px solid var(--moss-green);
     }
+
 
     /* ===== AUTH GATE ===== */
     body > header,
@@ -608,7 +769,8 @@
 </head>
 
 <body>
-  <!-- Ambient firefly particles -->
+  <!-- Ambient nature deep woods backdrop & fireflies -->
+  <div class="nature-bg"></div>
   <div id="fireflies"></div>
 
   <!-- AUTH GATE OVERLAY: shown only for unauthenticated users -->
@@ -625,9 +787,13 @@
   </div>
 
   <header class="header">
-    <div class="title">
+    <a href="/" class="title">
       <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="Tete" />
-    </div>
+      <div class="brand-title-wrap">
+        <span class="main-name">TeTe</span>
+        <span class="sub-name">🌿 Ranger Monitor AI</span>
+      </div>
+    </a>
     <div class="actions">
       <button class="btn primary" onclick="location.href='/game'">🎮 Game</button>
       <button class="btn scan-btn" onclick="location.href='/scan'">📷 Import card ID</button>
@@ -639,8 +805,28 @@
   </header>
 
   <main class="container">
+    <!-- Nature Guardian Welcome Banner -->
+    <div class="nature-banner">
+      <div class="banner-badge">
+        <span>🌲</span> Trung Tâm Chỉ Huy & Giám Sát Sinh Thái Thời Gian Thực
+      </div>
+      <div class="banner-content">
+        <div class="banner-text">
+          <h1 class="banner-title">Mạng Lưới Giám Sát Động Vật Hoang Dã</h1>
+          <p class="banner-desc">
+            Theo dõi di biến động của <strong>Tê Tê</strong>, <strong>Cầy Vòi Mốc</strong> và chủ động ngăn chặn các dấu hiệu xâm nhập rừng trái phép.
+          </p>
+        </div>
+        <div class="banner-status-pill">
+          <span class="pulse-beacon"></span>
+          <span>Rừng đang được bảo vệ 24/7</span>
+        </div>
+      </div>
+    </div>
+
     <section class="grid">
-      <div class="card">
+      <div class="card stat-metric-card">
+        <div class="card-top-icon">🐾</div>
         <div class="label">Tổng số lần phát hiện</div>
         <div class="row">
           <div class="value" id="total-events">0</div>
@@ -648,35 +834,38 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card stat-metric-card">
+        <div class="card-top-icon">⏱️</div>
         <div class="label">Lần phát hiện gần nhất</div>
         <div class="value" id="last-seen">—</div>
         <div class="events-sub" id="last-seen-sub">Mở CCTV để bắt đầu nhận dữ liệu.</div>
       </div>
 
-      <div class="card">
+      <div class="card stat-metric-card">
+        <div class="card-top-icon">📡</div>
         <div class="label">Tự động cập nhật</div>
         <div class="row">
           <div class="value" id="refresh-state">ON</div>
           <button class="btn" id="refresh-now">🔄 Làm mới</button>
         </div>
-        <div class="events-sub">Dashboard sẽ lấy dữ liệu từ màn camera (CCTV) qua API.</div>
+        <div class="events-sub">Dữ liệu liên tục đồng bộ từ hệ thống camera AI rừng sâu.</div>
       </div>
 
-      <div class="card">
-        <div class="label">Video gần nhất</div>
-        <div id="latest-video-empty" class="mini-empty">🎥<span>Chưa có video.</span></div>
+      <div class="card stat-metric-card">
+        <div class="card-top-icon">🎥</div>
+        <div class="label">Video ghi nhận mới nhất</div>
+        <div id="latest-video-empty" class="mini-empty">🌿<span>Chưa có clip ghi nhận.</span></div>
         <video id="latest-video" class="mini-video" style="display: none;" controls muted playsinline
           preload="metadata"></video>
-        <div class="events-sub" style="margin-top: 8px;">Preview nhanh video của sự kiện mới nhất.</div>
+        <div class="events-sub" style="margin-top: 8px;">Xem nhanh hình ảnh chuyển động mới nhất từ tán rừng.</div>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card events-section-card">
       <div class="events-header">
         <div>
-          <div class="events-title">🌿 Lịch sử phát hiện</div>
-          <div class="events-sub">Lưu ảnh + video clip mỗi lần phát hiện TeTe hoặc “Nguy hiểm”.</div>
+          <div class="events-title">🌿 Lịch sử quan trắc & Cảnh báo</div>
+          <div class="events-sub">Tự động chụp ảnh + trích xuất video khi AI phát hiện Tê Tê hoặc dấu vết lạ.</div>
         </div>
         <div class="actions">
           <button class="btn danger" id="clear-events" type="button">🗑️ Xóa lịch sử</button>
@@ -685,13 +874,13 @@
       </div>
 
       <div class="tabs-container">
-        <button class="tab-btn active" data-tab="tete">🦔 Tê tê</button>
-        <button class="tab-btn" data-tab="hunter">⚠️ Thợ săn</button>
+        <button class="tab-btn active" data-tab="tete">🦔 Tê tê & Động vật rừng</button>
+        <button class="tab-btn" data-tab="hunter">⚠️ Cảnh báo xâm nhập / Thợ săn</button>
       </div>
 
       <div id="events" class="events"></div>
       <div id="events-empty" class="empty" style="display:none;">
-        Chưa có sự kiện nào. Hãy mở trang CCTV và để AI chạy.
+        🍃 Chưa ghi nhận sự kiện nào. Hãy kích hoạt camera giám sát để nhận cảnh báo tức thời.
       </div>
     </section>
   </main>

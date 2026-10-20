@@ -35,7 +35,21 @@ except Exception as e:
     print(f"Warning: Could not initialize YOLO-World model: {e}")
     yolo_world_model = None
 
-# 2. Legacy / fine-tuned YOLOv8 model fallback
+# 2. YOLO fine-tuned models
+# 2a. manhnd_best_model.pt (mô hình gốc PyTorch không nén để kiểm tra độ chính xác)
+manhnd_model_path = os.path.join(app.root_path, "static", "onxx_model", "manhnd_best_model.pt")
+manhnd_model = None
+try:
+    if os.path.exists(manhnd_model_path):
+        manhnd_model = YOLO(manhnd_model_path)
+        print("Loaded manhnd_best_model.pt successfully. Classes:", manhnd_model.names)
+    else:
+        print(f"Warning: File not found at {manhnd_model_path}")
+except Exception as e:
+    print(f"Warning: Could not load manhnd_best_model.pt: {e}")
+    manhnd_model = None
+
+# 2b. Legacy / fine-tuned YOLOv8 model fallback
 yolo_model_path = os.path.join(app.root_path, "static", "my_model", "best.pt")
 try:
     yolo_model = YOLO(yolo_model_path)
@@ -86,6 +100,18 @@ def _init_db():
                 created_at TEXT NOT NULL,
                 image_path TEXT,
                 video_path TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS feedbacks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT,
+                role TEXT,
+                message TEXT NOT NULL,
+                created_at TEXT NOT NULL
             )
             """
         )
@@ -177,6 +203,72 @@ def scan():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/api/feedback", methods=["GET"])
+def get_feedback():
+    try:
+        with _db() as conn:
+            rows = conn.execute(
+                """
+                SELECT id, name, email, role, message, created_at
+                FROM feedbacks
+                ORDER BY id DESC
+                LIMIT 30
+                """
+            ).fetchall()
+        feedbacks = [
+            {
+                "id": r["id"],
+                "name": r["name"],
+                "email": r["email"],
+                "role": r["role"] or "Cộng tác viên yêu thiên nhiên",
+                "message": r["message"],
+                "created_at": r["created_at"],
+            }
+            for r in rows
+        ]
+        return jsonify({"feedbacks": feedbacks})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/feedback", methods=["POST"])
+def post_feedback():
+    data = request.get_json(silent=True) or request.form
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip()
+    role = (data.get("role") or "").strip()
+    message = (data.get("message") or "").strip()
+
+    if not name or not message:
+        return jsonify({"error": "Vui lòng nhập tên và lời nhắn của bạn."}), 400
+
+    created_at = _utc_now_iso()
+    try:
+        with _db() as conn:
+            cur = conn.execute(
+                """
+                INSERT INTO feedbacks (name, email, role, message, created_at)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (name, email or None, role or "Khách truy cập", message, created_at),
+            )
+            feedback_id = cur.lastrowid
+        return jsonify({
+            "success": True,
+            "message": "Cảm ơn bạn! Bình luận và lời nhắn của bạn đã được gửi thành công đến đội ngũ phát triển.",
+            "feedback": {
+                "id": feedback_id,
+                "name": name,
+                "email": email,
+                "role": role or "Khách truy cập",
+                "message": message,
+                "created_at": created_at,
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/hunter_spot")
 def hunter_spot():
@@ -420,6 +512,92 @@ def predict_api():
         "clip_info": clip_result,
         "image_size": [w, h]
     })
+
+
+@app.route("/api/predict_pt", methods=["POST"])
+def predict_pt_api():
+    """Endpoint suy luận trực tiếp với file model PyTorch gốc (manhnd_best_model.pt) không nén."""
+    if manhnd_model is None:
+        return jsonify({"error": "Model manhnd_best_model.pt chưa được khởi tạo hoặc không tìm thấy."}), 500
+
+    if "image" not in request.files and "file" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+
+    file = request.files.get("image") or request.files.get("file")
+    img_bytes = file.read()
+    nparr = np.frombuffer(img_bytes, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    if img is None:
+        return jsonify({"error": "Invalid image format"}), 400
+
+    h, w, _ = img.shape
+    detections = []
+    conf_thresh = float(request.args.get("conf", 0.25))
+
+    try:
+        results = manhnd_model(img, conf=conf_thresh)
+        for r in results:
+            boxes = r.boxes
+            for box in boxes:
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                conf = float(box.conf[0])
+                cls_id = int(box.cls[0])
+                raw_name = str(r.names[cls_id]) if hasattr(r, 'names') and cls_id in r.names else str(cls_id)
+                lower_name = raw_name.lower()
+
+                if "pangolin" in lower_name or "tete" in lower_name or cls_id == 0:
+                    standard_name = "pangolin"
+                    result_type = "tete"
+                elif "civet" in lower_name or "masked" in lower_name or cls_id == 1:
+                    standard_name = "masked palm civet"
+                    result_type = "civet"
+                else:
+                    standard_name = raw_name
+                    result_type = "unknown"
+
+                label_vi = CLASS_VI_MAP.get(standard_name.lower(), standard_name)
+                detections.append({
+                    "box": [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)],
+                    "confidence": round(conf, 3),
+                    "class": standard_name,
+                    "label_vi": label_vi,
+                    "type": result_type,
+                    "source": "YOLO-PT (manhnd_best_model.pt)"
+                })
+
+        # Sắp xếp theo confidence giảm dần
+        detections.sort(key=lambda d: d["confidence"], reverse=True)
+
+        type_detected = "unknown"
+        has_tete = any(d["type"] == "tete" for d in detections)
+        has_civet = any(d["type"] == "civet" for d in detections)
+        if has_tete and has_civet:
+            type_detected = detections[0]["type"]
+        elif has_tete:
+            type_detected = "tete"
+        elif has_civet:
+            type_detected = "civet"
+
+        max_conf = detections[0]["confidence"] if detections else 0.0
+        all_scores = [
+            {"className": f"{d['label_vi']} ({d['class']})", "probability": d["confidence"]}
+            for d in detections
+        ]
+
+        return jsonify({
+            "success": True,
+            "type": type_detected,
+            "confidence": max_conf,
+            "detections": detections,
+            "allScores": all_scores,
+            "image_size": [w, h],
+            "model": "manhnd_best_model.pt (PyTorch Uncompressed)"
+        })
+
+    except Exception as e:
+        print("manhnd_best_model.pt prediction error:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

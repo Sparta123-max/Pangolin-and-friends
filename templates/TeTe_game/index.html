@@ -15,69 +15,266 @@
         <meta http-equiv="pragma" content="no-cache"/>
 
         <!-- Set the title bar of the page -->
-        <title>Created with GameMaker</title>
+        <title>TeTe Game - Phiêu Lưu Bảo Tồn Tê Tê</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+            rel="stylesheet"
+        />
 
-        <!-- Custom PreStyle code is injected here -->
-        
-
-        <!-- Set the background colour of the document -->
         <style>
+            :root {
+                --bg-deep: #030a04;
+                --panel: rgba(12, 33, 16, 0.85);
+                --panel-border: rgba(129, 199, 132, 0.22);
+                --panel-border-hover: rgba(165, 214, 167, 0.5);
+                --leaf-green: #81c784;
+                --emerald: #2e7d32;
+                --text-primary: #edf7ee;
+                --text-muted: #8fae92;
+                --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
             body {
-                background: #000;
-                color: #cccccc;
+                background: var(--bg-deep);
+                color: var(--text-primary);
+                font-family: var(--font-sans);
                 margin: 0px;
                 padding: 0px;
                 border: 0px;
                 min-height: 100vh;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                overflow-x: hidden;
+                position: relative;
             }
 
-            /* Overlay navigation (outside the canvas) */
-            .tete-overlay-nav {
+            /* Nature Ambient Background */
+            .nature-bg {
                 position: fixed;
-                top: 12px;
-                right: 12px;
-                z-index: 9999;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                background:
+                    radial-gradient(circle at 15% 20%, rgba(46, 125, 50, 0.32) 0%, transparent 48%),
+                    radial-gradient(circle at 85% 25%, rgba(27, 94, 32, 0.38) 0%, transparent 52%),
+                    radial-gradient(circle at 50% 85%, rgba(13, 51, 21, 0.45) 0%, transparent 60%),
+                    linear-gradient(180deg, #061608 0%, #030a04 100%);
+            }
+
+            .nature-bg::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-image: radial-gradient(rgba(129, 199, 132, 0.08) 1px, transparent 1px);
+                background-size: 32px 32px;
+                opacity: 0.6;
+            }
+
+            /* Floating Fireflies */
+            #fireflies {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 1;
+                overflow: hidden;
+            }
+
+            .firefly {
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                border-radius: 50%;
+                background: radial-gradient(circle, #dcfce7 0%, #86efac 45%, transparent 100%);
+                box-shadow: 0 0 8px 3px rgba(134, 239, 172, 0.7);
+                animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
+            }
+
+            @keyframes flyFloat {
+                0% {
+                    transform: translate(0, 0) scale(0.6);
+                    opacity: 0;
+                }
+                20% {
+                    opacity: 0.95;
+                }
+                50% {
+                    transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2);
+                    opacity: 1;
+                }
+                80% {
+                    opacity: 0.7;
+                }
+                100% {
+                    transform: translate(var(--tx2, -30px), var(--ty2, -120px)) scale(0.5);
+                    opacity: 0;
+                }
+            }
+
+            /* Top Nature Navigation Bar */
+            .tete-top-nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                background: linear-gradient(to right, rgba(10, 31, 14, 0.92), rgba(4, 15, 6, 0.92));
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--panel-border);
+                padding: 10px 20px;
                 display: flex;
-                gap: 10px;
                 align-items: center;
-                pointer-events: auto;
+                justify-content: space-between;
+                gap: 14px;
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            }
+
+            .tete-top-nav::after {
+                content: "";
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    rgba(129, 199, 132, 0.2) 20%,
+                    rgba(129, 199, 132, 0.7) 50%,
+                    rgba(129, 199, 132, 0.2) 80%,
+                    transparent 100%
+                );
+            }
+
+            .brand-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+            }
+
+            .brand-icon {
+                font-size: 22px;
+                filter: drop-shadow(0 0 8px rgba(129, 199, 132, 0.4));
+            }
+
+            .brand-name {
+                font-size: 17px;
+                font-weight: 800;
+                color: #ffffff;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .brand-name small {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--leaf-green);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .nav-actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
             }
 
             .tete-btn {
-                padding: 8px 12px;
+                padding: 7px 14px;
                 border-radius: 12px;
-                border: 1px solid rgba(255, 255, 255, 0.18);
-                background: rgba(0, 0, 0, 0.45);
-                color: #e8f5e9;
-                font: 600 13px "Segoe UI", Arial, sans-serif;
+                border: 1px solid var(--panel-border);
+                background: rgba(255, 255, 255, 0.05);
+                color: var(--text-primary);
+                font: 600 13px var(--font-sans);
                 cursor: pointer;
-                transition: 0.2s;
-                backdrop-filter: blur(6px);
+                transition: all 0.25s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                text-decoration: none;
             }
 
             .tete-btn:hover {
-                transform: translateY(-1px);
-                border-color: rgba(139, 195, 74, 0.45);
+                transform: translateY(-2px);
+                border-color: var(--panel-border-hover);
+                background: rgba(129, 199, 132, 0.14);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+            }
+
+            .tete-btn.primary {
+                background: linear-gradient(135deg, #2e7d32, #1b5e20);
+                border-color: rgba(165, 214, 167, 0.35);
+                box-shadow: 0 2px 12px rgba(46, 125, 50, 0.3);
+            }
+
+            /* Game Container & Forest Arcade Frame */
+            .game-wrapper {
+                position: relative;
+                z-index: 2;
+                margin-top: 60px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .game-frame {
+                position: relative;
+                border-radius: 20px;
+                padding: 10px;
+                background: linear-gradient(145deg, rgba(16, 46, 22, 0.85), rgba(8, 26, 12, 0.95));
+                border: 2px solid rgba(129, 199, 132, 0.35);
+                box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.7),
+                    0 0 40px rgba(129, 199, 132, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
             }
 
             canvas {
+                display: block;
+                border-radius: 14px;
                 image-rendering: optimizeSpeed;
                 -webkit-interpolation-mode: nearest-neighbor;
                 -ms-touch-action: none;
                 touch-action: none;
-                margin: 0px;
-                padding: 0px;
-                border: 0px;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
             }
+
             canvas:-webkit-full-screen,
             canvas:fullscreen {
                 width: 100%;
                 height: 100%;
+                border-radius: 0;
             }
-            
+
+            .game-hint {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                color: var(--text-muted);
+                padding: 6px 16px;
+                border-radius: 999px;
+                background: rgba(12, 33, 16, 0.6);
+                border: 1px solid var(--panel-border);
+            }
+
+            .game-hint span {
+                color: var(--leaf-green);
+                font-weight: 700;
+            }
+
             /* Custom Runner Styles */
             div.gm4html5_div_class {
                 margin: 0px;
@@ -105,52 +302,82 @@
             div.gm4html5_login_header {
                 text-align: center;
             }
-            /* END - Custom Runner Styles */
-            
         </style>
-
-        <!-- Custom PostStyle code is injected here -->
-        
-
-        <!-- Builtin injector for injecting flurry analytics code -->
-        
     </head>
 
-    <!-- Custom PostHead code is injected here -->
-    
-
-    <!-- Custom PreBody code is injected here -->
-    
-
     <body>
-        <div class="tete-overlay-nav" aria-label="Navigation">
-            <button class="tete-btn" onclick="location.href='/'">Dashboard</button>
-            <button class="tete-btn" onclick="location.href='/about'">About us</button>
-        </div>
-        <div class="gm4html5_div_class" id="gm4html5_div_id">
-            
-            <!-- Builtin injector for splash screen -->
-            
+        <!-- Nature backdrop and glowing fireflies -->
+        <div class="nature-bg"></div>
+        <div id="fireflies"></div>
 
-            <!-- Create the canvas element the game draws to -->
-            <canvas id="canvas" width="720" height="640" >
-                <p>Your browser doesn't support HTML5 canvas.</p>
-            </canvas>
-        </div>
+        <!-- Top Forest Nav -->
+        <header class="tete-top-nav" aria-label="Navigation">
+            <a href="/" class="brand-group">
+                <span class="brand-icon">🎮</span>
+                <div class="brand-name">
+                    TeTe Adventure <small>🌿 Game Bảo Tồn</small>
+                </div>
+            </a>
+            <div class="nav-actions">
+                <button class="tete-btn primary" onclick="location.href='/'">📊 Dashboard</button>
+                <button class="tete-btn" onclick="location.href='/about'">🌿 About us</button>
+                <button class="tete-btn" onclick="location.href='/map'">🗺️ Animal Spot</button>
+            </div>
+        </header>
+
+        <!-- Game Center -->
+        <main class="game-wrapper">
+            <div class="game-frame">
+                <div class="gm4html5_div_class" id="gm4html5_div_id">
+                    <canvas id="canvas" width="720" height="640">
+                        <p>Trình duyệt của bạn không hỗ trợ HTML5 canvas.</p>
+                    </canvas>
+                </div>
+            </div>
+            <div class="game-hint">
+                <span>🍃 Hướng dẫn:</span> Sử dụng bàn phím để đồng hành cùng Tê Tê vượt qua chướng ngại vật trong rừng sâu!
+            </div>
+        </main>
 
         <!-- Run the game code -->
         <script type="text/javascript" src="html5game/TeTe(8).js?cachebust=460899484"></script>
 
-        <!-- Builtin injector for injecting runner path -->
-        
+        <script>
+            window.onload = GameMaker_Init;
 
-        <script>window.onload = GameMaker_Init;</script>
-
-        <!-- Builtin injector for injecting google analytics code -->
-        
-
+            /* Fireflies particle effect */
+            (function () {
+                const container = document.getElementById("fireflies");
+                const count = 24;
+                for (let i = 0; i < count; i++) {
+                    const f = document.createElement("div");
+                    f.className = "firefly";
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    const dur = 10 + Math.random() * 14;
+                    const delay = -(Math.random() * dur);
+                    const tx = (Math.random() - 0.5) * 120;
+                    const ty = -(30 + Math.random() * 80);
+                    const tx2 = (Math.random() - 0.5) * 90;
+                    const ty2 = -(70 + Math.random() * 130);
+                    const size = 2.5 + Math.random() * 3;
+                    f.style.cssText = [
+                        `left:${x}%`,
+                        `top:${y}%`,
+                        `--dur:${dur.toFixed(1)}s`,
+                        `--delay:${delay.toFixed(1)}s`,
+                        `--tx:${tx.toFixed(0)}px`,
+                        `--ty:${ty.toFixed(0)}px`,
+                        `--tx2:${tx2.toFixed(0)}px`,
+                        `--ty2:${ty2.toFixed(0)}px`,
+                        `width:${size.toFixed(1)}px`,
+                        `height:${size.toFixed(1)}px`,
+                        `animation-duration:${dur.toFixed(1)}s`,
+                        `animation-delay:${delay.toFixed(1)}s`,
+                    ].join(";");
+                    container.appendChild(f);
+                }
+            })();
+        </script>
     </body>
-
-    <!-- Custom PostBody code is injected here -->
-    
 </html>
