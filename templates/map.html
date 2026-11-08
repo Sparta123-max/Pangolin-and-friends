@@ -12,8 +12,7 @@
       referrerpolicy="no-referrer"
     />
 
-    <style>
-      :root {
+    <style> :root {
         --bg: #061306;
         --panel: #0f2312;
         --panel2: #132b16;
@@ -136,16 +135,11 @@
 
     <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
 
-    <script>
-      (() => {
+    <script id="camera-data-json" type="application/json">{{ camera|tojson }}</script>
+
+    <script> (() => {
         // Keep this scoped so refresh/hot-reload won't trip "Cannot redeclare ...".
-        const cameraData = {
-          id: {{ camera.id|tojson }},
-          name: {{ camera.name|tojson }},
-          lat: {{ camera.lat|tojson }},
-          lng: {{ camera.lng|tojson }},
-          url: {{ camera.url|tojson }},
-        };
+        const cameraData = JSON.parse(document.getElementById("camera-data-json").textContent);
 
         // Ensure marker icons are loaded from our own server (avoid CDN + tracking prevention issues)
         L.Icon.Default.mergeOptions({

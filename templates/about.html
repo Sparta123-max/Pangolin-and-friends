@@ -4,850 +4,668 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About Us - Dự án Bảo Tồn TeTe</title>
+    <meta name="description" content="Tìm hiểu về dự án TeTe Ranger Monitor AI - Hệ thống bảo tồn động vật hoang dã Tê Tê và Cầy Vòi Mốc bằng công nghệ AI." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
 
     <style>
       :root {
-        --bg-deep: #030a04;
-        --bg-forest: #07190b;
-        --panel: rgba(12, 33, 16, 0.75);
-        --panel-hover: rgba(17, 46, 23, 0.85);
-        --panel-border: rgba(129, 199, 132, 0.18);
-        --panel-border-hover: rgba(165, 214, 167, 0.4);
-        --leaf-green: #81c784;
-        --moss-green: #4caf50;
-        --emerald: #2e7d32;
-        --earth-gold: #e6c687;
-        --glow-green: rgba(129, 199, 132, 0.35);
-        --text-primary: #edf7ee;
-        --text-secondary: #c2ddc4;
+        --bg: #030a04;
+        --surface: rgba(10, 28, 13, 0.82);
+        --surface-hover: rgba(14, 38, 18, 0.9);
+        --surface-dark: rgba(6, 18, 8, 0.88);
+        --text: #edf7ee;
+        --text-secondary: #c0dcc2;
         --text-muted: #8fae92;
+        --green-100: #c8e6c9;
+        --green-300: #81c784;
+        --green-500: #4caf50;
+        --green-700: #2e7d32;
+        --green-900: #1b5e20;
+        --gold: #e6c687;
+        --border: rgba(129, 199, 132, 0.14);
+        --border-strong: rgba(165, 214, 167, 0.35);
+        --glow: rgba(129, 199, 132, 0.25);
         --font-serif: "Playfair Display", Georgia, serif;
         --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --radius-sm: 10px;
+        --radius-md: 16px;
+        --radius-lg: 22px;
+        --radius-xl: 28px;
+        --transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
         font-family: var(--font-sans);
-        background: var(--bg-deep);
-        color: var(--text-primary);
+        background: var(--bg);
+        color: var(--text);
         min-height: 100vh;
         overflow-x: hidden;
         position: relative;
         line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
       }
 
-      /* Nature Ambient Background Gradient & Leaf Silhouettes */
+      /* Ambient Background */
       .nature-bg {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
         background:
-          radial-gradient(circle at 15% 20%, rgba(46, 125, 50, 0.28) 0%, transparent 45%),
-          radial-gradient(circle at 85% 15%, rgba(27, 94, 32, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 50% 85%, rgba(13, 51, 21, 0.35) 0%, transparent 60%),
+          radial-gradient(ellipse 65% 55% at 12% 18%, rgba(46,125,50,0.22) 0%, transparent 55%),
+          radial-gradient(ellipse 55% 50% at 88% 14%, rgba(27,94,32,0.28) 0%, transparent 52%),
+          radial-gradient(ellipse 75% 60% at 50% 88%, rgba(13,51,21,0.3) 0%, transparent 62%),
           linear-gradient(180deg, #061608 0%, #030904 100%);
       }
 
       .nature-bg::after {
         content: "";
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(rgba(129, 199, 132, 0.08) 1px, transparent 1px);
-        background-size: 32px 32px;
-        opacity: 0.6;
+        position: absolute; inset: 0;
+        background-image: radial-gradient(rgba(129,199,132,0.055) 1px, transparent 1px);
+        background-size: 36px 36px;
       }
 
-      /* Floating Fireflies */
-      #fireflies {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-        overflow: hidden;
-      }
+      /* Fireflies */
+      #fireflies { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
 
       .firefly {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
+        position: absolute; border-radius: 50%;
         background: radial-gradient(circle, #dcfce7 0%, #86efac 45%, transparent 100%);
-        box-shadow: 0 0 8px 3px rgba(134, 239, 172, 0.7);
+        box-shadow: 0 0 8px 3px rgba(134,239,172,0.65);
         animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
       }
 
       @keyframes flyFloat {
-        0% {
-          transform: translate(0, 0) scale(0.6);
-          opacity: 0;
-        }
-        20% {
-          opacity: 0.9;
-        }
-        50% {
-          transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2);
-          opacity: 1;
-        }
-        80% {
-          opacity: 0.7;
-        }
-        100% {
-          transform: translate(var(--tx2, -30px), var(--ty2, -120px)) scale(0.5);
-          opacity: 0;
-        }
+        0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+        20% { opacity: 0.9; }
+        50% { transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2); opacity: 1; }
+        80% { opacity: 0.65; }
+        100% { transform: translate(var(--tx2, -30px), var(--ty2, -120px)) scale(0.5); opacity: 0; }
       }
 
-      /* Header */
+      /* ===== HEADER ===== */
       header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: linear-gradient(to right, rgba(10, 31, 14, 0.92), rgba(4, 15, 6, 0.92));
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid var(--panel-border);
-        padding: 12px 24px;
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(4, 13, 6, 0.88);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-bottom: 1px solid var(--border);
+        padding: 0 28px;
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.35);
       }
 
       header::after {
         content: "";
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(129, 199, 132, 0.2) 20%,
-          rgba(129, 199, 132, 0.7) 50%,
-          rgba(129, 199, 132, 0.2) 80%,
-          transparent 100%
-        );
+        position: absolute; bottom: 0; left: 10%; right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(129,199,132,0.6), transparent);
       }
 
       .logo-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
+        display: flex; align-items: center; gap: 10px;
+        text-decoration: none; flex-shrink: 0;
       }
 
       .brand-logo {
-        height: 48px;
-        width: auto;
-        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 14px rgba(129, 199, 132, 0.25));
-        transition: transform 0.3s ease;
+        height: 38px; width: auto;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+        transition: filter var(--transition);
       }
 
       .logo-link:hover .brand-logo {
-        transform: scale(1.05) rotate(-2deg);
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 12px rgba(129,199,132,0.35));
       }
 
       .brand-title {
-        font-size: 19px;
-        font-weight: 800;
-        letter-spacing: 0.3px;
-        color: var(--text-primary);
-        display: flex;
-        flex-direction: column;
-        line-height: 1.1;
+        font-size: 17px; font-weight: 800;
+        letter-spacing: -0.2px; color: var(--text);
+        display: flex; flex-direction: column; line-height: 1.2;
       }
 
       .brand-title small {
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        color: var(--leaf-green);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-top: 3px;
+        font-size: 10px; font-weight: 600;
+        letter-spacing: 1.2px; text-transform: uppercase;
+        color: var(--green-300); margin-top: 1px;
       }
 
-      .actions {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
+      .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
       .btn {
-        padding: 9px 16px;
-        border-radius: 12px;
-        border: 1px solid var(--panel-border);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 13px;
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 7px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.04);
+        color: rgba(200,230,205,0.65);
+        font-weight: 600; font-size: 12.5px;
+        font-family: inherit; cursor: pointer;
+        transition: all var(--transition);
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        display: inline-flex; align-items: center; gap: 6px;
+        white-space: nowrap; letter-spacing: 0.1px;
       }
 
       .btn:hover {
-        background: rgba(129, 199, 132, 0.12);
-        border-color: var(--panel-border-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        background: rgba(129,199,132,0.1);
+        border-color: var(--border-strong);
+        color: var(--text);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.3);
       }
 
       .btn.primary {
-        background: linear-gradient(135deg, #2e7d32, #1b5e20);
-        border-color: rgba(165, 214, 167, 0.3);
-        box-shadow: 0 4px 16px rgba(46, 125, 50, 0.35);
+        background: linear-gradient(135deg, rgba(46,125,50,0.85), rgba(27,94,32,0.75));
+        border-color: rgba(129,199,132,0.28);
+        color: var(--green-100);
+        box-shadow: 0 2px 10px rgba(46,125,50,0.2);
       }
 
       .btn.primary:hover {
-        background: linear-gradient(135deg, #388e3c, #2e7d32);
-        border-color: rgba(200, 230, 201, 0.5);
-        box-shadow: 0 6px 22px rgba(76, 175, 80, 0.45);
+        background: linear-gradient(135deg, rgba(56,142,60,0.9), rgba(46,125,50,0.85));
+        box-shadow: 0 4px 18px rgba(46,125,50,0.35);
       }
 
-      /* Main container */
+      /* ===== MAIN LAYOUT ===== */
       main {
-        position: relative;
-        z-index: 2;
-        padding: 36px 20px 60px;
-        max-width: 1040px;
-        margin: 0 auto;
-        display: grid;
-        gap: 24px;
+        position: relative; z-index: 2;
+        padding: 36px 28px 72px;
+        max-width: 1060px; margin: 0 auto;
+        display: grid; gap: 22px;
       }
 
-      /* Hero Botanical Card */
+      /* Hero Card */
       .hero-card {
-        background: linear-gradient(145deg, rgba(16, 46, 22, 0.8), rgba(8, 26, 12, 0.9));
-        border: 1px solid var(--panel-border);
-        border-radius: 24px;
-        padding: 38px 36px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        background: linear-gradient(145deg, rgba(14,42,20,0.82), rgba(7,22,10,0.92));
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 42px 40px;
+        position: relative; overflow: hidden;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
       }
 
       .hero-card::before {
         content: "";
-        position: absolute;
-        top: -60px;
-        right: -60px;
-        width: 220px;
-        height: 220px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(129, 199, 132, 0.18) 0%, transparent 70%);
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(129,199,132,0.45), transparent);
+      }
+
+      .hero-card::after {
+        content: "";
+        position: absolute; top: -60px; right: -60px;
+        width: 240px; height: 240px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(129,199,132,0.14) 0%, transparent 70%);
         pointer-events: none;
       }
 
       .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 14px;
-        border-radius: 999px;
-        background: rgba(129, 199, 132, 0.12);
-        border: 1px solid rgba(129, 199, 132, 0.3);
-        color: var(--leaf-green);
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        margin-bottom: 16px;
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 5px 14px; border-radius: 999px;
+        background: rgba(129,199,132,0.1);
+        border: 1px solid rgba(129,199,132,0.24);
+        color: var(--green-300);
+        font-size: 11.5px; font-weight: 700;
+        letter-spacing: 0.5px; text-transform: uppercase;
+        margin-bottom: 18px;
       }
 
-      .hero-badge span {
-        animation: pulseLeaf 2s infinite ease-in-out;
+      .hero-badge::before {
+        content: '';
+        width: 5px; height: 5px; border-radius: 50%;
+        background: var(--green-300);
+        box-shadow: 0 0 6px var(--green-300);
+        animation: dot-blink 2s ease-in-out infinite;
       }
 
-      @keyframes pulseLeaf {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.25); }
+      @keyframes dot-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
       }
 
       .hero-title {
         font-family: var(--font-serif);
-        font-size: 38px;
-        font-weight: 700;
-        line-height: 1.25;
-        margin: 0 0 14px;
-        background: linear-gradient(135deg, #ffffff 40%, #c8e6c9 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 40px; font-weight: 700;
+        line-height: 1.2; margin: 0 0 16px;
+        color: var(--text);
+        letter-spacing: -0.5px;
       }
 
       .hero-desc {
         color: var(--text-secondary);
-        font-size: 16px;
-        line-height: 1.7;
-        max-width: 800px;
-        margin: 0 0 24px;
+        font-size: 15.5px; line-height: 1.7;
+        max-width: 820px; margin: 0 0 26px;
       }
 
-      .tag-cloud {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .nature-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border-radius: 14px;
-        background: rgba(10, 30, 15, 0.6);
-        border: 1px solid var(--panel-border);
-        color: var(--text-secondary);
-        font-size: 13px;
-        font-weight: 600;
-        transition: all 0.25s ease;
-      }
-
-      .nature-tag:hover {
-        background: rgba(46, 125, 50, 0.3);
-        border-color: var(--leaf-green);
-        color: #ffffff;
-        transform: translateY(-2px);
-      }
-
-      .nature-tag i {
-        font-style: normal;
-        font-size: 15px;
-      }
-
-      /* Stats Highlight Bar */
+      /* Stats Bar */
       .stats-bar {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 14px;
       }
 
-      @media (max-width: 720px) {
-        .stats-bar {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 720px) { .stats-bar { grid-template-columns: 1fr; } }
 
       .stat-card {
-        background: linear-gradient(180deg, rgba(14, 39, 19, 0.7), rgba(9, 25, 12, 0.85));
-        border: 1px solid var(--panel-border);
-        border-radius: 20px;
+        background: linear-gradient(160deg, rgba(12,34,16,0.72), rgba(8,22,12,0.88));
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
         padding: 20px 22px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        transition: transform 0.25s, border-color 0.25s;
+        display: flex; align-items: center; gap: 16px;
+        transition: transform var(--transition), border-color var(--transition);
+        position: relative; overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
       }
 
       .stat-card:hover {
         transform: translateY(-3px);
-        border-color: var(--panel-border-hover);
+        border-color: var(--border-strong);
       }
 
       .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(129, 199, 132, 0.18), rgba(46, 125, 50, 0.35));
-        border: 1px solid rgba(129, 199, 132, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(129,199,132,0.15), rgba(46,125,50,0.3));
+        border: 1px solid rgba(129,199,132,0.22);
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
+        color: var(--green-300);
+      }
+
+      .stat-icon svg {
+        width: 22px; height: 22px;
+        stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
       }
 
       .stat-info .num {
-        font-size: 20px;
-        font-weight: 800;
-        color: var(--earth-gold);
-        line-height: 1.2;
+        font-size: 18px; font-weight: 800;
+        color: var(--gold); line-height: 1.2;
       }
 
       .stat-info .lbl {
-        font-size: 13px;
+        font-size: 12.5px;
         color: var(--text-muted);
-        margin-top: 2px;
+        margin-top: 3px;
+        line-height: 1.4;
       }
 
-      /* Grid 2-column cards */
+      /* Grid 2-col */
       .grid-2 {
         display: grid;
         grid-template-columns: 1.15fr 0.85fr;
-        gap: 20px;
+        gap: 18px;
       }
 
-      @media (max-width: 860px) {
-        .grid-2 {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
 
+      /* Generic Card */
       .card {
-        background: var(--panel);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--panel-border);
-        border-radius: 22px;
-        padding: 28px;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        overflow: hidden;
+        background: var(--surface);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 28px 28px 26px;
+        transition: all var(--transition);
+        position: relative; overflow: hidden;
+      }
+
+      .card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
       }
 
       .card:hover {
-        background: var(--panel-hover);
-        border-color: var(--panel-border-hover);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px var(--glow-green);
+        background: var(--surface-hover);
+        border-color: var(--border-strong);
+        box-shadow: 0 12px 36px rgba(0,0,0,0.4), 0 0 18px var(--glow);
       }
 
       .card-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        display: flex; align-items: center; gap: 12px;
         margin-bottom: 16px;
       }
 
       .card-icon {
-        font-size: 24px;
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: rgba(129, 199, 132, 0.12);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(129, 199, 132, 0.2);
+        width: 40px; height: 40px;
+        border-radius: 11px;
+        background: rgba(129,199,132,0.1);
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid rgba(129,199,132,0.18);
+        color: var(--green-300); flex-shrink: 0;
+      }
+
+      .card-icon svg {
+        width: 20px; height: 20px;
+        stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
       }
 
       h2 {
         font-family: var(--font-serif);
-        font-size: 22px;
-        font-weight: 700;
-        margin: 0;
-        color: #ffffff;
-        letter-spacing: 0.2px;
+        font-size: 21px; font-weight: 700;
+        margin: 0; color: var(--text);
+        letter-spacing: -0.2px;
       }
 
       p {
-        margin: 0;
-        color: var(--text-secondary);
-        font-size: 14.5px;
-        line-height: 1.7;
+        margin: 0; color: var(--text-secondary);
+        font-size: 14.5px; line-height: 1.7;
       }
 
-      /* Nature list */
+      /* Feature List */
       .feature-list {
-        list-style: none;
-        padding: 0;
-        margin: 18px 0 0;
-        display: grid;
-        gap: 12px;
+        list-style: none; padding: 0; margin: 18px 0 0;
+        display: grid; gap: 10px;
       }
 
       .feature-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
+        display: flex; align-items: flex-start; gap: 12px;
         padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(6, 20, 9, 0.45);
-        border: 1px solid rgba(129, 199, 132, 0.1);
-        font-size: 14px;
-        color: var(--text-secondary);
-        transition: background 0.2s;
+        border-radius: var(--radius-sm);
+        background: rgba(4,14,7,0.5);
+        border: 1px solid rgba(129,199,132,0.08);
+        font-size: 13.5px; color: var(--text-secondary);
+        transition: background var(--transition);
       }
 
-      .feature-item:hover {
-        background: rgba(22, 58, 29, 0.4);
-      }
+      .feature-item:hover { background: rgba(18,52,24,0.4); }
 
       .feature-bullet {
-        color: var(--leaf-green);
-        font-size: 16px;
-        line-height: 1.2;
-        flex-shrink: 0;
+        width: 22px; height: 22px; border-radius: 6px;
+        background: rgba(129,199,132,0.12);
+        border: 1px solid rgba(129,199,132,0.2);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; margin-top: 1px;
+        color: var(--green-300);
       }
 
-      /* Contact Card Special */
+      .feature-bullet svg {
+        width: 13px; height: 13px;
+        stroke: currentColor; fill: none;
+        stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+      }
+
+      /* Contact Card */
       .contact-card {
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
         justify-content: space-between;
       }
 
-      .contact-links {
-        margin-top: 20px;
-        display: grid;
-        gap: 12px;
-      }
+      .contact-links { margin-top: 20px; display: grid; gap: 10px; }
 
       .contact-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border-radius: 14px;
-        background: rgba(8, 25, 12, 0.6);
-        border: 1px solid var(--panel-border);
-        color: var(--text-primary);
-        text-decoration: none;
-        font-size: 13.5px;
-        font-weight: 500;
-        transition: all 0.2s;
+        display: flex; align-items: center; gap: 12px;
+        padding: 11px 15px;
+        border-radius: 12px;
+        background: rgba(6,20,10,0.6);
+        border: 1px solid var(--border);
+        color: var(--text); text-decoration: none;
+        font-size: 13px; font-weight: 500;
+        transition: all var(--transition);
       }
 
       .contact-item:hover {
-        background: rgba(46, 125, 50, 0.25);
-        border-color: var(--leaf-green);
+        background: rgba(46,125,50,0.22);
+        border-color: var(--green-300);
         color: #ffffff;
-        transform: translateX(4px);
+        transform: translateX(3px);
       }
 
-      .contact-item i {
-        font-size: 18px;
-        font-style: normal;
+      .contact-item-icon {
+        width: 34px; height: 34px; border-radius: 9px;
+        background: rgba(129,199,132,0.1);
+        border: 1px solid rgba(129,199,132,0.18);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; color: var(--green-300);
+      }
+
+      .contact-item-icon svg {
+        width: 16px; height: 16px;
+        stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
       }
 
       .nature-quote {
-        margin-top: 20px;
-        padding: 14px 16px;
-        border-radius: 14px;
-        background: rgba(230, 198, 135, 0.08);
-        border-left: 3px solid var(--earth-gold);
-        font-size: 13px;
-        font-style: italic;
-        color: #f0dfb8;
+        margin-top: 20px; padding: 14px 16px;
+        border-radius: 12px;
+        background: rgba(230,198,135,0.07);
+        border-left: 3px solid var(--gold);
+        font-size: 13px; font-style: italic;
+        color: #f0dfb8; line-height: 1.6;
       }
 
-      /* Comment & Feedback Section */
-      .comment-section {
-        margin-top: 10px;
-      }
+      /* Comment/Feedback Section */
+      .comment-section { margin-top: 6px; }
 
       .comment-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin-top: 14px;
+        gap: 22px; margin-top: 14px;
       }
 
-      @media (max-width: 860px) {
-        .comment-grid {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 860px) { .comment-grid { grid-template-columns: 1fr; } }
 
-      .comment-form {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
+      .comment-form { display: flex; flex-direction: column; gap: 12px; }
 
       .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 10px;
       }
 
-      @media (max-width: 540px) {
-        .form-row {
-          grid-template-columns: 1fr;
-        }
-      }
+      @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
 
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
+      .form-group { display: flex; flex-direction: column; gap: 6px; }
 
       .form-group label {
-        font-size: 13px;
-        font-weight: 600;
+        font-size: 12.5px; font-weight: 600;
         color: var(--text-secondary);
       }
 
       .form-group input,
       .form-group select,
       .form-group textarea {
-        background: rgba(4, 15, 7, 0.7);
-        border: 1px solid var(--panel-border);
-        border-radius: 12px;
-        padding: 10px 14px;
-        color: var(--text-primary);
-        font-family: inherit;
-        font-size: 13.5px;
-        outline: none;
-        transition: all 0.2s;
+        background: rgba(3,12,5,0.7);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        color: var(--text);
+        font-family: inherit; font-size: 13.5px;
+        outline: none; transition: all 0.2s;
       }
 
-      .form-group select {
-        cursor: pointer;
-      }
-
-      .form-group select option {
-        background: #08200f;
-        color: var(--text-primary);
-      }
-
-      .form-group textarea {
-        resize: vertical;
-        min-height: 90px;
-      }
+      .form-group select { cursor: pointer; }
+      .form-group select option { background: #071410; color: var(--text); }
+      .form-group textarea { resize: vertical; min-height: 88px; }
 
       .form-group input:focus,
       .form-group select:focus,
       .form-group textarea:focus {
-        border-color: var(--leaf-green);
-        box-shadow: 0 0 12px rgba(129, 199, 132, 0.25);
-        background: rgba(7, 24, 11, 0.85);
+        border-color: var(--green-300);
+        box-shadow: 0 0 0 3px rgba(129,199,132,0.15);
+        background: rgba(5,18,8,0.88);
       }
 
-      .submit-btn {
-        padding: 10px 22px;
-        font-size: 14px;
-      }
+      .submit-btn { padding: 10px 22px; font-size: 13.5px; }
 
-      .form-status {
-        font-size: 13px;
-        font-weight: 500;
-      }
-
-      .form-status.success {
-        color: #81c784;
-      }
-
-      .form-status.error {
-        color: #ef5350;
-      }
+      .form-status { font-size: 12.5px; font-weight: 500; }
+      .form-status.success { color: var(--green-300); }
+      .form-status.error { color: #ef9a9a; }
 
       /* Comments Wall */
       .comments-wall {
-        background: rgba(6, 20, 9, 0.5);
-        border: 1px solid var(--panel-border);
-        border-radius: 16px;
-        padding: 18px;
-        display: flex;
-        flex-direction: column;
+        background: rgba(4,14,7,0.55);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        display: flex; flex-direction: column;
         max-height: 380px;
       }
 
       .wall-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: flex; justify-content: space-between; align-items: center;
         padding-bottom: 12px;
-        border-bottom: 1px solid rgba(129, 199, 132, 0.12);
+        border-bottom: 1px solid rgba(129,199,132,0.1);
         margin-bottom: 12px;
       }
 
-      .wall-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-primary);
-      }
+      .wall-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
 
       .wall-badge {
-        font-size: 11.5px;
-        padding: 3px 10px;
+        font-size: 11px; padding: 3px 10px;
         border-radius: 999px;
-        background: rgba(129, 199, 132, 0.15);
-        border: 1px solid rgba(129, 199, 132, 0.25);
-        color: var(--leaf-green);
-        font-weight: 600;
+        background: rgba(129,199,132,0.12);
+        border: 1px solid rgba(129,199,132,0.22);
+        color: var(--green-300); font-weight: 600;
       }
 
       .comments-list {
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding-right: 4px;
+        overflow-y: auto; display: flex; flex-direction: column;
+        gap: 10px; padding-right: 4px;
       }
 
-      .comments-list::-webkit-scrollbar {
-        width: 5px;
-      }
-
+      .comments-list::-webkit-scrollbar { width: 4px; }
       .comments-list::-webkit-scrollbar-thumb {
-        background: rgba(129, 199, 132, 0.25);
-        border-radius: 10px;
+        background: rgba(129,199,132,0.22); border-radius: 10px;
       }
 
       .comment-item {
-        background: rgba(10, 31, 14, 0.6);
-        border: 1px solid rgba(129, 199, 132, 0.1);
-        border-radius: 12px;
-        padding: 12px 14px;
-        transition: transform 0.2s, border-color 0.2s;
+        background: rgba(8,24,12,0.6);
+        border: 1px solid rgba(129,199,132,0.09);
+        border-radius: 11px; padding: 11px 13px;
+        transition: transform var(--transition), border-color var(--transition);
       }
 
       .comment-item:hover {
-        border-color: rgba(129, 199, 132, 0.3);
+        border-color: rgba(129,199,132,0.25);
         transform: translateY(-1px);
       }
 
       .comment-author-bar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 6px;
+        display: flex; align-items: center;
+        gap: 9px; margin-bottom: 6px;
       }
 
       .comment-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(129, 199, 132, 0.18);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
+        width: 28px; height: 28px; border-radius: 50%;
+        background: rgba(129,199,132,0.15);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; font-size: 12px; font-weight: 700;
+        color: var(--green-300);
       }
 
-      .comment-author {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: #ffffff;
-      }
-
-      .comment-role {
-        font-size: 11px;
-        color: var(--leaf-green);
-      }
-
-      .comment-time {
-        margin-left: auto;
-        font-size: 11px;
-        color: var(--text-muted);
-      }
+      .comment-author { font-size: 13px; font-weight: 700; color: #ffffff; }
+      .comment-role { font-size: 10.5px; color: var(--green-300); margin-top: 1px; }
+      .comment-time { margin-left: auto; font-size: 10.5px; color: var(--text-muted); }
 
       .comment-body {
-        font-size: 13.5px;
-        color: var(--text-secondary);
-        line-height: 1.55;
-        white-space: pre-wrap;
-        word-break: break-word;
+        font-size: 13px; color: var(--text-secondary);
+        line-height: 1.55; white-space: pre-wrap; word-break: break-word;
       }
 
       .empty-comments {
-        text-align: center;
-        padding: 30px 10px;
-        color: var(--text-muted);
-        font-size: 13px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .empty-comments i {
-        font-style: normal;
-        font-size: 26px;
+        text-align: center; padding: 28px 10px;
+        color: var(--text-muted); font-size: 13px;
+        display: flex; flex-direction: column;
+        align-items: center; gap: 8px;
       }
 
       /* Footer */
       footer {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        padding: 24px;
-        color: var(--text-muted);
-        font-size: 13px;
-        border-top: 1px solid rgba(129, 199, 132, 0.1);
-        background: rgba(3, 10, 4, 0.6);
+        position: relative; z-index: 2;
+        text-align: center; padding: 24px;
+        color: var(--text-muted); font-size: 12.5px;
+        border-top: 1px solid rgba(129,199,132,0.08);
+        background: rgba(3,10,4,0.55);
       }
 
-      footer a {
-        color: var(--leaf-green);
-        text-decoration: none;
-      }
+      footer a { color: var(--green-300); text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
 
-      footer a:hover {
-        text-decoration: underline;
+      @media (max-width: 768px) {
+        header { padding: 0 16px; }
+        main { padding: 24px 16px 60px; }
+        .hero-card { padding: 28px 22px; }
+        .hero-title { font-size: 30px; }
       }
     </style>
   </head>
 
   <body>
-    <!-- Nature ambient backdrop & fireflies -->
     <div class="nature-bg"></div>
     <div id="fireflies"></div>
 
     <header>
       <a href="/" class="logo-link">
-        <img
-          class="brand-logo"
-          src="{{ url_for('static', filename='images/tete-logo.png') }}"
-          alt="TeTe Logo"
-        />
+        <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="TeTe Logo" />
         <div class="brand-title">
           <span>TeTe</span>
-          <small>🌿 Ranger Monitor AI</small>
+          <small>Ranger Monitor AI</small>
         </div>
       </a>
       <div class="actions">
-        <a class="btn" href="/">📊 Dashboard</a>
-        <a class="btn" href="/game">🎮 Mini Game</a>
-        <a class="btn primary" href="/map">🗺️ Animal Spot</a>
-        <a class="btn" href="/hunter_spot">⚠️ Hunter Spot</a>
+        <a class="btn" href="/">Dashboard</a>
+        <a class="btn" href="/species">Sổ Tay Tê Tê</a>
+        <a class="btn" href="/game">Mini Game</a>
+        <a class="btn primary" href="/map">Animal Spot</a>
+        <a class="btn" href="/hunter_spot">Hunter Spot</a>
+        <a class="btn" href="/visitors">Thống kê truy cập</a>
       </div>
     </header>
 
     <main>
-      <!-- Hero Forest Card -->
+      <!-- Hero Section -->
       <section class="hero-card">
-        <div class="hero-badge">
-          <span>🌱</span> Đồng hành cùng lực lượng Kiểm lâm & Động vật hoang dã
-        </div>
-        <h1 class="hero-title">Bảo tồn sinh cảnh & Vì một tương lai xanh</h1>
+        <div class="hero-badge">Đồng hành cùng lực lượng Kiểm lâm &amp; Động vật hoang dã</div>
+        <h1 class="hero-title">Bảo tồn sinh cảnh &amp; Vì một tương lai xanh</h1>
         <p class="hero-desc">
           <strong>TeTe (Ranger Monitor AI)</strong> là giải pháp công nghệ tuần tra và giám sát sinh thái thông minh.
           Hệ thống kết hợp mạng lưới CCTV tầm xa, trí tuệ nhân tạo nhận diện cá thể đặc hữu (Tê Tê, Cầy Vòi Mốc) và
-          cảnh báo thợ săn tức thời – tiếp sức cho những người gác rừng gìn giữ hơi thở của đại ngàn.
+          cảnh báo thợ săn tức thời — tiếp sức cho những người gác rừng gìn giữ hơi thở của đại ngàn.
         </p>
       </section>
 
-      <!-- Highlights / Stats Bar -->
+      <!-- Stats Bar -->
       <section class="stats-bar">
         <div class="stat-card">
-          <div class="stat-icon">🍃</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
           <div class="stat-info">
             <div class="num">Bảo tồn 24/7</div>
-            <div class="lbl">Giám sát liên tục ngày & đêm dưới tán rừng</div>
+            <div class="lbl">Giám sát liên tục ngày &amp; đêm dưới tán rừng</div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">⚡</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
           <div class="stat-info">
-            <div class="num">&lt; Nhanh nhất có thể</div>
+            <div class="num">Nhanh nhất có thể</div>
             <div class="lbl">Tốc độ cảnh báo khi phát hiện nguy cơ xâm nhập</div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">🌲</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
           <div class="stat-info">
             <div class="num">Hệ sinh thái</div>
             <div class="lbl">Khoanh vùng an toàn cho các loài quý hiếm</div>
@@ -857,11 +675,13 @@
 
       <!-- Detailed Info Grid -->
       <section class="grid-2">
-        <!-- Mission Section -->
+        <!-- Mission -->
         <section class="card">
           <div class="card-header">
-            <div class="card-icon">🎯</div>
-            <h2>Sứ mệnh của tôi</h2>
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8l0 4 3 3"/></svg>
+            </div>
+            <h2>Sứ mệnh của chúng tôi</h2>
           </div>
           <p>
             Giúp lực lượng kiểm lâm và tình nguyện viên quan trắc rừng nhanh hơn, giảm tải tuần tra hiểm trở và phản ứng kịp thời trước các mối nguy đe dọa động vật hoang dã.
@@ -869,30 +689,32 @@
 
           <ul class="feature-list">
             <li class="feature-item">
-              <span class="feature-bullet">🌿</span>
+              <span class="feature-bullet"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
               <span><strong>Tự động nhận diện động vật:</strong> AI phân tích luồng camera để nhận biết Tê Tê và Cầy Vòi Mốc với độ chính xác cao.</span>
             </li>
             <li class="feature-item">
-              <span class="feature-bullet">⚠️</span>
-              <span><strong>Cảnh báo bẫy & thợ săn:</strong> Tức tốc định vị điểm nóng trên bản đồ khi phát hiện người khả nghi hoặc tiếng ồn lạ.</span>
+              <span class="feature-bullet"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span><strong>Cảnh báo bẫy &amp; thợ săn:</strong> Tức tốc định vị điểm nóng trên bản đồ khi phát hiện người khả nghi hoặc tiếng ồn lạ.</span>
             </li>
             <li class="feature-item">
-              <span class="feature-bullet">🎞️</span>
+              <span class="feature-bullet"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
               <span><strong>Lưu trữ bằng chứng số:</strong> Ghi nhận tự động ảnh và clip ngắn phục vụ công tác nghiên cứu và pháp lý bảo tồn.</span>
             </li>
             <li class="feature-item">
-              <span class="feature-bullet">🤝</span>
+              <span class="feature-bullet"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
               <span><strong>Nâng cao nhận thức cộng đồng:</strong> Tích hợp trò chơi tương tác giáo dục bảo vệ loài Tê Tê quý hiếm.</span>
             </li>
           </ul>
         </section>
 
-        <!-- Contact Section -->
+        <!-- Contact -->
         <section class="card contact-card">
           <div>
             <div class="card-header">
-              <div class="card-icon">📬</div>
-              <h2>Liên hệ & Hợp tác</h2>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <h2>Liên hệ &amp; Hợp tác</h2>
             </div>
             <p>
               Chúng tôi luôn chào đón mọi sự hợp tác từ các tổ chức bảo tồn động vật hoang dã, các bạn sinh viên và chuyên gia công nghệ xanh.
@@ -900,91 +722,85 @@
 
             <div class="contact-links">
               <a class="contact-item" href="mailto:trancongvinh601@gmail.com">
-                <i>✉️</i>
+                <div class="contact-item-icon">
+                  <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
                 <span>trancongvinh601@gmail.com</span>
               </a>
               <div class="contact-item">
-                <i>📍</i>
-                <span>Việt Nam • Vì Rừng Xanh Bền Vững</span>
+                <div class="contact-item-icon">
+                  <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <span>Việt Nam · Vì Rừng Xanh Bền Vững</span>
               </div>
             </div>
+          </div>
+          <div class="nature-quote">
+            "Bảo tồn thiên nhiên không chỉ là trách nhiệm — đó là hành động yêu thương dành cho các thế hệ tương lai."
           </div>
         </section>
       </section>
 
-      <!-- Feedback & Comments for Developers Section -->
+      <!-- Feedback & Comments -->
       <section class="card comment-section">
         <div class="card-header">
-          <div class="card-icon">💬</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
           <div>
-            <h2>Gửi lời nhắn & Bình luận cho Nhà phát triển</h2>
-            <p style="margin-top: 4px; font-size: 13.5px; color: var(--text-muted)">
+            <h2>Gửi lời nhắn &amp; Bình luận cho Nhà phát triển</h2>
+            <p style="margin-top: 4px; font-size: 13px; color: var(--text-muted)">
               Chia sẻ ý kiến đóng góp, báo lỗi hoặc gửi lời động viên tới đội ngũ phát triển dự án TeTe.
             </p>
           </div>
         </div>
 
         <div class="comment-grid">
-          <!-- Form input -->
+          <!-- Form -->
           <form id="feedback-form" class="comment-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="fb-name">Họ và tên / Biệt danh <span style="color: #ef5350">*</span></label>
-                <input
-                  type="text"
-                  id="fb-name"
-                  placeholder="Ví dụ: Hưng, SV Sinh học..."
-                  required
-                />
+                <label for="fb-name">Họ và tên / Biệt danh <span style="color:#ef9a9a">*</span></label>
+                <input type="text" id="fb-name" placeholder="Ví dụ: Hưng, SV Sinh học..." required />
               </div>
               <div class="form-group">
                 <label for="fb-email">Email (tùy chọn)</label>
-                <input
-                  type="email"
-                  id="fb-email"
-                  placeholder="email@example.com để nhận phản hồi"
-                />
+                <input type="email" id="fb-email" placeholder="email@example.com" />
               </div>
             </div>
 
             <div class="form-group">
               <label for="fb-role">Bạn là</label>
               <select id="fb-role">
-                <option value="Người yêu thiên nhiên 🌿">🌿 Người yêu thiên nhiên & bảo tồn</option>
-                <option value="Kiểm lâm / Cán bộ bảo tồn 🌲">🌲 Kiểm lâm / Cán bộ bảo tồn</option>
-                <option value="Nhà nghiên cứu / Sinh viên 📚">📚 Nhà nghiên cứu / Sinh viên</option>
-                <option value="Lập trình viên / Kỹ sư AI 💻">💻 Lập trình viên / Kỹ sư AI</option>
-                <option value="Khách tham quan 🎒">🎒 Khách tham quan website</option>
+                <option value="Người yêu thiên nhiên">Người yêu thiên nhiên &amp; bảo tồn</option>
+                <option value="Kiểm lâm / Cán bộ bảo tồn">Kiểm lâm / Cán bộ bảo tồn</option>
+                <option value="Nhà nghiên cứu / Sinh viên">Nhà nghiên cứu / Sinh viên</option>
+                <option value="Lập trình viên / Kỹ sư AI">Lập trình viên / Kỹ sư AI</option>
+                <option value="Khách tham quan">Khách tham quan website</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="fb-message">Nội dung lời nhắn <span style="color: #ef5350">*</span></label>
-              <textarea
-                id="fb-message"
-                rows="4"
-                placeholder="Nhập nhận xét, gợi ý tính năng hoặc lời nhắn gửi tới nhóm phát triển..."
-                required
-              ></textarea>
+              <label for="fb-message">Nội dung lời nhắn <span style="color:#ef9a9a">*</span></label>
+              <textarea id="fb-message" rows="4" placeholder="Nhập nhận xét, gợi ý tính năng hoặc lời nhắn gửi tới nhóm phát triển..." required></textarea>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
               <button type="submit" class="btn primary submit-btn" id="fb-submit-btn">
-                <span>🍃 Gửi lời nhắn</span>
+                <span>Gửi lời nhắn</span>
               </button>
               <div id="fb-status" class="form-status"></div>
             </div>
           </form>
 
-          <!-- Comment list / Wall -->
+          <!-- Comments wall -->
           <div class="comments-wall">
             <div class="wall-header">
-              <span class="wall-title">🌱 Lời nhắn từ cộng đồng</span>
+              <span class="wall-title">Lời nhắn từ cộng đồng</span>
               <span class="wall-badge" id="comment-count">0 lời nhắn</span>
             </div>
             <div id="comments-list" class="comments-list">
               <div class="empty-comments">
-                <i>🍃</i>
                 <div>Chưa có lời nhắn nào. Hãy là người đầu tiên gửi ý kiến cho nhóm nhé!</div>
               </div>
             </div>
@@ -994,14 +810,14 @@
     </main>
 
     <footer>
-      <div>🌿 Dự án TeTe - Ranger Monitor AI © 2026. Chung tay bảo tồn thiên nhiên & động vật hoang dã.</div>
+      <div>Dự án TeTe - Ranger Monitor AI &copy; 2026. Chung tay bảo tồn thiên nhiên &amp; động vật hoang dã.</div>
     </footer>
 
-    <!-- Firefly ambient generation script & Feedback handlers -->
     <script>
+      /* Fireflies */
       (function () {
         const container = document.getElementById("fireflies");
-        const count = 28;
+        const count = 24;
         for (let i = 0; i < count; i++) {
           const f = document.createElement("div");
           f.className = "firefly";
@@ -1015,24 +831,17 @@
           const ty2 = -(70 + Math.random() * 140);
           const size = 2.5 + Math.random() * 3.5;
           f.style.cssText = [
-            `left:${x}%`,
-            `top:${y}%`,
-            `--dur:${dur.toFixed(1)}s`,
-            `--delay:${delay.toFixed(1)}s`,
-            `--tx:${tx.toFixed(0)}px`,
-            `--ty:${ty.toFixed(0)}px`,
-            `--tx2:${tx2.toFixed(0)}px`,
-            `--ty2:${ty2.toFixed(0)}px`,
-            `width:${size.toFixed(1)}px`,
-            `height:${size.toFixed(1)}px`,
-            `animation-duration:${dur.toFixed(1)}s`,
-            `animation-delay:${delay.toFixed(1)}s`,
+            `left:${x}%`, `top:${y}%`,
+            `--dur:${dur.toFixed(1)}s`, `--delay:${delay.toFixed(1)}s`,
+            `--tx:${tx.toFixed(0)}px`, `--ty:${ty.toFixed(0)}px`,
+            `--tx2:${tx2.toFixed(0)}px`, `--ty2:${ty2.toFixed(0)}px`,
+            `width:${size.toFixed(1)}px`, `height:${size.toFixed(1)}px`,
           ].join(";");
           container.appendChild(f);
         }
       })();
 
-      // ===== FEEDBACK & COMMENT SYSTEM =====
+      // ===== FEEDBACK SYSTEM =====
       const fbForm = document.getElementById("feedback-form");
       const fbSubmitBtn = document.getElementById("fb-submit-btn");
       const fbStatus = document.getElementById("fb-status");
@@ -1041,57 +850,41 @@
 
       function escapeHtml(str) {
         if (!str) return "";
-        return str
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       }
 
       function formatTime(isoStr) {
         try {
           const d = new Date(isoStr);
           if (isNaN(d.getTime())) return "Vừa xong";
-          return d.toLocaleDateString("vi-VN", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        } catch (e) {
-          return "Vừa xong";
-        }
+          return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+        } catch (e) { return "Vừa xong"; }
+      }
+
+      function getInitial(name) {
+        return (name || "?").charAt(0).toUpperCase();
       }
 
       function renderComments(feedbacks) {
         if (!feedbacks || feedbacks.length === 0) {
-          commentsList.innerHTML = `
-            <div class="empty-comments">
-              <i>🍃</i>
-              <div>Chưa có lời nhắn nào. Hãy là người đầu tiên gửi ý kiến cho nhóm nhé!</div>
-            </div>`;
+          commentsList.innerHTML = `<div class="empty-comments"><div>Chưa có lời nhắn nào. Hãy là người đầu tiên gửi ý kiến cho nhóm nhé!</div></div>`;
           commentCount.textContent = "0 lời nhắn";
           return;
         }
-
         commentCount.textContent = `${feedbacks.length} lời nhắn`;
-        commentsList.innerHTML = feedbacks
-          .map((fb) => `
-            <div class="comment-item">
-              <div class="comment-author-bar">
-                <div class="comment-avatar">🌿</div>
-                <div>
-                  <div class="comment-author">${escapeHtml(fb.name)}</div>
-                  <div class="comment-role">${escapeHtml(fb.role || "Cộng tác viên")}</div>
-                </div>
-                <div class="comment-time">${formatTime(fb.created_at)}</div>
+        commentsList.innerHTML = feedbacks.map((fb) => `
+          <div class="comment-item">
+            <div class="comment-author-bar">
+              <div class="comment-avatar">${escapeHtml(getInitial(fb.name))}</div>
+              <div>
+                <div class="comment-author">${escapeHtml(fb.name)}</div>
+                <div class="comment-role">${escapeHtml(fb.role || "Cộng tác viên")}</div>
               </div>
-              <div class="comment-body">${escapeHtml(fb.message)}</div>
+              <div class="comment-time">${formatTime(fb.created_at)}</div>
             </div>
-          `)
-          .join("");
+            <div class="comment-body">${escapeHtml(fb.message)}</div>
+          </div>
+        `).join("");
       }
 
       async function loadComments() {
@@ -1100,9 +893,7 @@
           if (!res.ok) return;
           const data = await res.json();
           renderComments(data.feedbacks || []);
-        } catch (e) {
-          console.error("Không thể tải bình luận:", e);
-        }
+        } catch (e) { console.error("Không thể tải bình luận:", e); }
       }
 
       fbForm.addEventListener("submit", async (e) => {
@@ -1119,7 +910,7 @@
         }
 
         fbSubmitBtn.disabled = true;
-        fbSubmitBtn.innerHTML = `<span>⏳ Đang gửi...</span>`;
+        fbSubmitBtn.innerHTML = `<span>Đang gửi...</span>`;
         fbStatus.className = "form-status";
         fbStatus.textContent = "";
 
@@ -1133,12 +924,10 @@
 
           if (res.ok && result.success) {
             fbStatus.className = "form-status success";
-            fbStatus.textContent = "🌱 " + result.message;
+            fbStatus.textContent = result.message;
             fbForm.reset();
             loadComments();
-            setTimeout(() => {
-              fbStatus.textContent = "";
-            }, 6000);
+            setTimeout(() => { fbStatus.textContent = ""; }, 6000);
           } else {
             fbStatus.className = "form-status error";
             fbStatus.textContent = result.error || "Gửi thất bại, vui lòng thử lại!";
@@ -1148,14 +937,11 @@
           fbStatus.textContent = "Lỗi kết nối máy chủ!";
         } finally {
           fbSubmitBtn.disabled = false;
-          fbSubmitBtn.innerHTML = `<span>🍃 Gửi lời nhắn</span>`;
+          fbSubmitBtn.innerHTML = `<span>Gửi lời nhắn</span>`;
         }
       });
 
-      // Load on start
       loadComments();
     </script>
   </body>
 </html>
-
-

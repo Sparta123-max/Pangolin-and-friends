@@ -115,6 +115,22 @@ def _init_db():
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS visits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ip_address TEXT,
+                user_agent TEXT,
+                browser TEXT,
+                os_name TEXT,
+                device_type TEXT,
+                page_path TEXT,
+                page_name TEXT,
+                referrer TEXT,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
 
 
 def _utc_now_iso():
@@ -156,6 +172,125 @@ def _safe_unlink_under(base_dir: str, rel_path: Optional[str]) -> bool:
 
 _init_db()
 
+PAGE_NAME_MAP = {
+    "/": "Trang chủ",
+    "/about": "Giới thiệu",
+    "/species": "Sổ tay Tê Tê",
+    "/notes": "Sổ tay Tê Tê",
+    "/tete-notes": "Sổ tay Tê Tê",
+    "/scan": "Import Card ID",
+    "/cctv": "Camera AI",
+    "/hunter_spot": "Hunter Spot",
+    "/map": "Bản đồ sinh thái",
+    "/game": "Mini Game Tê Tê",
+    "/login": "Đăng nhập",
+    "/register": "Đăng ký",
+    "/visitors": "Thống kê truy cập",
+    "/traffic": "Thống kê truy cập",
+}
+
+
+def _get_page_name(path: str) -> str:
+    return PAGE_NAME_MAP.get(path, path)
+
+
+def _get_client_ip():
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "127.0.0.1"
+
+
+def _parse_ua(ua_str: str):
+    ua_lower = (ua_str or "").lower()
+
+    if "mobile" in ua_lower or "android" in ua_lower or "iphone" in ua_lower:
+        device = "Điện thoại"
+    elif "tablet" in ua_lower or "ipad" in ua_lower:
+        device = "Máy tính bảng"
+    else:
+        device = "Máy tính"
+
+    if "windows" in ua_lower:
+        os_name = "Windows"
+    elif "android" in ua_lower:
+        os_name = "Android"
+    elif "iphone" in ua_lower or "ipad" in ua_lower or "ipod" in ua_lower:
+        os_name = "iOS"
+    elif "macintosh" in ua_lower or "mac os" in ua_lower:
+        os_name = "macOS"
+    elif "linux" in ua_lower:
+        os_name = "Linux"
+    else:
+        os_name = "Khác"
+
+    if "edg/" in ua_lower:
+        browser = "Edge"
+    elif "opr/" in ua_lower or "opera" in ua_lower:
+        browser = "Opera"
+    elif "chrome/" in ua_lower and "chromium" not in ua_lower:
+        browser = "Chrome"
+    elif "safari/" in ua_lower and "chrome/" not in ua_lower:
+        browser = "Safari"
+    elif "firefox/" in ua_lower:
+        browser = "Firefox"
+    else:
+        browser = "Khác"
+
+    return browser, os_name, device
+
+
+@app.before_request
+def _track_visitor():
+    if request.method != "GET":
+        return
+    path = request.path
+    if (
+        path.startswith("/static")
+        or path.startswith("/api")
+        or path.startswith("/html5game")
+        or path.startswith("/TeTe_game")
+        or path == "/favicon.ico"
+        or any(
+            path.endswith(ext)
+            for ext in [
+                ".css",
+                ".js",
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".svg",
+                ".ico",
+                ".woff",
+                ".woff2",
+                ".ttf",
+                ".map",
+                ".mp4",
+                ".pt",
+            ]
+        )
+    ):
+        return
+
+    try:
+        ip = _get_client_ip()
+        ua_str = request.headers.get("User-Agent", "")
+        browser, os_name, device = _parse_ua(ua_str)
+        page_name = _get_page_name(path)
+        referrer = request.referrer or ""
+        created_at = _utc_now_iso()
+
+        with _db() as conn:
+            conn.execute(
+                """
+                INSERT INTO visits (ip_address, user_agent, browser, os_name, device_type, page_path, page_name, referrer, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (ip, ua_str[:250], browser, os_name, device, path, page_name, referrer[:250], created_at),
+            )
+    except Exception as e:
+        print(f"Error logging visit: {e}")
+
 # ===== AI GIẢ LẬP =====
 def analyze_audio(file_path):
     # Sau này thay bằng model TensorFlow/PyTorch
@@ -171,7 +306,8 @@ def login():
 
 @app.route("/cctv")
 def cctv():
-    return render_template("camera.html")
+    mode = request.args.get("mode", "animal")
+    return render_template("camera.html", mode=mode)
 
 @app.route("/map")
 def map_view():
@@ -203,6 +339,13 @@ def scan():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/species")
+@app.route("/notes")
+@app.route("/tete-notes")
+def species():
+    return render_template("species_guide.html")
 
 
 @app.route("/api/feedback", methods=["GET"])
@@ -270,9 +413,90 @@ def post_feedback():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/visits/stats", methods=["GET"])
+def get_visit_stats():
+    try:
+        today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today_prefix = f"{today_date}%"
+
+        with _db() as conn:
+            total_visits = conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
+            unique_visitors = conn.execute("SELECT COUNT(DISTINCT ip_address) FROM visits").fetchone()[0]
+            today_visits = conn.execute(
+                "SELECT COUNT(*) FROM visits WHERE created_at LIKE ?", (today_prefix,)
+            ).fetchone()[0]
+            today_unique = conn.execute(
+                "SELECT COUNT(DISTINCT ip_address) FROM visits WHERE created_at LIKE ?", (today_prefix,)
+            ).fetchone()[0]
+
+            last_row = conn.execute(
+                "SELECT created_at, browser, os_name, device_type, page_name FROM visits ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+
+            last_visit = None
+            if last_row:
+                last_visit = {
+                    "created_at": last_row["created_at"],
+                    "browser": last_row["browser"],
+                    "os_name": last_row["os_name"],
+                    "device_type": last_row["device_type"],
+                    "page_name": last_row["page_name"],
+                }
+
+            rows = conn.execute(
+                """
+                SELECT id, browser, os_name, device_type, page_path, page_name, created_at
+                FROM visits
+                ORDER BY id DESC
+                LIMIT 50
+                """
+            ).fetchall()
+
+            recent_visits = [
+                {
+                    "id": r["id"],
+                    "browser": r["browser"],
+                    "os_name": r["os_name"],
+                    "device_type": r["device_type"],
+                    "page_path": r["page_path"],
+                    "page_name": r["page_name"] or r["page_path"],
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+        return jsonify({
+            "total_visits": total_visits,
+            "unique_visitors": unique_visitors,
+            "today_visits": today_visits,
+            "today_unique": today_unique,
+            "last_visit": last_visit,
+            "recent_visits": recent_visits,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/visits/clear", methods=["POST"])
+def clear_visits():
+    try:
+        with _db() as conn:
+            conn.execute("DELETE FROM visits")
+        return jsonify({"ok": True, "message": "Đã xóa toàn bộ lịch sử truy cập."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/visitors")
+@app.route("/traffic")
+def visitors_page():
+    return render_template("visitors.html")
+
+
 @app.route("/hunter_spot")
 def hunter_spot():
-    return render_template("camera_hunter.html")
+    return render_template("camera.html", mode="hunter")
 
 @app.route("/html5game/<path:filename>")
 def gamemaker_html5game(filename):

@@ -1,75 +1,295 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ranger Monitor AI - Solo View</title>
+  <title>Ranger Monitor AI - Hệ Thống Giám Sát Camera Kép</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --bg-dark-green: #0b1a03;
-      --frame-bg: #1a2e11;
-      --label-bg: rgba(0, 0, 0, 0.7);
+      --bg-dark-green: #040d05;
+      --surface-dark: #0a1c0d;
+      --frame-bg: #0f2413;
+      --label-bg: rgba(0, 0, 0, 0.75);
       --accent-green: #8bc34a;
+      --green-glow: rgba(139, 195, 74, 0.35);
+      --accent-hunter: #ff9800;
+      --hunter-glow: rgba(255, 152, 0, 0.35);
+      --text: #f0f7f1;
+      --text-muted: #8aa88e;
+      --border: rgba(139, 195, 74, 0.2);
+      --border-hunter: rgba(255, 152, 0, 0.3);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      padding: 0;
       background-color: var(--bg-dark-green);
-      font-family: "Segoe UI", sans-serif;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       height: 100vh;
-      color: white;
+      color: var(--text);
       overflow: hidden;
+      position: relative;
     }
 
+    /* Ambient Background Pattern */
+    body::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(46,125,50,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 20%, rgba(27,94,32,0.2) 0%, transparent 50%),
+        linear-gradient(180deg, #061608 0%, #030a04 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== HEADER ===== */
     header {
       width: 100%;
-      padding: 20px 0;
+      height: 68px;
+      padding: 0 24px;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
+      position: relative;
+      z-index: 20;
+      background: rgba(4, 14, 6, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateX(-2px);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title small {
+      font-size: 10.5px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(139, 195, 74, 0.15);
+      border: 1px solid rgba(139, 195, 74, 0.3);
+      color: var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    /* ===== TWO PRIMARY SWITCHER BUTTONS ===== */
+    .mode-switcher {
+      display: flex;
+      gap: 8px;
+      background: rgba(3, 10, 4, 0.85);
+      padding: 5px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(139, 195, 74, 0.18);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .switch-btn {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--transition);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .switch-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Active Animal Button */
+    .switch-btn.active.animal-btn {
+      background: linear-gradient(135deg, rgba(46,125,50,0.85), rgba(27,94,32,0.9));
+      color: #ffffff;
+      border-color: rgba(139, 195, 74, 0.4);
+      box-shadow: 0 2px 14px var(--green-glow);
+    }
+
+    .switch-btn.active.animal-btn .dot {
+      background: #8bc34a;
+      box-shadow: 0 0 8px #8bc34a;
+    }
+
+    /* Active Hunter Button */
+    .switch-btn.active.hunter-btn {
+      background: linear-gradient(135deg, rgba(230,81,0,0.85), rgba(191,54,12,0.9));
+      color: #ffffff;
+      border-color: rgba(255, 152, 0, 0.4);
+      box-shadow: 0 2px 14px var(--hunter-glow);
+    }
+
+    .switch-btn.active.hunter-btn .dot {
+      background: #ff9800;
+      box-shadow: 0 0 8px #ff9800;
+    }
+
+    .switch-btn .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transition: all var(--transition);
+    }
+
+    /* Header Right Actions */
+    .header-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: white;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition);
+    }
+
+    .settings-btn:hover {
+      background: var(--accent-green);
+      color: #0b1a03;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+
+    /* Status Sub-bar */
+    .status-bar {
+      width: 95%;
+      margin: 12px auto 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
       position: relative;
       z-index: 5;
     }
 
-    .back-btn {
-      position: absolute;
-      left: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(139, 195, 74, 0.1);
+      border: 1px solid rgba(139, 195, 74, 0.25);
+      color: var(--accent-green);
+      font-weight: 600;
     }
 
+    .status-badge.hunter-mode {
+      background: rgba(255, 152, 0, 0.12);
+      border-color: rgba(255, 152, 0, 0.3);
+      color: var(--accent-hunter);
+    }
+
+    /* ===== MONITOR GRID ===== */
     .monitor-grid {
       width: 95%;
       flex-grow: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 25px;
+      gap: 16px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 860px) {
+      .mode-switcher { position: static; transform: none; order: 3; width: 100%; justify-content: center; }
+      header { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+      .monitor-grid { grid-template-columns: 1fr; overflow-y: auto; }
     }
 
     .cam-frame {
       position: relative;
       background: var(--frame-bg);
-      border-radius: 15px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
 
     .cam-frame:hover {
-      border: 1px solid var(--accent-green);
+      border-color: var(--accent-green);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 15px rgba(139, 195, 74, 0.15);
+    }
+
+    .hunter-active .cam-frame:hover {
+      border-color: var(--accent-hunter);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 15px rgba(255, 152, 0, 0.15);
     }
 
     .cam-frame.fullscreen {
@@ -91,10 +311,13 @@
       background: var(--label-bg);
       border: 1px solid white;
       color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
       font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
       z-index: 10001;
+      backdrop-filter: blur(8px);
     }
 
     .cam-frame.fullscreen .exit-fs {
@@ -103,67 +326,50 @@
 
     .cam-label {
       position: absolute;
-      top: 15px;
-      left: 15px;
+      top: 16px;
+      left: 16px;
       background: var(--label-bg);
+      backdrop-filter: blur(8px);
       padding: 6px 14px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: bold;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       border-left: 3px solid var(--accent-green);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* 🔥 ADD */
+    .hunter-active .cam-label.primary-cam {
+      border-left-color: var(--accent-hunter);
+    }
+
     #label-container {
       margin-top: 10px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
+      color: #ffffff;
+      min-height: 24px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
     }
 
     canvas {
       max-width: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    /* Settings Button & Layout */
-    .header-btns {
-      position: absolute;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .settings-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.3s ease;
-    }
-
-    .settings-btn:hover {
-      background: var(--accent-green);
-      color: #0b1a03;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 10px rgba(139, 195, 74, 0.5);
-    }
-
-    /* Glassmorphic Settings Modal */
+    /* Modal Overlay & Settings */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
       z-index: 10000;
       justify-content: center;
       align-items: center;
@@ -177,13 +383,13 @@
     }
 
     .settings-modal {
-      background: rgba(26, 46, 17, 0.95);
-      border: 1px solid var(--accent-green);
-      border-radius: 16px;
+      background: rgba(14, 34, 18, 0.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       padding: 30px;
       width: 90%;
       max-width: 500px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 195, 74, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 20px rgba(139, 195, 74, 0.15);
       transform: translateY(-20px);
       transition: transform 0.3s ease;
       position: relative;
@@ -194,7 +400,7 @@
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       margin-bottom: 20px;
       color: var(--accent-green);
@@ -217,31 +423,29 @@
       transition: color 0.2s;
     }
 
-    .modal-close:hover {
-      color: white;
-    }
+    .modal-close:hover { color: white; }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
 
     .form-group label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: #e0e0e0;
       text-align: left;
     }
 
     .form-group input {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 10px 14px;
       color: white;
-      font-size: 14px;
+      font-size: 13.5px;
       font-family: inherit;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -255,33 +459,31 @@
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 12px;
-      margin-top: 25px;
+      gap: 10px;
+      margin-top: 22px;
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.16); }
 
     .btn-primary {
       background: var(--accent-green);
       border: none;
       color: #0b1a03;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -309,170 +511,209 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 13.5px;
     }
 
-    .toast.show {
-      bottom: 30px;
-    }
+    .toast.show { bottom: 25px; }
   </style>
 </head>
 
-<body>
+<body class="{{ 'hunter-active' if mode == 'hunter' else 'animal-active' }}">
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <a class="back-btn" href="/">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Trang Chủ
+      </a>
+      <div class="brand-title">
+        <span>Ranger Monitor</span>
+        <small id="currentModeBadge">{{ 'HUNTER DETECT' if mode == 'hunter' else 'ANIMAL DETECT' }}</small>
+      </div>
+    </div>
 
-<header>
-  <button class="back-btn" onclick="location.href='/'">Back</button>
-  <div style="font-size:22px;font-weight:600;">🌿 Ranger Monitor AI</div>
-  <div class="header-btns">
-    <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-  </div>
-</header>
+    <!-- The 2 Primary Navigation Buttons -->
+    <nav class="mode-switcher" aria-label="Camera Mode Switcher">
+      <a
+        href="/cctv"
+        class="switch-btn animal-btn {{ 'active' if mode != 'hunter' else '' }}"
+        id="btnAnimalMode"
+        title="Quan trắc động vật hoang dã (Tê Tê, Cầy Vòi Mốc)"
+      >
+        <span class="dot"></span>
+        <span>Animal Spot (Camera Động Vật)</span>
+      </a>
 
-<main class="monitor-grid">
+      <a
+        href="/hunter_spot"
+        class="switch-btn hunter-btn {{ 'active' if mode == 'hunter' else '' }}"
+        id="btnHunterMode"
+        title="Nhận diện thợ săn, súng săn và người xâm nhập rừng"
+      >
+        <span class="dot"></span>
+        <span>Hunter Spot (Camera Thợ Săn)</span>
+      </a>
+    </nav>
 
-  <!-- CAM 1 (AI CAMERA) -->
-  <div class="cam-frame" id="cam1" onclick="openFull(this)">
-    <button class="exit-fs" onclick="closeFull(event, 'cam1')">❮ Exit</button>
-    <div class="cam-label">AI CAM</div>
+    <div class="header-btns">
+      <button class="settings-btn" onclick="openSettings()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cấu Hình IP
+      </button>
+    </div>
+  </header>
 
-    <!-- 🔥 FIX: stop click + layout -->
-    <div onclick="event.stopPropagation()" style="text-align:center; width:100%;">
-
-      <!-- Hidden image stream -->
-      <img id="ipcam"
-           src=""
-           crossorigin="anonymous"
-           style="display:none;" />
-
-      <!-- Canvas -->
-      <canvas id="canvas" width="400" height="300"></canvas>
-
-      <!-- 🔥 ADD loading text -->
-      <div id="label-container">⏳ Đang khởi động AI...</div>
-
+  <!-- Status sub-bar -->
+  <div class="status-bar">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="status-badge {{ 'hunter-mode' if mode == 'hunter' else '' }}">
+        <span style="width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block;"></span>
+        Chế độ đang chạy: <strong>{{ 'Phát Hiện Thợ Săn (Hunter Detection)' if mode == 'hunter' else 'Quan Trắc Động Vật (Animal Detection)' }}</strong>
+      </span>
+      <span>• Nhấp vào khung hình để phóng to toàn màn hình</span>
+    </div>
+    <div style="font-family:'JetBrains Mono', monospace; font-size:11.5px;">
+      AI Engine: {{ 'Teachable Machine TF.js' if mode == 'hunter' else 'YOLOv8 + CLIP Zero-Shot' }}
     </div>
   </div>
 
-  <!-- CAM 2 (IP CAMERA) -->
-  <div class="cam-frame" id="cam2" onclick="openFull(this)">
-    <button class="exit-fs" onclick="closeFull(event, 'cam2')">❮ Exit</button>
-    <div class="cam-label">CAM 2</div>
+  <!-- Monitor Grid -->
+  <main class="monitor-grid">
+    <!-- CAM 1 (PRIMARY AI CAMERA) -->
+    <div class="cam-frame" id="cam1" onclick="openFull(this)">
+      <button class="exit-fs" onclick="closeFull(event, 'cam1')">Thu Nhỏ</button>
+      <div class="cam-label primary-cam">
+        <span style="width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block;"></span>
+        {{ 'AI HUNTER CAM 1' if mode == 'hunter' else 'AI ANIMAL CAM 1' }}
+      </div>
 
-    <img id="cam2-img" src="" width="100%" />
+      <div onclick="event.stopPropagation()" style="text-align:center; width:100%;">
+        <!-- Hidden image stream -->
+        <img id="ipcam" src="" crossorigin="anonymous" style="display:none;" />
+        <!-- Processing Canvas -->
+        <canvas id="canvas" width="400" height="300"></canvas>
+        <!-- AI Inference Label Output -->
+        <div id="label-container">Đang khởi động mạng nơ-ron AI...</div>
+      </div>
+    </div>
+
+    <!-- CAM 2 (AUXILIARY IP CAMERA) -->
+    <div class="cam-frame" id="cam2" onclick="openFull(this)">
+      <button class="exit-fs" onclick="closeFull(event, 'cam2')">Thu Nhỏ</button>
+      <div class="cam-label">
+        <span style="width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block;"></span>
+        CAM 2 (IP STREAM)
+      </div>
+      <img id="cam2-img" src="" width="100%" alt="Camera phụ" />
+    </div>
+  </main>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
+    <div class="settings-modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeSettings()">&times;</button>
+      <div class="modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Cấu Hình Luồng Camera IP
+      </div>
+      <div class="form-group">
+        <label for="cam1-url">AI Camera Stream URL (Cam 1)</label>
+        <input type="text" id="cam1-url" placeholder="http://192.168.1.4:8080/video" />
+      </div>
+      <div class="form-group">
+        <label for="cam2-url">Auxiliary Camera Stream URL (Cam 2)</label>
+        <input type="text" id="cam2-url" placeholder="http://192.168.110.227:8080/video" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="resetToDefaults()">Khôi Phục Mặc Định</button>
+        <button class="btn-primary" onclick="saveSettings()">Lưu Cấu Hình</button>
+      </div>
+    </div>
   </div>
 
-</main>
-
-<!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
-  <div class="settings-modal" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeSettings()">&times;</button>
-    <div class="modal-title">⚙️ Camera IP Configuration</div>
-    
-    <div class="form-group">
-      <label for="cam1-url">AI Camera Stream URL</label>
-      <input type="text" id="cam1-url" placeholder="http://192.168.1.4:8080/video" />
-    </div>
-    
-    <div class="form-group">
-      <label for="cam2-url">CAM 2 Stream URL</label>
-      <input type="text" id="cam2-url" placeholder="http://192.168.110.227:8080/video" />
-    </div>
-    
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="resetToDefaults()">Reset Defaults</button>
-      <button class="btn-primary" onclick="saveSettings()">Save Changes</button>
-    </div>
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">
+    <span>Đã lưu cấu hình luồng camera thành công!</span>
   </div>
-</div>
 
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast">
-  <span>✅ Saved settings successfully!</span>
-</div>
+  <!-- DYNAMIC IP INITIALIZATION & MODAL LOGIC -->
+  <script>
+    const DEFAULT_CAM1 = "http://192.168.1.4:8080/video";
+    const DEFAULT_CAM2 = "http://192.168.110.227:8080/video";
 
-<!-- DYNAMIC IP INITIALIZATION & MODAL LOGIC -->
-<script>
-  const DEFAULT_CAM1 = "http://192.168.1.4:8080/video";
-  const DEFAULT_CAM2 = "http://192.168.110.227:8080/video";
+    let currentCam1 = localStorage.getItem("cam1_url") || DEFAULT_CAM1;
+    let currentCam2 = localStorage.getItem("cam2_url") || DEFAULT_CAM2;
 
-  // Load saved values or fall back to defaults
-  let currentCam1 = localStorage.getItem("cam1_url") || DEFAULT_CAM1;
-  let currentCam2 = localStorage.getItem("cam2_url") || DEFAULT_CAM2;
-
-  // Apply URLs immediately so they are ready when DOMContentLoaded fires
-  const ipCamImg = document.getElementById("ipcam");
-  const cam2Img = document.getElementById("cam2-img");
-  if (ipCamImg) ipCamImg.src = currentCam1;
-  if (cam2Img) cam2Img.src = currentCam2;
-
-  // Pre-populate input values in the modal
-  document.getElementById("cam1-url").value = currentCam1;
-  document.getElementById("cam2-url").value = currentCam2;
-
-  function openSettings() {
-    const overlay = document.getElementById("settingsOverlay");
-    overlay.style.display = "flex";
-    // Trigger reflow to run transition
-    void overlay.offsetWidth;
-    overlay.classList.add("active");
-  }
-
-  function closeSettings(event) {
-    const overlay = document.getElementById("settingsOverlay");
-    overlay.classList.remove("active");
-    setTimeout(() => {
-      overlay.style.display = "none";
-    }, 300);
-  }
-
-  function saveSettings() {
-    const cam1Input = document.getElementById("cam1-url").value.trim() || DEFAULT_CAM1;
-    const cam2Input = document.getElementById("cam2-url").value.trim() || DEFAULT_CAM2;
-
-    localStorage.setItem("cam1_url", cam1Input);
-    localStorage.setItem("cam2_url", cam2Input);
-
-    currentCam1 = cam1Input;
-    currentCam2 = cam2Input;
-
-    // Update images dynamically
+    const ipCamImg = document.getElementById("ipcam");
+    const cam2Img = document.getElementById("cam2-img");
     if (ipCamImg) ipCamImg.src = currentCam1;
     if (cam2Img) cam2Img.src = currentCam2;
 
-    closeSettings();
-    showToast();
-  }
+    document.getElementById("cam1-url").value = currentCam1;
+    document.getElementById("cam2-url").value = currentCam2;
 
-  function resetToDefaults() {
-    document.getElementById("cam1-url").value = DEFAULT_CAM1;
-    document.getElementById("cam2-url").value = DEFAULT_CAM2;
-  }
+    function openSettings() {
+      const overlay = document.getElementById("settingsOverlay");
+      overlay.style.display = "flex";
+      void overlay.offsetWidth;
+      overlay.classList.add("active");
+    }
 
-  function showToast() {
-    const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
-  }
-</script>
+    function closeSettings() {
+      const overlay = document.getElementById("settingsOverlay");
+      overlay.classList.remove("active");
+      setTimeout(() => { overlay.style.display = "none"; }, 300);
+    }
 
-<!-- FULLSCREEN SCRIPT -->
-<script>
-function openFull(el) {
-  if (!el.classList.contains("fullscreen")) {
-    el.classList.add("fullscreen");
-  }
-}
+    function saveSettings() {
+      const cam1Input = document.getElementById("cam1-url").value.trim() || DEFAULT_CAM1;
+      const cam2Input = document.getElementById("cam2-url").value.trim() || DEFAULT_CAM2;
 
-function closeFull(event, id) {
-  event.stopPropagation();
-  document.getElementById(id).classList.remove("fullscreen");
-}
-</script>
+      localStorage.setItem("cam1_url", cam1Input);
+      localStorage.setItem("cam2_url", cam2Input);
 
-<!-- YOUR JS -->
-<script src="/static/index.js"></script>
+      currentCam1 = cam1Input;
+      currentCam2 = cam2Input;
 
+      if (ipCamImg) ipCamImg.src = currentCam1;
+      if (cam2Img) cam2Img.src = currentCam2;
+
+      closeSettings();
+      showToast();
+    }
+
+    function resetToDefaults() {
+      document.getElementById("cam1-url").value = DEFAULT_CAM1;
+      document.getElementById("cam2-url").value = DEFAULT_CAM2;
+    }
+
+    function showToast() {
+      const toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(() => { toast.classList.remove("show"); }, 3000);
+    }
+
+    function openFull(el) {
+      if (!el.classList.contains("fullscreen")) {
+        el.classList.add("fullscreen");
+      }
+    }
+
+    function closeFull(event, id) {
+      event.stopPropagation();
+      document.getElementById(id).classList.remove("fullscreen");
+    }
+  </script>
+
+  <!-- AI SCRIPT INJECTION (ANIMAL VS. HUNTER ENGINE) -->
+  {% if mode == 'hunter' %}
+    <!-- Hunter Detection Model (TensorFlow.js + Teachable Machine) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="/static/hunter_index.js"></script>
+  {% else %}
+    <!-- Animal Detection Model (YOLO + CLIP Zero-Shot Backend) -->
+    <script src="/static/index.js"></script>
+  {% endif %}
 </body>
 </html>

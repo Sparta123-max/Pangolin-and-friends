@@ -1,30 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-
-    <!-- Custom PreHead code is injected here -->
-    
-
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name ="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta charset="utf-8"/>
-
-        <!-- Builtin injector for disabling cache -->
-        <meta http-equiv="pragma" content="no-cache"/>
-
-        <!-- Set the title bar of the page -->
-        <title>TeTe Game - Phiêu Lưu Bảo Tồn Tê Tê</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
+<html lang="en"> <!-- Custom PreHead code is injected here --> <head> <meta http-equiv="X-UA-Compatible" content="IE=edge" /> <meta name="apple-mobile-web-app-capable" content="yes" /> <meta name ="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" /> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /> <meta charset="utf-8"/> <!-- Builtin injector for disabling cache --> <meta http-equiv="pragma" content="no-cache"/> <!-- Set the title bar of the page --> <title>TeTe</title> <link rel="preconnect" href="https://fonts.googleapis.com" /> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
             rel="stylesheet"
-        />
-
-        <style>
-            :root {
+        /> <style> :root {
                 --bg-deep: #030a04;
                 --panel: rgba(12, 33, 16, 0.85);
                 --panel-border: rgba(129, 199, 132, 0.22);
@@ -162,17 +140,14 @@
             }
 
             .brand-icon {
-                font-size: 22px;
-                filter: drop-shadow(0 0 8px rgba(129, 199, 132, 0.4));
+              display: none;
             }
 
             .brand-name {
                 font-size: 17px;
                 font-weight: 800;
                 color: #ffffff;
-                display: flex;
-                align-items: center;
-                gap: 6px;
+                letter-spacing: -0.2px;
             }
 
             .brand-name small {
@@ -301,49 +276,7 @@
             }
             div.gm4html5_login_header {
                 text-align: center;
-            }
-        </style>
-    </head>
-
-    <body>
-        <!-- Nature backdrop and glowing fireflies -->
-        <div class="nature-bg"></div>
-        <div id="fireflies"></div>
-
-        <!-- Top Forest Nav -->
-        <header class="tete-top-nav" aria-label="Navigation">
-            <a href="/" class="brand-group">
-                <span class="brand-icon">🎮</span>
-                <div class="brand-name">
-                    TeTe Adventure <small>🌿 Game Bảo Tồn</small>
-                </div>
-            </a>
-            <div class="nav-actions">
-                <button class="tete-btn primary" onclick="location.href='/'">📊 Dashboard</button>
-                <button class="tete-btn" onclick="location.href='/about'">🌿 About us</button>
-                <button class="tete-btn" onclick="location.href='/map'">🗺️ Animal Spot</button>
-            </div>
-        </header>
-
-        <!-- Game Center -->
-        <main class="game-wrapper">
-            <div class="game-frame">
-                <div class="gm4html5_div_class" id="gm4html5_div_id">
-                    <canvas id="canvas" width="720" height="640">
-                        <p>Trình duyệt của bạn không hỗ trợ HTML5 canvas.</p>
-                    </canvas>
-                </div>
-            </div>
-            <div class="game-hint">
-                <span>🍃 Hướng dẫn:</span> Sử dụng bàn phím để đồng hành cùng Tê Tê vượt qua chướng ngại vật trong rừng sâu!
-            </div>
-        </main>
-
-        <!-- Run the game code -->
-        <script type="text/javascript" src="html5game/TeTe(8).js?cachebust=460899484"></script>
-
-        <script>
-            window.onload = GameMaker_Init;
+            } </style> </head> <body> <!-- Nature backdrop and glowing fireflies --> <div class="nature-bg"></div> <div id="fireflies"></div> <!-- Top Forest Nav --> <header class="tete-top-nav" aria-label="Navigation"> <a href="/" class="brand-group"> <span class="brand-icon"></span> <div class="brand-name"> TeTe </div> </a> <div class="nav-actions"> <button class="tete-btn primary" onclick="location.href='/'"> Dashboard</button> <button class="tete-btn" onclick="location.href='/about'"> About us</button> <button class="tete-btn" onclick="location.href='/map'"> Animal Spot</button> </div> </header> <!-- Game Center --> <main class="game-wrapper"> <div class="game-frame"> <div class="gm4html5_div_class" id="gm4html5_div_id"> <canvas id="canvas" width="720" height="640"> <p>Trình duyệt của bạn không hỗ trợ HTML5 canvas.</p> </canvas> </div> </div> </main> <!-- Run the game code --> <script type="text/javascript" src="html5game/TeTe(8).js?cachebust=460899484"></script> <script> window.onload = GameMaker_Init;
 
             /* Fireflies particle effect */
             (function () {
@@ -377,7 +310,5 @@
                     ].join(";");
                     container.appendChild(f);
                 }
-            })();
-        </script>
-    </body>
+            })(); </script> </body>
 </html>

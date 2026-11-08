@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thống Kê &amp; Lịch Sử Truy Cập - Ranger Monitor AI</title>
+  <meta name="description" content="Thống kê số lượng người truy cập và nhật ký truy cập hệ thống Ranger Monitor AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #030a04;
+      --surface: rgba(10, 28, 13, 0.85);
+      --surface-2: rgba(6, 18, 8, 0.92);
+      --surface-raised: rgba(14, 38, 18, 0.78);
+      --text: #edf7ee;
+      --text-muted: rgba(200, 230, 205, 0.65);
+      --text-dim: rgba(160, 200, 165, 0.45);
+      --green-50: #f0faf0;
+      --green-100: #c8e6c9;
+      --green-300: #81c784;
+      --green-500: #4caf50;
+      --green-700: #2e7d32;
+      --green-900: #1b5e20;
+      --teal-400: #26c6da;
+      --teal-600: #00acc1;
+      --danger: #ef5350;
+      --gold: #e6c687;
+      --border: rgba(129, 199, 132, 0.14);
+      --border-strong: rgba(165, 214, 167, 0.38);
+      --glow: rgba(129, 199, 132, 0.28);
+      --font-serif: "Playfair Display", Georgia, serif;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-xl: 28px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+      --transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Background */
+    .nature-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 55% at 15% 10%, rgba(46,125,50,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 85% 15%, rgba(27,94,32,0.28) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 50% 95%, rgba(13,51,21,0.32) 0%, transparent 65%),
+        linear-gradient(180deg, #061608 0%, #030a04 100%);
+    }
+
+    .nature-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(129,199,132,0.055) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    /* Fireflies */
+    #fireflies { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+
+    .firefly {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, #dcfce7 0%, #86efac 45%, transparent 100%);
+      box-shadow: 0 0 8px 3px rgba(134,239,172,0.65);
+      animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
+    }
+
+    @keyframes flyFloat {
+      0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+      18%  { opacity: 0.9; }
+      50%  { transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.2); opacity: 1; }
+      82%  { opacity: 0.65; }
+      100% { transform: translate(var(--tx2, -25px), var(--ty2, -120px)) scale(0.5); opacity: 0; }
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(4, 13, 6, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.35);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(129,199,132,0.6), transparent);
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      height: 38px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+      transition: filter var(--transition);
+    }
+
+    .brand-logo:hover {
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 12px rgba(129,199,132,0.35));
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-title-wrap .main-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-title-wrap .sub-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green-300);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: rgba(8, 26, 12, 0.6);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      font-family: inherit;
+      line-height: 1.2;
+      transition: all var(--transition);
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn:hover {
+      background: rgba(129,199,132,0.14);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(46,125,50,0.85), rgba(27,94,32,0.75));
+      border-color: rgba(129,199,132,0.28);
+      color: var(--green-100);
+      box-shadow: 0 2px 10px rgba(46,125,50,0.2);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, rgba(56,142,60,0.9), rgba(46,125,50,0.85));
+      box-shadow: 0 4px 18px rgba(46,125,50,0.35);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, rgba(211,47,47,0.8), rgba(183,28,28,0.7));
+      border-color: rgba(239,83,80,0.28);
+      color: #ffebee;
+    }
+
+    .btn.danger:hover {
+      background: linear-gradient(135deg, rgba(229,57,53,0.9), rgba(211,47,47,0.85));
+      box-shadow: 0 4px 18px rgba(211,47,47,0.3);
+    }
+
+    .btn.active-nav {
+      background: linear-gradient(135deg, #2e7d32, #1b5e20);
+      border-color: rgba(165,214,167,0.4);
+      color: #ffffff;
+      box-shadow: 0 3px 14px rgba(46,125,50,0.3);
+    }
+
+    /* Container */
+    .container {
+      padding: 28px 28px 72px;
+      max-width: 1380px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Banner */
+    .nature-banner {
+      background: linear-gradient(145deg, rgba(14,40,18,0.8), rgba(7,22,10,0.92));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .nature-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(129,199,132,0.5), transparent);
+    }
+
+    .banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(129,199,132,0.1);
+      border: 1px solid rgba(129,199,132,0.25);
+      color: var(--green-300);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .banner-badge::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green-300);
+      box-shadow: 0 0 6px var(--green-300);
+    }
+
+    .banner-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .banner-title {
+      font-family: var(--font-serif);
+      font-size: 27px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .banner-desc {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.65;
+      max-width: 650px;
+    }
+
+    .banner-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: rgba(46,125,50,0.2);
+      border: 1px solid rgba(129,199,132,0.3);
+      color: var(--green-100);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .pulse-beacon {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-300);
+      box-shadow: 0 0 8px var(--green-300);
+      animation: beacon-pulse 2s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+
+    @keyframes beacon-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.7); opacity: 0.4; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+    }
+
+    /* Stat Cards Grid */
+    .visitor-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .visitor-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 580px) {
+      .visitor-stats-grid { grid-template-columns: 1fr; }
+    }
+
+    .visitor-stat-box {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+    }
+
+    .visitor-stat-box:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .visitor-stat-label {
+      color: var(--text-dim);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .visitor-stat-num {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #c5e88a, #7cb342);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+
+    .visitor-stat-time {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      -webkit-text-fill-color: initial;
+      background: none;
+      word-break: break-word;
+      line-height: 1.35;
+    }
+
+    .visitor-stat-sub {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* History Card */
+    .history-card {
+      border-left: 3px solid rgba(76, 175, 80, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .history-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+
+    .history-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .history-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--green-100);
+    }
+
+    .meta-count {
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    /* Table */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      max-height: 480px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .table-wrap::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(129, 199, 132, 0.25);
+      border-radius: 999px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+      min-width: 650px;
+    }
+
+    .data-table th {
+      background: rgba(6, 20, 9, 0.95);
+      color: var(--green-300);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 13px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(129, 199, 132, 0.08);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    .data-table tbody tr:hover td {
+      background: rgba(129, 199, 132, 0.04);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty-state {
+      padding: 44px 16px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13.5px;
+    }
+
+    /* Badges */
+    .badge-device {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(38, 198, 218, 0.12);
+      color: #80deea;
+      border: 1px solid rgba(38, 198, 218, 0.25);
+    }
+
+    .badge-system {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .badge-page {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(76, 175, 80, 0.14);
+      color: #c8e6c9;
+      border: 1px solid rgba(76, 175, 80, 0.28);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header { padding: 0 16px; }
+      .container { padding: 18px 16px 60px; }
+      .nature-banner { padding: 22px 20px; }
+      .banner-title { font-size: 22px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="nature-bg"></div>
+  <div id="fireflies"></div>
+
+  <header class="header">
+    <a href="/" class="title">
+      <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="TeTe" />
+      <div class="brand-title-wrap">
+        <span class="main-name">TeTe</span>
+        <span class="sub-name">Ranger Monitor AI</span>
+      </div>
+    </a>
+    <nav class="nav-actions">
+      <button class="btn" onclick="location.href='/'">Dashboard</button>
+      <button class="btn" onclick="location.href='/species'">Sổ Tay Tê Tê</button>
+      <button class="btn primary" onclick="location.href='/game'">Mini Game</button>
+      <button class="btn" onclick="location.href='/scan'">Import Card ID</button>
+      <button class="btn primary" onclick="location.href='/about'">About Us</button>
+      <button class="btn" onclick="location.href='/map'">Animal Spot</button>
+      <button class="btn" onclick="location.href='/hunter_spot'">Hunter Spot</button>
+      <button class="btn active-nav" onclick="location.href='/visitors'">Thống kê truy cập</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Welcome Banner -->
+    <div class="nature-banner">
+      <div class="banner-badge">Hệ Thống Thống Kê &amp; Nhật Ký Truy Cập</div>
+      <div class="banner-content">
+        <div class="banner-text">
+          <h1 class="banner-title">Thống Kê Lượng Người Truy Cập &amp; Lịch Sử Truy Cập</h1>
+          <p class="banner-desc">
+            Theo dõi lưu lượng khách truy cập, tần suất người dùng và lịch sử các phiên kết nối hệ thống theo thời gian thực.
+          </p>
+        </div>
+        <div class="banner-status-pill">
+          <span class="pulse-beacon"></span>
+          <span>Theo dõi lưu lượng tự động</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Metric Cards -->
+    <section class="visitor-stats-grid">
+      <div class="visitor-stat-box">
+        <div class="visitor-stat-label">Tổng lượt truy cập</div>
+        <div class="visitor-stat-num" id="stat-total-visits">0</div>
+        <div class="visitor-stat-sub">Tổng số lần tải trang trên hệ thống</div>
+      </div>
+
+      <div class="visitor-stat-box">
+        <div class="visitor-stat-label">Số người truy cập</div>
+        <div class="visitor-stat-num" id="stat-unique-visitors">0</div>
+        <div class="visitor-stat-sub">Ước tính số lượng người dùng duy nhất</div>
+      </div>
+
+      <div class="visitor-stat-box">
+        <div class="visitor-stat-label">Truy cập hôm nay</div>
+        <div class="visitor-stat-num" id="stat-today-visits">0</div>
+        <div class="visitor-stat-sub">Số phiên truy cập trong ngày hôm nay</div>
+      </div>
+
+      <div class="visitor-stat-box">
+        <div class="visitor-stat-label">Lần truy cập gần nhất</div>
+        <div class="visitor-stat-num visitor-stat-time" id="stat-last-time">—</div>
+        <div class="visitor-stat-sub" id="stat-last-details">Chưa có bản ghi</div>
+      </div>
+    </section>
+
+    <!-- Access History Section -->
+    <section class="card history-card">
+      <div class="history-header">
+        <div>
+          <div class="history-title">Nhật ký truy cập chi tiết</div>
+          <div class="history-sub">Danh sách các phiên truy cập gần đây của người dùng vào các phân hệ giám sát.</div>
+        </div>
+        <div class="history-actions">
+          <button class="btn" id="refresh-visits-btn" type="button">Làm mới</button>
+          <button class="btn danger" id="clear-visits-btn" type="button">Xóa lịch sử</button>
+          <div class="meta-count" id="visits-updated-at">—</div>
+        </div>
+      </div>
+
+      <div class="history-meta-row">
+        <div class="meta-title">Danh sách phiên kết nối gần đây</div>
+        <div class="meta-count" id="visitor-record-count">Đang tải dữ liệu...</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">STT</th>
+              <th>Thời gian</th>
+              <th>Thiết bị</th>
+              <th>Trình duyệt &amp; Hệ điều hành</th>
+              <th>Trang truy cập</th>
+            </tr>
+          </thead>
+          <tbody id="visits-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+        <div id="visits-empty" class="empty-state" style="display:none;">
+          Chưa có lịch sử truy cập nào được ghi nhận.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function formatTime(iso) {
+      if (!iso) return "—";
+      const dt = new Date(iso);
+      if (Number.isNaN(dt.getTime())) return iso;
+      return dt.toLocaleString();
+    }
+
+    async function fetchVisitStats() {
+      const res = await fetch("/api/visits/stats", {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }
+
+    async function clearAllVisitHistory() {
+      const btn = document.getElementById("clear-visits-btn");
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch("/api/visits/clear", { method: "POST" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderVisitStats(data) {
+      if (!data) return;
+
+      const totalEl = document.getElementById("stat-total-visits");
+      const uniqueEl = document.getElementById("stat-unique-visitors");
+      const todayEl = document.getElementById("stat-today-visits");
+      const lastTimeEl = document.getElementById("stat-last-time");
+      const lastDetailsEl = document.getElementById("stat-last-details");
+      const visitsUpdatedEl = document.getElementById("visits-updated-at");
+      const recordCountEl = document.getElementById("visitor-record-count");
+      const tbody = document.getElementById("visits-tbody");
+      const emptyEl = document.getElementById("visits-empty");
+
+      if (totalEl) totalEl.textContent = Number(data.total_visits || 0).toLocaleString();
+      if (uniqueEl) uniqueEl.textContent = Number(data.unique_visitors || 0).toLocaleString();
+      if (todayEl) todayEl.textContent = Number(data.today_visits || 0).toLocaleString();
+
+      if (data.last_visit && data.last_visit.created_at) {
+        if (lastTimeEl) lastTimeEl.textContent = formatTime(data.last_visit.created_at);
+        if (lastDetailsEl) {
+          lastDetailsEl.textContent = (data.last_visit.device_type || "Máy tính") + " · " + (data.last_visit.browser || "") + " (" + (data.last_visit.os_name || "") + ")";
+        }
+      } else {
+        if (lastTimeEl) lastTimeEl.textContent = "—";
+        if (lastDetailsEl) lastDetailsEl.textContent = "Chưa có bản ghi";
+      }
+
+      if (visitsUpdatedEl) {
+        visitsUpdatedEl.textContent = "Cập nhật: " + new Date().toLocaleTimeString();
+      }
+
+      const visits = Array.isArray(data.recent_visits) ? data.recent_visits : [];
+      if (recordCountEl) {
+        recordCountEl.textContent = "Hiển thị " + visits.length + " bản ghi gần nhất";
+      }
+
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (visits.length === 0) {
+        if (emptyEl) emptyEl.style.display = "block";
+        return;
+      }
+
+      if (emptyEl) emptyEl.style.display = "none";
+
+      visits.forEach((v, index) => {
+        const tr = document.createElement("tr");
+
+        const sttTd = document.createElement("td");
+        sttTd.style.color = "var(--text-dim)";
+        sttTd.textContent = String(index + 1);
+
+        const timeTd = document.createElement("td");
+        timeTd.textContent = formatTime(v.created_at);
+
+        const deviceTd = document.createElement("td");
+        const deviceBadge = document.createElement("span");
+        deviceBadge.className = "badge-device";
+        deviceBadge.textContent = v.device_type || "Máy tính";
+        deviceTd.appendChild(deviceBadge);
+
+        const systemTd = document.createElement("td");
+        const systemBadge = document.createElement("span");
+        systemBadge.className = "badge-system";
+        systemBadge.textContent = (v.browser || "Khác") + " · " + (v.os_name || "Khác");
+        systemTd.appendChild(systemBadge);
+
+        const pageTd = document.createElement("td");
+        const pageBadge = document.createElement("span");
+        pageBadge.className = "badge-page";
+        pageBadge.textContent = v.page_name || v.page_path || "/";
+        pageTd.appendChild(pageBadge);
+
+        tr.appendChild(sttTd);
+        tr.appendChild(timeTd);
+        tr.appendChild(deviceTd);
+        tr.appendChild(systemTd);
+        tr.appendChild(pageTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function refreshVisits() {
+      const btn = document.getElementById("refresh-visits-btn");
+      if (btn) btn.disabled = true;
+      try {
+        const data = await fetchVisitStats();
+        renderVisitStats(data);
+      } catch (e) {
+        console.warn("Lỗi tải thống kê truy cập:", e);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const refreshVisitsBtn = document.getElementById("refresh-visits-btn");
+      if (refreshVisitsBtn) {
+        refreshVisitsBtn.addEventListener("click", refreshVisits);
+      }
+
+      const clearVisitsBtn = document.getElementById("clear-visits-btn");
+      if (clearVisitsBtn) {
+        clearVisitsBtn.addEventListener("click", async () => {
+          if (!confirm("Xóa toàn bộ lịch sử truy cập của người dùng?")) return;
+          try {
+            await clearAllVisitHistory();
+            await refreshVisits();
+          } catch (e) {
+            alert(e?.message || String(e));
+          }
+        });
+      }
+
+      refreshVisits();
+      setInterval(refreshVisits, 5000);
+    });
+
+    /* Firefly ambient particles */
+    (function () {
+      const container = document.getElementById('fireflies');
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const f = document.createElement('div');
+        f.className = 'firefly';
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const dur = 10 + Math.random() * 14;
+        const delay = -(Math.random() * dur);
+        const tx  = (Math.random() - 0.5) * 120;
+        const ty  = -(20 + Math.random() * 80);
+        const tx2 = (Math.random() - 0.5) * 80;
+        const ty2 = -(60 + Math.random() * 120);
+        const sz  = 2 + Math.random() * 3;
+        f.style.cssText = [
+          `left:${x}%`, `top:${y}%`,
+          `--dur:${dur.toFixed(1)}s`, `--delay:${delay.toFixed(1)}s`,
+          `--tx:${tx.toFixed(0)}px`, `--ty:${ty.toFixed(0)}px`,
+          `--tx2:${tx2.toFixed(0)}px`, `--ty2:${ty2.toFixed(0)}px`,
+          `width:${sz.toFixed(1)}px`, `height:${sz.toFixed(1)}px`,
+        ].join(';');
+        container.appendChild(f);
+      }
+    })();
+  </script>
+</body>
+
+</html>
