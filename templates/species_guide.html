@@ -5,44 +5,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sổ Tay Định Danh Thực Địa - Tê Tê Java và Tê Tê Vàng</title>
-  <meta name="description" content="Tài liệu chuyên môn nhận dạng và phân biệt Tê tê Java (Manis javanica) và Tê tê Vàng (Manis pentadactyla) dành cho lực lượng kiểm lâm và nghiên cứu thực địa." />
+  <meta name="description" content="Tài liệu chuyên môn nhận dạng và phân biệt Tê tê Java (Manis javanica) và Tê tê Vàng (Manis pentadactyla) dành cho lực lượng kiểm lâm, tuần tra rừng và nghiên cứu thực địa." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --bg: #030804;
-      --surface: rgba(10, 26, 14, 0.85);
-      --surface-card: rgba(13, 34, 18, 0.75);
-      --surface-raised: rgba(18, 48, 25, 0.88);
-      --surface-dark: rgba(4, 14, 7, 0.95);
-      --text: #f0f7f1;
-      --text-secondary: #c2dec6;
-      --text-muted: #83a587;
-      --green-100: #d4ebd6;
-      --green-300: #81c784;
+      --bg: #040d06;
+      --bg-surface: #0a1f0f;
+      --surface-card: #0e2915;
+      --surface-raised: #13381c;
+      --surface-dark: #06150a;
+      --text: #f1f8f2;
+      --text-secondary: #c4dec8;
+      --text-muted: #82a887;
+      --green-100: #d7edd9;
+      --green-300: #8ecf91;
       --green-400: #66bb6a;
-      --green-500: #43a047;
+      --green-500: #388e3c;
       --green-700: #2e7d32;
       --green-900: #1b5e20;
-      --gold: #e5c07b;
-      --gold-dark: #b89146;
-      --gold-glow: rgba(229, 192, 123, 0.25);
+      --gold: #dfb260;
+      --gold-dark: #b3883b;
+      --gold-light: #fef3d6;
       --danger: #ef5350;
-      --danger-glow: rgba(239, 83, 80, 0.22);
-      --border: rgba(129, 199, 132, 0.16);
-      --border-strong: rgba(165, 214, 167, 0.38);
-      --glow: rgba(129, 199, 132, 0.2);
+      --border: rgba(142, 207, 145, 0.18);
+      --border-strong: rgba(165, 214, 167, 0.35);
       --font-serif: "Playfair Display", Georgia, serif;
       --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --font-mono: "JetBrains Mono", Consolas, monospace;
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --radius-xl: 26px;
-      --transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      --shadow-card: 0 16px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,46 +54,22 @@
       position: relative;
     }
 
-    /* Ambient Background */
+    /* Ambient Background - clean natural forest gradient */
     .nature-bg {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 70% 50% at 12% 12%, rgba(46,125,50,0.2) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 45% at 88% 18%, rgba(27,94,32,0.28) 0%, transparent 55%),
-        radial-gradient(ellipse 75% 60% at 50% 90%, rgba(13,51,21,0.3) 0%, transparent 65%),
-        linear-gradient(180deg, #051408 0%, #030804 100%);
-    }
-
-    .nature-bg::after {
-      content: "";
-      position: absolute; inset: 0;
-      background-image: radial-gradient(rgba(129,199,132,0.06) 1px, transparent 1px);
-      background-size: 32px 32px;
-    }
-
-    #fireflies { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-
-    .firefly {
-      position: absolute; border-radius: 50%;
-      background: radial-gradient(circle, #ecfdf5 0%, #86efac 45%, transparent 100%);
-      box-shadow: 0 0 10px 3px rgba(134,239,172,0.6);
-      animation: flyFloat var(--dur, 12s) ease-in-out infinite var(--delay, 0s);
-    }
-
-    @keyframes flyFloat {
-      0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-      20% { opacity: 0.95; }
-      50% { transform: translate(var(--tx, 40px), var(--ty, -60px)) scale(1.15); opacity: 1; }
-      80% { opacity: 0.65; }
-      100% { transform: translate(var(--tx2, -30px), var(--ty2, -120px)) scale(0.5); opacity: 0; }
+        radial-gradient(ellipse 70% 50% at 15% 15%, rgba(46,125,50,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 45% at 85% 20%, rgba(27,94,32,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 50% 95%, rgba(10,36,15,0.3) 0%, transparent 65%),
+        linear-gradient(180deg, #06170a 0%, #040d06 100%);
     }
 
     /* Header */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(4, 13, 6, 0.92);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(4, 13, 6, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 0 28px;
       height: 64px;
@@ -105,56 +77,49 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.4);
-    }
-
-    header::after {
-      content: "";
-      position: absolute; bottom: 0; left: 8%; right: 8%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(129,199,132,0.7), transparent);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
     }
 
     .logo-link {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 12px;
       text-decoration: none; flex-shrink: 0;
     }
 
     .brand-logo {
-      height: 40px; width: auto;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+      height: 38px; width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     }
 
     .brand-title {
-      font-size: 17px; font-weight: 800;
-      letter-spacing: -0.2px; color: var(--text);
-      display: flex; flex-direction: column; line-height: 1.15;
+      font-size: 16px; font-weight: 800;
+      color: var(--text);
+      display: flex; flex-direction: column; line-height: 1.2;
     }
 
     .brand-title small {
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--green-300); margin-top: 1px;
+      font-size: 10.5px; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--green-300);
     }
 
-    .nav-actions { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+    .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
     .btn {
       padding: 7px 14px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
-      color: rgba(200,230,205,0.75);
+      color: rgba(200,230,205,0.85);
       font-weight: 600; font-size: 12.5px;
       font-family: inherit; cursor: pointer;
-      transition: all var(--transition);
+      transition: all 0.2s ease;
       text-decoration: none;
       display: inline-flex; align-items: center; gap: 6px;
       white-space: nowrap;
     }
 
     .btn:hover {
-      background: rgba(129,199,132,0.12);
+      background: rgba(142,207,145,0.12);
       border-color: var(--border-strong);
       color: var(--text);
       transform: translateY(-1px);
@@ -162,116 +127,102 @@
 
     .btn.primary {
       background: linear-gradient(135deg, rgba(46,125,50,0.9), rgba(27,94,32,0.85));
-      border-color: rgba(129,199,132,0.35);
-      color: var(--green-100);
+      border-color: rgba(142,207,145,0.4);
+      color: #ffffff;
     }
 
     .btn.active {
-      background: rgba(129,199,132,0.2);
+      background: rgba(142,207,145,0.18);
       border-color: var(--green-300);
-      color: #fff;
+      color: #ffffff;
     }
 
     /* Main Container */
     main {
       position: relative; z-index: 2;
-      padding: 30px 24px 80px;
-      max-width: 1220px;
+      padding: 28px 24px 80px;
+      max-width: 1200px;
       margin: 0 auto;
       display: grid;
       gap: 24px;
     }
 
-    /* Hero Dossier Header */
-    .dossier-hero {
-      background: linear-gradient(145deg, rgba(14, 40, 20, 0.9), rgba(6, 20, 10, 0.96));
+    /* Hero Manual Header */
+    .manual-hero {
+      background: linear-gradient(145deg, rgba(14, 40, 20, 0.85), rgba(7, 22, 11, 0.95));
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 34px 38px;
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
       box-shadow: var(--shadow-card);
+      position: relative;
     }
 
-    .dossier-hero::before {
-      content: "";
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(129,199,132,0.7), transparent);
-    }
-
-    .dossier-meta-bar {
+    .manual-meta-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(129,199,132,0.14);
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(142,207,145,0.12);
     }
 
-    .dossier-ref {
+    .manual-tag {
       font-family: var(--font-mono);
-      font-size: 11.5px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: var(--green-300);
-      letter-spacing: 0.8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .dossier-ref-tag {
-      background: rgba(129,199,132,0.12);
-      border: 1px solid rgba(129,199,132,0.25);
-      padding: 3px 8px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      background: rgba(142,207,145,0.1);
+      border: 1px solid rgba(142,207,145,0.22);
+      padding: 3px 10px;
       border-radius: 4px;
     }
 
-    .dossier-status-badges {
+    .status-badges {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
     }
 
     .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 11px;
-      border-radius: 999px;
+      display: inline-flex; align-items: center;
+      padding: 4px 10px;
+      border-radius: 4px;
       font-size: 11px; font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      background: rgba(129,199,132,0.1);
-      border: 1px solid rgba(129,199,132,0.22);
+      letter-spacing: 0.3px;
+      background: rgba(142,207,145,0.1);
+      border: 1px solid rgba(142,207,145,0.22);
       color: var(--green-300);
     }
 
     .badge-cr {
       background: rgba(239,83,80,0.15);
-      border-color: rgba(239,83,80,0.4);
+      border-color: rgba(239,83,80,0.35);
       color: #ff8a80;
     }
 
     .badge-gold {
-      background: rgba(229,192,123,0.14);
-      border-color: rgba(229,192,123,0.35);
+      background: rgba(223,178,96,0.15);
+      border-color: rgba(223,178,96,0.35);
       color: var(--gold);
     }
 
     .hero-title {
       font-family: var(--font-serif);
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 700;
       color: #ffffff;
       line-height: 1.25;
       margin-bottom: 10px;
-      letter-spacing: -0.3px;
     }
 
     .hero-lead {
-      font-size: 14.5px;
+      font-size: 14px;
       color: var(--text-secondary);
-      max-width: 860px;
+      max-width: 960px;
       line-height: 1.65;
     }
 
@@ -292,23 +243,23 @@
     }
 
     .metric-card {
-      background: rgba(4, 16, 8, 0.65);
-      border: 1px solid rgba(129,199,132,0.12);
+      background: rgba(4, 16, 8, 0.75);
+      border: 1px solid rgba(142,207,145,0.12);
       border-radius: var(--radius-md);
       padding: 12px 16px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
     }
 
     .metric-card .num {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
       color: #ffffff;
       font-family: var(--font-mono);
       display: flex;
       align-items: baseline;
-      gap: 4px;
+      gap: 5px;
     }
 
     .metric-card .num span {
@@ -325,61 +276,50 @@
       font-weight: 600;
     }
 
-    /* 3-Second Rapid Field Rule (Direct ranger utility) */
-    .rapid-rule-card {
-      background: linear-gradient(135deg, rgba(16, 46, 24, 0.75), rgba(8, 26, 12, 0.85));
+    /* Quick Field Identification Rule Card */
+    .field-rule-card {
+      background: linear-gradient(135deg, rgba(16, 44, 22, 0.7), rgba(9, 25, 13, 0.85));
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
       padding: 22px 26px;
       box-shadow: var(--shadow-card);
-      position: relative;
     }
 
-    .rapid-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .field-rule-header {
       margin-bottom: 14px;
     }
 
-    .rapid-header-icon {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      background: rgba(129,199,132,0.18);
-      border: 1px solid rgba(129,199,132,0.3);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--green-300);
-    }
-
-    .rapid-title {
-      font-size: 16px;
+    .field-rule-title {
+      font-size: 17px;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
     }
 
-    .rapid-sub {
-      font-size: 12px;
+    .field-rule-sub {
+      font-size: 12.5px;
       color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    .rapid-cols {
+    .field-rule-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+      margin-top: 12px;
     }
 
-    @media (max-width: 720px) {
-      .rapid-cols { grid-template-columns: 1fr; }
+    @media (max-width: 760px) {
+      .field-rule-cols { grid-template-columns: 1fr; }
     }
 
     .rule-box {
-      background: rgba(3, 12, 5, 0.65);
-      border: 1px solid rgba(129, 199, 132, 0.14);
+      background: rgba(3, 12, 5, 0.7);
+      border: 1px solid rgba(142, 207, 145, 0.15);
       border-radius: var(--radius-md);
-      padding: 14px 16px;
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .rule-box.sunda { border-left: 4px solid var(--green-400); }
@@ -389,29 +329,31 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .rule-box-name {
-      font-size: 14.5px;
+      font-size: 15px;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
     }
 
     .rule-tag {
       font-size: 10.5px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 4px;
     }
 
-    .rule-box.sunda .rule-tag { background: rgba(129,199,132,0.15); color: var(--green-300); }
-    .rule-box.chinese .rule-tag { background: rgba(229,192,123,0.15); color: var(--gold); }
+    .rule-box.sunda .rule-tag { background: rgba(142,207,145,0.15); color: var(--green-300); }
+    .rule-box.chinese .rule-tag { background: rgba(223,178,96,0.15); color: var(--gold); }
 
     .rule-checklist {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       font-size: 13px;
       color: var(--text-secondary);
     }
@@ -428,15 +370,19 @@
       white-space: nowrap;
     }
 
-    .check-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      flex-shrink: 0; transform: translateY(-2px);
+    .bullet-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
     }
 
-    .rule-box.sunda .check-dot { background: var(--green-400); box-shadow: 0 0 6px var(--green-400); }
-    .rule-box.chinese .check-dot { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+    .rule-box.sunda .bullet-tag { background: rgba(102,187,106,0.2); color: var(--green-300); }
+    .rule-box.chinese .bullet-tag { background: rgba(223,178,96,0.2); color: var(--gold); }
 
-    /* Interactive Search & Filter Toolbar */
+    /* Search & Filter Toolbar */
     .filter-bar {
       display: flex;
       justify-content: space-between;
@@ -447,19 +393,18 @@
       background: rgba(10, 26, 14, 0.75);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      backdrop-filter: blur(12px);
     }
 
     .search-box {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(4, 14, 7, 0.85);
-      border: 1px solid rgba(129,199,132,0.18);
+      background: rgba(3, 10, 4, 0.65);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 6px 12px;
-      width: 280px;
-      max-width: 100%;
+      flex: 1;
+      max-width: 420px;
     }
 
     .search-box input {
@@ -467,8 +412,8 @@
       border: none;
       outline: none;
       color: var(--text);
+      font-size: 13px;
       font-family: inherit;
-      font-size: 12.5px;
       width: 100%;
     }
 
@@ -476,126 +421,89 @@
       color: var(--text-muted);
     }
 
-    .filter-pills {
-      display: flex;
-      gap: 6px;
-      background: rgba(3, 10, 5, 0.7);
-      padding: 4px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(129,199,132,0.12);
-    }
+    .filter-pills { display: flex; gap: 6px; }
 
     .filter-btn {
-      background: transparent;
-      border: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text-muted);
-      font-family: inherit;
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
       cursor: pointer;
-      transition: all var(--transition);
+      font-family: inherit;
+      transition: all 0.2s ease;
     }
 
-    .filter-btn:hover { color: #fff; }
+    .filter-btn:hover {
+      background: rgba(142,207,145,0.1);
+      color: var(--text);
+    }
+
     .filter-btn.active {
-      background: rgba(129,199,132,0.22);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      background: rgba(142,207,145,0.2);
+      border-color: var(--green-300);
+      color: #ffffff;
     }
 
-    /* Species Detailed Dossier Cards Grid */
+    /* Detailed Species Cards Grid */
     .species-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 22px;
+      gap: 20px;
     }
 
     @media (max-width: 920px) {
       .species-container { grid-template-columns: 1fr; }
     }
 
-    .dossier-card {
-      background: var(--surface);
+    .species-card {
+      background: linear-gradient(145deg, rgba(14, 38, 20, 0.75), rgba(7, 20, 10, 0.88));
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 30px;
+      border-radius: var(--radius-lg);
+      padding: 24px;
       box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       position: relative;
-      overflow: hidden;
-      transition: transform var(--transition), border-color var(--transition);
     }
 
-    .dossier-card:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-2px);
-    }
-
-    .dossier-card.sunda {
-      background: linear-gradient(160deg, rgba(14, 38, 20, 0.88) 0%, rgba(5, 17, 8, 0.95) 100%);
-    }
-
-    .dossier-card.chinese {
-      background: linear-gradient(160deg, rgba(28, 26, 12, 0.85) 0%, rgba(8, 18, 9, 0.95) 100%);
-    }
+    .species-card.sunda { border-top: 4px solid var(--green-400); }
+    .species-card.chinese { border-top: 4px solid var(--gold); }
 
     .card-head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 14px;
+      gap: 12px;
     }
 
     .card-titles h2 {
       font-family: var(--font-serif);
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       color: #ffffff;
-      margin-top: 4px;
+      margin: 4px 0 2px;
     }
 
-    .sci-classification {
-      font-family: var(--font-mono);
-      font-size: 12.5px;
+    .sci-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 14px;
       color: var(--green-300);
+    }
+
+    .species-card.chinese .sci-name { color: var(--gold); }
+
+    .vernacular-names {
+      font-size: 11.5px;
+      color: var(--text-muted);
       margin-top: 2px;
     }
 
-    .chinese .sci-classification {
-      color: var(--gold);
-    }
-
-    .card-emblem {
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      border: 1px solid var(--border-strong);
-      background: rgba(129, 199, 132, 0.12);
-    }
-
-    .chinese .card-emblem {
-      border-color: rgba(229,192,123,0.35);
-      background: rgba(229,192,123,0.12);
-    }
-
-    .card-emblem svg {
-      width: 32px; height: 32px;
-      stroke: var(--green-300);
-      fill: none;
-    }
-
-    .chinese .card-emblem svg {
-      stroke: var(--gold);
-    }
-
-    /* Morphological Spec Matrix */
+    /* Spec Metric Matrix */
     .spec-matrix {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -603,132 +511,112 @@
     }
 
     .spec-cell {
-      background: rgba(3, 12, 5, 0.65);
-      border: 1px solid rgba(129, 199, 132, 0.1);
+      background: rgba(4, 14, 6, 0.6);
+      border: 1px solid rgba(142, 207, 145, 0.12);
       border-radius: var(--radius-sm);
-      padding: 10px 14px;
+      padding: 10px 12px;
     }
 
     .spec-lbl {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
+      font-size: 10.5px;
       color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      margin-bottom: 3px;
     }
 
     .spec-val {
-      font-size: 13.5px;
-      font-weight: 700;
+      font-size: 13px;
       color: #ffffff;
-      line-height: 1.35;
+      font-weight: 600;
+      line-height: 1.4;
     }
 
-    /* Anatomical Breakdown */
+    /* Tail Ratio Visual Bar */
+    .tail-scale-box {
+      background: rgba(4, 14, 6, 0.65);
+      border: 1px solid rgba(142, 207, 145, 0.14);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+
+    .scale-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .scale-bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .species-card.sunda .scale-bar-fill {
+      width: 95%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-700), var(--green-400));
+      border-radius: 999px;
+    }
+
+    .species-card.chinese .scale-bar-fill {
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      border-radius: 999px;
+    }
+
+    /* Anatomical Notes */
     .anatomy-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
     }
 
     .anatomy-item {
-      background: rgba(255, 255, 255, 0.02);
-      border-left: 3px solid var(--green-400);
-      border-radius: 0 8px 8px 0;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    .chinese .anatomy-item {
-      border-left-color: var(--gold);
+      background: rgba(3, 10, 4, 0.45);
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border-left: 2px solid rgba(142,207,145,0.25);
     }
 
     .anatomy-item strong {
       color: #ffffff;
       display: block;
       margin-bottom: 2px;
-      font-size: 13px;
+      font-size: 12.5px;
     }
 
-    /* Visual Scale Bar Component */
-    .tail-scale-box {
-      background: rgba(3, 10, 5, 0.7);
-      border: 1px solid rgba(129, 199, 132, 0.12);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .scale-label-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .scale-bar-track {
-      width: 100%;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .scale-bar-fill {
-      height: 100%;
-      border-radius: 999px;
-    }
-
-    .sunda .scale-bar-fill {
-      width: 88%;
-      background: linear-gradient(90deg, var(--green-700), var(--green-300));
-    }
-
-    .chinese .scale-bar-fill {
-      width: 58%;
-      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
-    }
-
-    /* Tag pills */
     .card-tags {
       display: flex;
-      flex-wrap: wrap;
       gap: 6px;
-      padding-top: 8px;
-      border-top: 1px dashed rgba(129, 199, 132, 0.14);
+      flex-wrap: wrap;
+      margin-top: 4px;
     }
 
     .tag-pill {
       font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(129, 199, 132, 0.08);
-      border: 1px solid rgba(129, 199, 132, 0.18);
-      color: var(--green-300);
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
     }
 
-    .chinese .tag-pill {
-      background: rgba(229, 192, 123, 0.08);
-      border-color: rgba(229, 192, 123, 0.22);
-      color: var(--gold);
-    }
-
-    /* Comprehensive Differential Table */
+    /* Comparative Table Section */
     .table-section {
-      background: var(--surface);
+      background: linear-gradient(145deg, rgba(14, 38, 20, 0.75), rgba(7, 20, 10, 0.88));
       border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 30px;
+      border-radius: var(--radius-lg);
+      padding: 24px;
       box-shadow: var(--shadow-card);
-      overflow-x: auto;
     }
 
     .table-header-group {
@@ -736,122 +624,241 @@
       justify-content: space-between;
       align-items: flex-end;
       flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(142,207,145,0.15);
     }
 
     .table-titles h3 {
       font-family: var(--font-serif);
-      font-size: 22px;
-      font-weight: 700;
+      font-size: 20px;
       color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      margin: 4px 0 2px;
     }
 
     .table-titles p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 4px;
     }
 
     .comp-table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 720px;
+      border-collapse: collapse;
       font-size: 13px;
-    }
-
-    .comp-table th, .comp-table td {
-      padding: 13px 18px;
       text-align: left;
-      border-bottom: 1px solid rgba(129, 199, 132, 0.1);
-      vertical-align: middle;
     }
 
     .comp-table th {
-      background: rgba(4, 14, 7, 0.9);
+      padding: 12px 14px;
+      background: rgba(4, 14, 6, 0.85);
       color: var(--green-300);
-      font-weight: 700;
-      font-size: 11.5px;
+      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border-strong);
     }
 
-    .comp-table th:first-child { border-top-left-radius: 10px; }
-    .comp-table th:last-child { border-top-right-radius: 10px; }
-
-    .comp-table tbody tr:hover td {
-      background: rgba(129, 199, 132, 0.04);
+    .comp-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(142,207,145,0.08);
+      color: var(--text-secondary);
+      vertical-align: top;
+      line-height: 1.5;
     }
 
-    .comp-table tbody tr:last-child td {
-      border-bottom: none;
+    .comp-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .td-criterion {
       font-weight: 700;
-      color: var(--green-100);
-      width: 22%;
+      color: #ffffff;
+      width: 24%;
+      background: rgba(0, 0, 0, 0.15);
     }
 
-    .td-sunda {
-      color: var(--text-secondary);
-      width: 39%;
-      line-height: 1.5;
-    }
-
-    .td-chinese {
-      color: #ebe4d3;
-      width: 39%;
-      line-height: 1.5;
-    }
+    .td-sunda { width: 38%; }
+    .td-chinese { width: 38%; }
 
     .val-highlight {
-      color: #ffffff;
+      color: var(--green-300);
       font-weight: 700;
     }
 
-    /* Action bar at bottom: Copy Field Summary, Print, Back */
+    /* Field Signs Section */
+    .signs-section {
+      background: linear-gradient(145deg, rgba(14, 38, 20, 0.75), rgba(7, 20, 10, 0.88));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .signs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .signs-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      .signs-grid { grid-template-columns: 1fr; }
+    }
+
+    .sign-card {
+      background: rgba(4, 14, 6, 0.65);
+      border: 1px solid rgba(142, 207, 145, 0.14);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sign-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sign-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .sign-desc strong {
+      color: var(--green-300);
+    }
+
+    /* Rescue & Field Handling Protocol */
+    .protocol-section {
+      background: linear-gradient(145deg, rgba(18, 42, 22, 0.8), rgba(8, 22, 11, 0.92));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .protocol-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .protocol-steps { grid-template-columns: 1fr; }
+    }
+
+    .step-box {
+      background: rgba(4, 14, 6, 0.7);
+      border: 1px solid rgba(142, 207, 145, 0.15);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--green-300);
+      background: rgba(142,207,145,0.12);
+      padding: 2px 8px;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .step-desc b {
+      color: #ff8a80;
+    }
+
+    /* Hotlines Callout */
+    .hotline-box {
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: rgba(3, 10, 4, 0.75);
+      border: 1px solid rgba(223, 178, 96, 0.3);
+      border-radius: var(--radius-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hotline-info {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .hotline-info strong {
+      color: var(--gold);
+    }
+
+    /* Bottom Action Bar */
     .field-actions-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      background: rgba(10, 26, 14, 0.7);
+      padding: 16px 20px;
+      background: rgba(10, 26, 14, 0.75);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 14px 20px;
     }
 
     .action-note {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
+    .action-note b {
+      color: #ffffff;
+    }
+
+    /* Copy Toast */
     .copy-toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
       background: #1b5e20;
-      color: #e8f5e9;
-      border: 1px solid #81c784;
-      border-radius: 8px;
-      padding: 10px 18px;
+      border: 1px solid var(--green-300);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 10000;
       opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.25s ease;
       pointer-events: none;
-      z-index: 1000;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      transform: translateY(10px);
     }
 
     .copy-toast.show {
@@ -861,37 +868,38 @@
 
     /* Footer */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 26px;
       text-align: center;
+      padding: 30px 20px;
       font-size: 12px;
       color: var(--text-muted);
-      position: relative;
-      z-index: 2;
+      border-top: 1px solid var(--border);
       line-height: 1.6;
     }
 
-    /* Print styles */
+    /* Print Stylesheet */
     @media print {
       body { background: #ffffff !important; color: #111111 !important; }
-      .nature-bg, #fireflies, header, .filter-bar, .field-actions-bar, footer { display: none !important; }
-      .dossier-hero, .dossier-card, .table-section, .rapid-rule-card {
+      header, .filter-bar, .field-actions-bar, footer, .btn { display: none !important; }
+      .nature-bg { display: none !important; }
+      main { padding: 0 !important; max-width: 100% !important; }
+      .manual-hero, .field-rule-card, .species-card, .table-section, .signs-section, .protocol-section {
         background: #ffffff !important;
         border: 1px solid #cccccc !important;
         box-shadow: none !important;
         color: #111111 !important;
         page-break-inside: avoid;
       }
-      .hero-title, .card-titles h2, .spec-val, .rule-box-name, .table-titles h3 { color: #000000 !important; }
-      .anatomy-item strong, .val-highlight { color: #000000 !important; }
-      .comp-table th { background: #eeeeee !important; color: #222222 !important; }
+      .hero-title, .card-titles h2, .spec-val, .rule-box-name, .table-titles h3, .sign-title, .step-title {
+        color: #000000 !important;
+      }
+      .comp-table th { background: #f0f0f0 !important; color: #111111 !important; }
+      .comp-table td { color: #222222 !important; }
     }
   </style>
 </head>
 
 <body>
   <div class="nature-bg"></div>
-  <div id="fireflies"></div>
 
   <!-- Header -->
   <header>
@@ -899,7 +907,7 @@
       <img class="brand-logo" src="{{ url_for('static', filename='images/tete-logo.png') }}" alt="TeTe Logo" />
       <div class="brand-title">
         <span>TeTe</span>
-        <small>Ranger Monitor AI</small>
+        <small>Hệ Thống Quản Lý &amp; Bảo Tồn Động Vật Hoang Dã</small>
       </div>
     </a>
     <nav class="nav-actions">
@@ -909,22 +917,16 @@
       <a class="btn" href="/game">Mini Game</a>
       <a class="btn" href="/about">About Us</a>
       <a class="btn" href="/visitors">Thống kê truy cập</a>
-      <button class="btn" onclick="window.print()" title="In hoặc lưu PDF">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        In Sổ Tay
-      </button>
+      <button class="btn" onclick="window.print()" title="In hoặc lưu PDF">In Sổ Tay</button>
     </nav>
   </header>
 
   <main>
-    <!-- Dossier Hero Header -->
-    <section class="dossier-hero">
-      <div class="dossier-meta-bar">
-        <div class="dossier-ref">
-          <span class="dossier-ref-tag">DOC-REF: VN-WILDLIFE-CR-02</span>
-          <span>QUY CHUẨN ĐỊNH DANH THỰC ĐỊA 2026</span>
-        </div>
-        <div class="dossier-status-badges">
+    <!-- Manual Hero Header -->
+    <section class="manual-hero">
+      <div class="manual-meta-bar">
+        <span class="manual-tag">Tài Liệu Hướng Dẫn Nghiệp Vụ Thực Địa</span>
+        <div class="status-badges">
           <span class="badge badge-cr">IUCN Red List: CR (Cực kỳ nguy cấp)</span>
           <span class="badge badge-gold">Nghị định 84/2021: Nhóm IB</span>
           <span class="badge">CITES Phụ lục I</span>
@@ -933,7 +935,7 @@
 
       <h1 class="hero-title">Sổ Tay Phân Biệt Thực Địa: Tê Tê Java &amp; Tê Tê Vàng</h1>
       <p class="hero-lead">
-        Việt Nam ghi nhận sự hiện diện tự nhiên của <strong>02 loài tê tê</strong> quý hiếm bậc nhất hành tinh. Cả hai đều đối mặt với nguy cơ tuyệt chủng tối cao và được bảo vệ ở cấp độ pháp lý nghiêm ngặt nhất. Tài liệu nghiệp vụ này cô đọng các <em>chỉ số hình thái đối chiếu nhanh</em> nhằm hỗ trợ các tổ tuần tra kiểm lâm, camera bẫy ảnh AI và chuyên viên bảo tồn xác định loài chính xác trong 3 giây.
+        Việt Nam là sinh cảnh tự nhiên của <strong>02 loài tê tê</strong> quý hiếm: Tê tê Java (<em>Manis javanica</em>) và Tê tê Vàng (<em>Manis pentadactyla</em>). Cả hai loài đều nằm ở cấp bảo tồn cao nhất (Cực kỳ nguy cấp - CR) và thuộc Nhóm IB động vật rừng nghiêm cấm khai thác, sử dụng vì mục đích thương mại. Tài liệu này cung cấp các chỉ số hình thái, dấu vết và quy trình cứu hộ tại chỗ phục vụ công tác tuần tra bảo vệ rừng.
       </p>
 
       <!-- Key metric indicators -->
@@ -948,46 +950,41 @@
         </div>
         <div class="metric-card">
           <div class="num">100% <span>Dạ hành</span></div>
-          <div class="lbl">Tập tính kiếm ăn ban đêm</div>
+          <div class="lbl">Hoạt động kiếm ăn ban đêm</div>
         </div>
         <div class="metric-card">
-          <div class="num">Nhóm IB <span>Nghiêm ngặt</span></div>
-          <div class="lbl">Cấm khai thác thương mại</div>
+          <div class="num">Nhóm IB <span>Nghiêm cấm</span></div>
+          <div class="lbl">Bảo vệ pháp lý tối đa</div>
         </div>
       </div>
     </section>
 
-    <!-- Rapid 3-Second Field Recognition Card -->
-    <section class="rapid-rule-card">
-      <div class="rapid-header">
-        <div class="rapid-header-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div>
-          <div class="rapid-title">Nguyên Tắc 3 Giây Nhận Diện Nhanh Tại Hiện Trường</div>
-          <div class="rapid-sub">Phản xạ định danh cốt lõi dành cho lực lượng trinh sát và kiểm tra bẫy ảnh</div>
-        </div>
+    <!-- Quick Field Recognition Rule Card -->
+    <section class="field-rule-card">
+      <div class="field-rule-header">
+        <div class="field-rule-title">Dấu Hiệu Nhận Diện Nhanh Ngoài Hiện Trường</div>
+        <div class="field-rule-sub">3 đặc điểm trực quan nhất giúp cán bộ kiểm lâm và tuần tra phân biệt chính xác hai loài</div>
       </div>
 
-      <div class="rapid-cols">
+      <div class="field-rule-cols">
         <!-- Sunda Rule -->
         <div class="rule-box sunda">
           <div class="rule-box-header">
             <span class="rule-box-name">Tê Tê Java (Manis javanica)</span>
-            <span class="rule-tag">Miền Trung &amp; Nam</span>
+            <span class="rule-tag">Miền Trung &amp; Miền Nam</span>
           </div>
           <ul class="rule-checklist">
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Nhìn Đuôi:</strong> Đuôi <em>dài hơn hoặc bằng thân</em>, thon nhọn, vảy đuôi nhiều (28–30 hàng).</span>
+              <span class="bullet-tag">01</span>
+              <span><strong>Vành tai:</strong> Không có vành tai ngoài (vành tai thoái hóa, chỉ là nếp gờ da chìm sát hộp sọ).</span>
             </li>
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Nhìn Tai:</strong> <em>Không thấy vành tai ngoài</em> (chỉ có nếp gờ da chìm sát đầu).</span>
+              <span class="bullet-tag">02</span>
+              <span><strong>Đuôi:</strong> Đuôi dài hơn hoặc bằng thân (35–55 cm), thon nhọn dần về đỉnh, vảy đuôi nhiều (28–30 hàng).</span>
             </li>
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Vị trí bắt gặp:</strong> Thường ở <em>trên cây cao, chạc cây</em> hoặc hốc cây gỗ mục.</span>
+              <span class="bullet-tag">03</span>
+              <span><strong>Tập tính:</strong> Giỏi leo trèo cây, chóp đuôi có đệm mút quấn cành; ban ngày thường ngủ trong hốc cây cao.</span>
             </li>
           </ul>
         </div>
@@ -1000,16 +997,16 @@
           </div>
           <ul class="rule-checklist">
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Nhìn Tai:</strong> <em>Có vành tai ngoài nhô hẳn ra</em>, dễ thấy rõ ràng bằng mắt thường.</span>
+              <span class="bullet-tag">01</span>
+              <span><strong>Vành tai:</strong> Có vành tai ngoài nhô hẳn ra ngoài, quan sát thấy rất rõ ràng bằng mắt thường.</span>
             </li>
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Nhìn Đuôi:</strong> Đuôi <em>ngắn hơn thân</em> rõ rệt, vảy đuôi ít (16–19 hàng), chóp đuôi tù tròn.</span>
+              <span class="bullet-tag">02</span>
+              <span><strong>Đuôi:</strong> Đuôi ngắn hơn thân rõ rệt (25–38 cm), to bè, chóp đuôi tù tròn, vảy đuôi ít (16–19 hàng).</span>
             </li>
             <li>
-              <span class="check-dot"></span>
-              <span><strong>Vị trí bắt gặp:</strong> Chủ yếu <em>đào bới dưới mặt đất</em>, cửa hang đất sâu hoặc hốc đá núi.</span>
+              <span class="bullet-tag">03</span>
+              <span><strong>Tập tính:</strong> Chuyên đào hang đất ngầm sâu 2–4 mét, móng vuốt trước to khỏe bản rộng; ít khi leo cây.</span>
             </li>
           </ul>
         </div>
@@ -1019,32 +1016,26 @@
     <!-- Toolbar: Search & Species Toggle -->
     <div class="filter-bar">
       <div class="search-box">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="speciesSearch" placeholder="Tìm kiếm nhanh: tai, đuôi, vảy, Cát Tiên..." />
+        <input type="text" id="speciesSearch" placeholder="Tìm kiếm nhanh: tai, đuôi, móng, Cúc Phương, Cát Tiên..." />
       </div>
 
       <div class="filter-pills">
-        <button class="filter-btn active" data-view="all">Tất Cả</button>
+        <button class="filter-btn active" data-view="all">Tất Cả 02 Loài</button>
         <button class="filter-btn" data-view="sunda">Tê Tê Java</button>
         <button class="filter-btn" data-view="chinese">Tê Tê Vàng</button>
       </div>
     </div>
 
-    <!-- Detailed Dossier Cards Grid -->
+    <!-- Detailed Species Cards Grid -->
     <div class="species-container" id="dossierContainer">
       <!-- Species Card 1: Sunda Pangolin -->
-      <article class="dossier-card sunda" id="dossierSunda">
+      <article class="species-card sunda" id="dossierSunda">
         <div class="card-head">
           <div class="card-titles">
             <span class="badge badge-cr">CR • Cực kỳ nguy cấp</span>
             <h2>Tê Tê Java</h2>
-            <div class="sci-classification">Manis javanica (Desmarest, 1822)</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Tên tiếng Anh: Sunda / Malayan Pangolin</div>
-          </div>
-          <div class="card-emblem" title="Biểu tượng Tê tê Java">
-            <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 18c2-4 6-6 10-6 4 0 7 3 7 6M2 18h20M12 6a4 4 0 0 1 4 4c0 3-4 5-4 5s-4-2-4-5a4 4 0 0 1 4-4z"/>
-            </svg>
+            <div class="sci-name">Manis javanica (Desmarest, 1822)</div>
+            <div class="vernacular-names">Tên gọi khác: Tê tê Mã Lai, Tê tê đuôi dài • Tên tiếng Anh: Sunda Pangolin</div>
           </div>
         </div>
 
@@ -1052,19 +1043,19 @@
         <div class="spec-matrix">
           <div class="spec-cell">
             <div class="spec-lbl">Vùng Phân Bố</div>
-            <div class="spec-val">Miền Trung &amp; Nam<br /><small style="color:var(--text-muted);font-weight:normal">(Thừa Thiên Huế → Cà Mau)</small></div>
+            <div class="spec-val">Miền Trung &amp; Miền Nam<br /><small style="color:var(--text-muted);font-weight:normal">(Thừa Thiên Huế trở vào đến Cà Mau)</small></div>
           </div>
           <div class="spec-cell">
-            <div class="spec-lbl">Chiều Dài Thân &amp; Đuôi</div>
-            <div class="spec-val">Thân: 40–65 cm<br />Đuôi: 35–55 cm <small style="color:var(--green-300)">(Đuôi dài)</small></div>
+            <div class="spec-lbl">Kích Thước Thân &amp; Đuôi</div>
+            <div class="spec-val">Thân: 40–65 cm<br />Đuôi: 35–55 cm <small style="color:var(--green-300)">(Đuôi dài thon)</small></div>
           </div>
           <div class="spec-cell">
             <div class="spec-lbl">Hàng Vảy Đuôi</div>
-            <div class="spec-val">28 – 30 hàng vảy<br /><small style="color:var(--text-muted);font-weight:normal">(Vảy nhọn dần về chóp)</small></div>
+            <div class="spec-val">28 – 30 hàng vảy<br /><small style="color:var(--text-muted);font-weight:normal">(Vảy nhọn dần về chóp đuôi)</small></div>
           </div>
           <div class="spec-cell">
             <div class="spec-lbl">Vành Tai Ngoài</div>
-            <div class="spec-val">Không có vành tai<br /><small style="color:var(--text-muted);font-weight:normal">(Chìm dưới lớp da đầu)</small></div>
+            <div class="spec-val">Không có vành tai<br /><small style="color:var(--text-muted);font-weight:normal">(Gờ da chìm dưới đầu)</small></div>
           </div>
         </div>
 
@@ -1072,7 +1063,7 @@
         <div class="tail-scale-box">
           <div class="scale-label-row">
             <span>Tỷ lệ chiều dài đuôi so với thân:</span>
-            <span style="color:var(--green-300); font-weight:700;">~ 90% – 105% (Rất Dài)</span>
+            <span style="color:var(--green-300); font-weight:700;">~ 90% – 105% (Đuôi Rất Dài)</span>
           </div>
           <div class="scale-bar-track">
             <div class="scale-bar-fill"></div>
@@ -1082,16 +1073,16 @@
         <!-- Morphological Details -->
         <div class="anatomy-list">
           <div class="anatomy-item">
-            <strong>Màu sắc vảy sừng &amp; Hoa văn:</strong>
-            Màu nâu tối, nâu đen hoặc xám lục pha vàng nhạt; mép sau của từng vảy thường có gờ khía răng cưa nhẹ. Thân thon dài hơn.
+            <strong>Màu sắc vảy sừng &amp; Cấu trúc:</strong>
+            Màu nâu tối, nâu đen hoặc xám xỉn pha vàng nhạt; mép sau vảy có gờ khía nhẹ. Thân hình thon thả, thích nghi hoàn hảo với việc di chuyển mềm mại luồn lách qua cành lá rậm rạp.
           </div>
           <div class="anatomy-item">
-            <strong>Khả năng bám cành &amp; Thích nghi leo trèo:</strong>
-            Đuôi có đệm mút chịu lực ở chóp, có thể cuộn chặt quanh cành cây và treo ngược toàn bộ thân thể để tìm tổ mối trên cao.
+            <strong>Khả năng leo trèo &amp; Thích nghi tán cây:</strong>
+            Chóp đuôi có phần đệm thịt chịu lực, có thể cuộn chặt quanh cành cây và treo ngược toàn bộ cơ thể để dùng móng phá tổ kiến, tổ mối trên cao.
           </div>
           <div class="anatomy-item">
-            <strong>Khu bảo tồn trọng điểm:</strong>
-            VQG Cát Tiên, VQG Bù Gia Mập, VQG Phong Nha - Kẻ Bàng, Khu BTTN Kon Chư Răng, VQG Lò Gò - Xa Mát.
+            <strong>Các Vườn Quốc gia &amp; Khu bảo tồn trọng điểm:</strong>
+            VQG Cát Tiên, VQG Bù Gia Mập, VQG Phong Nha - Kẻ Bàng, Khu BTTN Kon Chư Răng, VQG Lò Gò - Xa Mát, VQG Yok Đôn.
           </div>
         </div>
 
@@ -1099,24 +1090,19 @@
           <span class="tag-pill">Leo trèo cây</span>
           <span class="tag-pill">Đuôi dài nhọn</span>
           <span class="tag-pill">Không vành tai</span>
-          <span class="tag-pill">Vảy nâu xám</span>
+          <span class="tag-pill">Vảy nâu sẫm</span>
           <span class="tag-pill">Rừng nhiệt đới miền Nam</span>
         </div>
       </article>
 
       <!-- Species Card 2: Chinese Pangolin -->
-      <article class="dossier-card chinese" id="dossierChinese">
+      <article class="species-card chinese" id="dossierChinese">
         <div class="card-head">
           <div class="card-titles">
             <span class="badge badge-cr">CR • Cực kỳ nguy cấp</span>
             <h2>Tê Tê Vàng</h2>
-            <div class="sci-classification">Manis pentadactyla (Linnaeus, 1758)</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Tên tiếng Anh: Chinese Pangolin</div>
-          </div>
-          <div class="card-emblem" title="Biểu tượng Tê tê Vàng">
-            <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 17a9 9 0 0 1 18 0M7 17v4M17 17v4M12 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM2 21h20"/>
-            </svg>
+            <div class="sci-name">Manis pentadactyla (Linnaeus, 1758)</div>
+            <div class="vernacular-names">Tên gọi khác: Tê tê Trung Hoa, Tê tê tai • Tên tiếng Anh: Chinese Pangolin</div>
           </div>
         </div>
 
@@ -1124,19 +1110,19 @@
         <div class="spec-matrix">
           <div class="spec-cell">
             <div class="spec-lbl">Vùng Phân Bố</div>
-            <div class="spec-val">Miền Bắc &amp; Bắc Trung Bộ<br /><small style="color:var(--text-muted);font-weight:normal">(Quảng Bình → Vùng núi phía Bắc)</small></div>
+            <div class="spec-val">Miền Bắc &amp; Bắc Trung Bộ<br /><small style="color:var(--text-muted);font-weight:normal">(Quảng Bình trở ra đến vùng núi phía Bắc)</small></div>
           </div>
           <div class="spec-cell">
-            <div class="spec-lbl">Chiều Dài Thân &amp; Đuôi</div>
-            <div class="spec-val">Thân: 40–60 cm<br />Đuôi: 25–38 cm <small style="color:var(--gold)">(Đuôi ngắn)</small></div>
+            <div class="spec-lbl">Kích Thước Thân &amp; Đuôi</div>
+            <div class="spec-val">Thân: 40–60 cm<br />Đuôi: 25–38 cm <small style="color:var(--gold)">(Đuôi ngắn tù)</small></div>
           </div>
           <div class="spec-cell">
             <div class="spec-lbl">Hàng Vảy Đuôi</div>
-            <div class="spec-val">16 – 19 hàng vảy<br /><small style="color:var(--text-muted);font-weight:normal">(Chóp đuôi tròn tù rõ rệt)</small></div>
+            <div class="spec-val">16 – 19 hàng vảy<br /><small style="color:var(--text-muted);font-weight:normal">(Chóp đuôi tù tròn có vảy phủ)</small></div>
           </div>
           <div class="spec-cell">
             <div class="spec-lbl">Vành Tai Ngoài</div>
-            <div class="spec-val">Có vành tai nhô rõ<br /><small style="color:var(--gold)">(Rất dễ nhìn từ xa)</small></div>
+            <div class="spec-val">Có vành tai nhô rõ<br /><small style="color:var(--gold)">(Dễ nhìn thấy từ xa)</small></div>
           </div>
         </div>
 
@@ -1154,15 +1140,15 @@
         <!-- Morphological Details -->
         <div class="anatomy-list">
           <div class="anatomy-item">
-            <strong>Màu sắc vảy sừng &amp; Hoa văn:</strong>
-            Màu vàng nhạt, vàng rơm, nâu đất pha vàng hoặc màu sừng trong mờ; vảy rất dày, cứng, mép vảy nhẵn nhụi không có răng cưa.
+            <strong>Màu sắc vảy sừng &amp; Cấu trúc:</strong>
+            Màu vàng nhạt, vàng rơm, nâu đất pha vàng hoặc màu sừng trong mờ; vảy rất dày, cứng, bề mặt nhẵn bóng. Cơ thể đậm chắc, tròn bè hơn so với Tê tê Java.
           </div>
           <div class="anatomy-item">
-            <strong>Khả năng đào bới &amp; Thích nghi hang đất:</strong>
-            Vuốt chân trước ngón giữa dài và to khoẻ khác thường, chuyên khoét phá đất đồi nén cứng và đào hang sâu từ 2 đến 4 mét dưới lòng đất.
+            <strong>Khả năng đào bới &amp; Hang ngầm:</strong>
+            Vuốt ngón giữa chi trước to bản và khỏe khoắn vượt trội, chuyên phá đất nén cứng và đào hang sâu từ 2 đến 4 mét dưới lòng đất hoặc khe đá núi vôi để trú ẩn qua mùa đông giá lạnh.
           </div>
           <div class="anatomy-item">
-            <strong>Khu bảo tồn trọng điểm:</strong>
+            <strong>Các Vườn Quốc gia &amp; Khu bảo tồn trọng điểm:</strong>
             VQG Cúc Phương, VQG Hoàng Liên, VQG Ba Bể, VQG Tam Đảo, VQG Pù Mát, Khu BTTN Na Hang.
           </div>
         </div>
@@ -1172,7 +1158,7 @@
           <span class="tag-pill">Đuôi ngắn tròn tù</span>
           <span class="tag-pill">Có vành tai ngoài</span>
           <span class="tag-pill">Vảy vàng rơm</span>
-          <span class="tag-pill">Rừng núi đá vôi miền Bắc</span>
+          <span class="tag-pill">Rừng núi đá vôi phía Bắc</span>
         </div>
       </article>
     </div>
@@ -1181,24 +1167,18 @@
     <section class="table-section" id="tableSection">
       <div class="table-header-group">
         <div class="table-titles">
-          <span class="badge badge-gold">Ma Trận Đối Chiếu Trực Tiếp</span>
-          <h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
-            Bảng Chẩn Đoán Phân Biệt Hình Thái Học
-          </h3>
-          <p>Tập hợp 8 tiêu chí phân loại tiêu chuẩn khoa học giúp phân định cá thể tại hiện trường.</p>
+          <span class="badge badge-gold">Bảng Đối Chiếu Hình Thái Học</span>
+          <h3>So Sánh Chi Tiết Tiêu Chí Nhận Diện Thực Địa</h3>
+          <p>Đối chiếu song song các chỉ số giải phẫu và sinh thái học phục vụ biên bản giám định hiện trường</p>
         </div>
 
-        <button class="btn" id="copySummaryBtn" title="Sao chép nội dung tóm tắt để gửi báo cáo tuần tra">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Sao Chép Tóm Tắt Nghiệp Vụ
-        </button>
+        <button class="btn" id="copySummaryBtn" title="Sao chép tóm tắt nghiệp vụ">Sao Chép Tóm Tắt</button>
       </div>
 
       <table class="comp-table" id="matrixTable">
         <thead>
           <tr>
-            <th>Tiêu chí giải phẫu / Tập tính</th>
+            <th>Tiêu chí nhận dạng</th>
             <th>Tê Tê Java (Manis javanica)</th>
             <th>Tê Tê Vàng (Manis pentadactyla)</th>
           </tr>
@@ -1206,58 +1186,156 @@
         <tbody>
           <tr>
             <td class="td-criterion">Vành tai ngoài</td>
-            <td class="td-sunda"><span class="val-highlight">Không có vành tai ngoài</span> (chỉ là nếp gờ da nhỏ chìm sát sọ)</td>
-            <td class="td-chinese"><span class="val-highlight" style="color:#ffe082">Có vành tai ngoài nhô ra rõ ràng</span> (dễ quan sát)</td>
+            <td class="td-sunda"><span class="val-highlight">Không có vành tai ngoài</span> (vành tai thoái hóa, chỉ là gờ da phẳng sát sọ)</td>
+            <td class="td-chinese"><span class="val-highlight" style="color:var(--gold)">Có vành tai ngoài nhô ra rõ rệt</span> (khoảng 1.5 – 2 cm, dễ quan sát)</td>
           </tr>
           <tr>
             <td class="td-criterion">Chiều dài đuôi vs. Thân</td>
-            <td class="td-sunda"><span class="val-highlight">Đuôi dài hơn hoặc bằng thân</span> (35–55 cm, đầu đuôi nhọn thon)</td>
-            <td class="td-chinese"><span class="val-highlight" style="color:#ffe082">Đuôi ngắn hơn thân rõ rệt</span> (25–38 cm, chóp đuôi tù tròn)</td>
+            <td class="td-sunda"><span class="val-highlight">Đuôi dài hơn hoặc bằng thân</span> (35–55 cm, đầu đuôi thon nhọn)</td>
+            <td class="td-chinese"><span class="val-highlight" style="color:var(--gold)">Đuôi ngắn hơn thân rõ rệt</span> (25–38 cm, chóp đuôi tù tròn)</td>
           </tr>
           <tr>
             <td class="td-criterion">Số hàng vảy đuôi</td>
-            <td class="td-sunda">Nhiều hơn: <strong>28 – 30 hàng vảy</strong></td>
-            <td class="td-chinese">Ít hơn: <strong>16 – 19 hàng vảy</strong></td>
+            <td class="td-sunda">Nhiều hơn: <strong>28 – 30 hàng vảy</strong> dọc sống đuôi</td>
+            <td class="td-chinese">Ít hơn: <strong>16 – 19 hàng vảy</strong> dọc sống đuôi</td>
           </tr>
           <tr>
             <td class="td-criterion">Màu sắc vảy sừng</td>
             <td class="td-sunda">Nâu sẫm, nâu xám đến đen xám hoặc lục tối</td>
-            <td class="td-chinese">Vàng rơm, nâu đất pha vàng hoặc màu sừng trong</td>
+            <td class="td-chinese">Vàng rơm, nâu đất pha vàng hoặc màu sừng trong mờ</td>
           </tr>
           <tr>
-            <td class="td-criterion">Đặc điểm móng vuốt</td>
-            <td class="td-sunda">Vuốt cong khoẻ, ngón sau có đệm thịt bám cành linh hoạt</td>
-            <td class="td-chinese">Vuốt trước thứ 3 rất to bản, khoẻ khoắn chuyên đào đất sâu</td>
+            <td class="td-criterion">Cấu trúc móng vuốt</td>
+            <td class="td-sunda">Móng vuốt cong vừa phải, có đệm thịt chóp đuôi hỗ trợ quấn cành</td>
+            <td class="td-chinese">Móng ngón giữa chân trước rất to bản, khoẻ khoắn chuyên đào đất cứng</td>
           </tr>
           <tr>
             <td class="td-criterion">Khả năng vận động</td>
-            <td class="td-sunda"><span class="val-highlight">Leo trèo cây xuất sắc</span>, di chuyển nhanh nhẹn trên cành</td>
-            <td class="td-chinese"><span class="val-highlight" style="color:#ffe082">Chuyên đào bới hang ngầm</span>, đi lại chậm trên mặt đất</td>
+            <td class="td-sunda"><span class="val-highlight">Leo trèo cây xuất sắc</span>, di chuyển nhanh nhẹn trên chạc cành</td>
+            <td class="td-chinese"><span class="val-highlight" style="color:var(--gold)">Chuyên đào hang đất ngầm</span>, đi lại tương đối chậm trên mặt đất</td>
           </tr>
           <tr>
             <td class="td-criterion">Nơi trú ẩn ban ngày</td>
-            <td class="td-sunda">Hốc cây cao, chạc cây um tùm hoặc bọng cây gỗ mục</td>
-            <td class="td-chinese">Hang đất sâu 2 – 4 mét, hốc đá ngầm kín gió</td>
+            <td class="td-sunda">Hốc cây mục trên cao, chạc cây um tùm hoặc bọng cây gỗ lớn</td>
+            <td class="td-chinese">Hang đất tự đào sâu 2 – 4 mét, hốc đá vôi kín gió</td>
           </tr>
           <tr>
-            <td class="td-criterion">Địa bàn sinh cảnh tại VN</td>
-            <td class="td-sunda">Từ Thừa Thiên Huế trở vào Nam (Cát Tiên, Kon Tum, Lâm Đồng)</td>
-            <td class="td-chinese">Từ Quảng Bình trở ra Bắc (Cúc Phương, Pù Mát, Hoàng Liên)</td>
+            <td class="td-criterion">Vùng sinh cảnh tại VN</td>
+            <td class="td-sunda">Từ Thừa Thiên Huế trở vào Nam (Cát Tiên, Bù Gia Mập, Kon Tum, Lâm Đồng)</td>
+            <td class="td-chinese">Từ Quảng Bình trở ra Bắc (Cúc Phương, Pù Mát, Hoàng Liên, Tam Đảo)</td>
           </tr>
           <tr>
             <td class="td-criterion">Cấp độ bảo vệ pháp luật</td>
-            <td class="td-sunda"><span class="badge badge-cr" style="margin:0">IUCN: CR</span> • Nhóm IB NĐ 84/2021/NĐ-CP</td>
-            <td class="td-chinese"><span class="badge badge-cr" style="margin:0">IUCN: CR</span> • Nhóm IB NĐ 84/2021/NĐ-CP</td>
+            <td class="td-sunda"><span class="badge badge-cr">IUCN: CR</span> • Nhóm IB Nghị định 84/2021/NĐ-CP</td>
+            <td class="td-chinese"><span class="badge badge-cr">IUCN: CR</span> • Nhóm IB Nghị định 84/2021/NĐ-CP</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <!-- Field Ranger Actions Utility Bar -->
+    <!-- Field Signs Section -->
+    <section class="signs-section">
+      <div class="table-titles">
+        <span class="badge badge-gold">Dấu Vết Ngoài Thực Địa</span>
+        <h3>Nhận Diện Dấu Vết Sinh Cảnh Của Tê Tê</h3>
+        <p>Các dấu hiệu trực quan giúp lực lượng kiểm lâm và nghiên cứu đặt camera bẫy ảnh chính xác</p>
+      </div>
+
+      <div class="signs-grid">
+        <div class="sign-card">
+          <div class="sign-title">Cửa Hang Trú Ẩn</div>
+          <div class="sign-desc">
+            Miệng hang hình tròn hoặc bán nguyệt, đường kính <strong>15–20 cm</strong>. Thường có đụn đất mới đùn ra cửa hang và vết móng cào song song rõ ở vách đất.
+          </div>
+        </div>
+
+        <div class="sign-card">
+          <div class="sign-title">Vết Cào Tổ Mối / Kiến</div>
+          <div class="sign-desc">
+            Ụ mối đất hoặc gốc cây mục bị cào thủng một bên lộ lõi tổ. Vết cào sâu 5–15 cm có dấu vết móng vuốt nhọn, khác với vết húc rộng của lợn rừng.
+          </div>
+        </div>
+
+        <div class="sign-card">
+          <div class="sign-title">Đặc Điểm Phân (Scat)</div>
+          <div class="sign-desc">
+            Dạng viên thỏi nhỏ thuôn dài 2–4 cm, màu đen sẫm hoặc xám đất. Khi bóp nhẹ thấy chứa toàn bộ <strong>mảnh vụn vỏ kitin</strong> lấp lánh của kiến và mối.
+          </div>
+        </div>
+
+        <div class="sign-card">
+          <div class="sign-title">Dấu Vết Chân &amp; Đuôi</div>
+          <div class="sign-desc">
+            Chân sau in 5 ngón ngắn; chân trước đi gập mu bàn chân để bảo vệ vuốt. Trên đất bùn ẩm thường thấy <strong>vệt kéo dài của đuôi</strong> song hành cùng dấu chân.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rescue & Handling Guidelines -->
+    <section class="protocol-section">
+      <div class="table-titles">
+        <span class="badge badge-cr">Quy Trình Xử Lý Thực Địa</span>
+        <h3>Hướng Dẫn Tiếp Nhận &amp; Cứu Hộ Ban Đầu Khi Bắt Gặp</h3>
+        <p>Quy trình chuẩn nhằm bảo toàn tính mạng cho cá thể tê tê trước khi bàn giao trung tâm cứu hộ</p>
+      </div>
+
+      <div class="protocol-steps">
+        <div class="step-box">
+          <span class="step-num">BƯỚC 1</span>
+          <div class="step-title">Tiếp Cận Nhẹ Nhàng</div>
+          <div class="step-desc">
+            Tê tê không cắn (không có răng) nhưng cuộn tròn phòng vệ và dùng mép vảy quất mạnh. Dùng khăn vải mềm hoặc bao tải vải thoáng khí bọc nhẹ toàn thân.
+          </div>
+        </div>
+
+        <div class="step-box">
+          <span class="step-num">BƯỚC 2</span>
+          <div class="step-title">Dụng Cụ Chứa Đựng</div>
+          <div class="step-desc">
+            Đặt cá thể vào thùng carton hoặc thùng gỗ có đục lỗ thông khí nhỏ. <b>Tuyệt đối không dùng lồng sắt có nan thưa</b> vì tê tê sẽ húc rách mũi và gãy móng.
+          </div>
+        </div>
+
+        <div class="step-box">
+          <span class="step-num">BƯỚC 3</span>
+          <div class="step-title">Nơi Đặt Cá Thể</div>
+          <div class="step-desc">
+            Đặt thùng ở nơi tối, yên tĩnh, nhiệt độ thoáng mát 24–28°C. Tránh ánh nắng trực tiếp, gió lùa, khói thuốc và tiếng ồn lớn gây sốc tâm lý.
+          </div>
+        </div>
+
+        <div class="step-box">
+          <span class="step-num">BƯỚC 4</span>
+          <div class="step-title">Điều Cấm Tuyệt Đối</div>
+          <div class="step-desc">
+            <b>Không cho uống sữa có đường, sữa đặc</b> (gây viêm ruột tử vong). <b>Không cho ăn cơm, thịt, trái cây</b>. Chỉ có thể nhỏ vài giọt nước lọc sạch vào mép miệng nếu mất nước.
+          </div>
+        </div>
+
+        <div class="step-box">
+          <span class="step-num">BƯỚC 5</span>
+          <div class="step-title">Bàn Giao Khẩn Cấp</div>
+          <div class="step-desc">
+            Liên hệ ngay với Trung tâm Cứu hộ SVW, Vườn Quốc gia Cúc Phương hoặc Hạt Kiểm lâm địa bàn gần nhất để bác sĩ thú y tiếp nhận chuyên môn.
+          </div>
+        </div>
+      </div>
+
+      <div class="hotline-box">
+        <div class="hotline-info">
+          Đường dây nóng cứu hộ khẩn cấp: <strong>Trung tâm Cứu hộ SVW (Vườn Quốc gia Cúc Phương): 0978 331 441</strong> • <strong>Trung tâm Cứu hộ ĐVHD Hà Nội (Sóc Sơn): 0243 599 0014</strong>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted);">
+          Hoạt động tiếp nhận 24/7 trên toàn quốc
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Actions Bar -->
     <div class="field-actions-bar">
       <div class="action-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green-300)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Mọi trường hợp phát hiện cá thể tê tê cần báo cáo ngay về Ban Chỉ Huy Hạt Kiểm Lâm sở tại hoặc SVW Hotline.</span>
+        <b>Chế tài pháp lý:</b> Mọi hành vi săn bắt, tàng trữ, buôn bán cá thể tê tê thuộc Nhóm IB bị truy cứu trách nhiệm hình sự theo <b>Điều 244 Bộ luật Hình sự</b> với mức phạt tù từ 01 đến 15 năm.
       </div>
 
       <div style="display:flex; gap:8px;">
@@ -1271,33 +1349,12 @@
   <div class="copy-toast" id="copyToast">Đã sao chép tóm tắt định danh vào bộ nhớ tạm!</div>
 
   <footer>
-    Dự án Hệ Thống Quan Trắc Sinh Thái Thời Gian Thực TeTe Ranger Monitor AI<br />
-    Nguồn dữ liệu hình thái học: Viện Sinh thái và Tài nguyên sinh vật (IEBR) • IUCN Pangolin Specialist Group • Sách Đỏ Việt Nam
+    Hệ Thống Quản Lý &amp; Bảo Tồn Động Vật Hoang Dã TeTe<br />
+    Nguồn dữ liệu hình thái học: Viện Sinh thái và Tài nguyên sinh vật (IEBR) • Trung tâm Bảo tồn Động vật Hoang dã tại Việt Nam (SVW) • IUCN Pangolin Specialist Group • Sách Đỏ Việt Nam
   </footer>
 
   <script>
-    // Ambient fireflies animation
-    const ffContainer = document.getElementById('fireflies');
-    if (ffContainer) {
-      for (let i = 0; i < 22; i++) {
-        const f = document.createElement('div');
-        f.className = 'firefly';
-        const size = Math.random() * 3 + 2;
-        f.style.width = size + 'px';
-        f.style.height = size + 'px';
-        f.style.left = (Math.random() * 100) + 'vw';
-        f.style.top = (Math.random() * 100) + 'vh';
-        f.style.setProperty('--dur', (Math.random() * 10 + 8) + 's');
-        f.style.setProperty('--delay', (Math.random() * 5) + 's');
-        f.style.setProperty('--tx', (Math.random() * 80 - 40) + 'px');
-        f.style.setProperty('--ty', (Math.random() * -120 - 30) + 'px');
-        f.style.setProperty('--tx2', (Math.random() * 60 - 30) + 'px');
-        f.style.setProperty('--ty2', (Math.random() * -200 - 60) + 'px');
-        ffContainer.appendChild(f);
-      }
-    }
-
-    // Filter pills (All, Sunda, Chinese)
+    // Filter buttons (All, Sunda, Chinese)
     const filterBtns = document.querySelectorAll('.filter-btn');
     const dossierSunda = document.getElementById('dossierSunda');
     const dossierChinese = document.getElementById('dossierChinese');
@@ -1356,18 +1413,22 @@
 
     const summaryText = `[SỔ TAY KIỂM LÂM - PHÂN BIỆT TÊ TÊ TẠI VIỆT NAM]
 1. TÊ TÊ JAVA (Manis javanica):
-- Vành tai: KHÔNG có vành tai ngoài.
-- Đuôi: DÀI hơn thân (35-55cm, 28-30 hàng vảy).
-- Tập tính: Giỏi LEO TRÈO CÂY, ngủ hốc cây cao.
-- Phân bố: Miền Trung & Nam (Thừa Thiên Huế trở vào).
-- Bảo tồn: Cực kỳ nguy cấp (CR) - Nhóm IB.
+- Vành tai: KHÔNG có vành tai ngoài (gờ da chìm sát hộp sọ).
+- Đuôi: DÀI hơn hoặc bằng thân (35-55cm, 28-30 hàng vảy dọc đuôi).
+- Tập tính: Giỏi LEO TRÈO CÂY, chóp đuôi quấn cành, ngủ hốc cây cao.
+- Phân bố: Miền Trung & Nam (Thừa Thiên Huế trở vào đến Cà Mau).
+- Cấp bảo tồn: Cực kỳ nguy cấp (CR) - Nhóm IB Nghị định 84/2021.
 
 2. TÊ TÊ VÀNG (Manis pentadactyla):
-- Vành tai: CÓ VÀNH TAI NGOÀI nhô rõ.
-- Đuôi: NGẮN hơn thân (25-38cm, 16-19 hàng vảy, chóp tù).
-- Tập tính: Chuyên ĐÀO HANG ĐẤT (2-4m), ít trèo.
-- Phân bố: Miền Bắc & Bắc Trung Bộ (Quảng Bình trở ra).
-- Bảo tồn: Cực kỳ nguy cấp (CR) - Nhóm IB.`;
+- Vành tai: CÓ VÀNH TAI NGOÀI nhô rõ (khoảng 1.5-2cm, dễ quan sát).
+- Đuôi: NGẮN hơn thân rõ rệt (25-38cm, 16-19 hàng vảy, chóp tù tròn).
+- Tập tính: Chuyên ĐÀO HANG ĐẤT (2-4m), móng vuốt trước rất to bản.
+- Phân bố: Miền Bắc & Bắc Trung Bộ (Quảng Bình trở ra phía Bắc).
+- Cấp bảo tồn: Cực kỳ nguy cấp (CR) - Nhóm IB Nghị định 84/2021.
+
+ĐƯỜNG DÂY NÓNG CỨU HỘ KHẨN CẤP:
+- Trung tâm Cứu hộ SVW (Vườn Quốc gia Cúc Phương): 0978 331 441
+- Trung tâm Cứu hộ ĐVHD Hà Nội: 0243 599 0014`;
 
     copySummaryBtn.addEventListener('click', async () => {
       try {
