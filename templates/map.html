@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CCTV Map</title>
+    <title>Bản Đồ Camera – Ranger Monitor AI</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}" />
     <link
@@ -11,6 +11,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
       referrerpolicy="no-referrer"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <style> :root {
         --bg: #061306;
@@ -23,12 +26,13 @@
 
       body {
         margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
         background: radial-gradient(1200px 800px at 30% 0%, #0e2a12, var(--bg));
         color: var(--text);
         height: 100vh;
         display: flex;
         flex-direction: column;
+        -webkit-font-smoothing: antialiased;
       }
 
       header {
@@ -116,18 +120,18 @@
 
   <body>
     <header>
-      <div class="title">CCTV Map</div>
+      <div class="title">Bản đồ Camera CCTV</div>
       <div class="actions">
         <button class="btn" onclick="location.href='/'">Dashboard</button>
-        <button class="btn" onclick="location.href='{{ camera.url }}'">Open CCTV</button>
+        <button class="btn" onclick="location.href='{{ camera.url }}'">Mở Camera</button>
       </div>
     </header>
 
     <main class="wrap">
       <section class="card">
         <div><strong>{{ camera.name }}</strong></div>
-        <div class="sub">Lat: {{ camera.lat }}, Lng: {{ camera.lng }}</div>
-        <div class="sub">Click the marker to open the camera.</div>
+        <div class="sub">Vĩ độ: {{ camera.lat }}, Kinh độ: {{ camera.lng }}</div>
+        <div class="sub">Nhấn vào marker để mở camera.</div>
       </section>
 
       <section id="map"></section>
@@ -164,7 +168,7 @@
         });
 
         const marker = L.marker([cameraData.lat, cameraData.lng], { icon: cctvIcon }).addTo(map);
-        marker.bindPopup(`<b>${cameraData.name}</b><br/><a href="${cameraData.url}">Open CCTV</a>`);
+        marker.bindPopup(`<b>${cameraData.name}</b><br/><a href="${cameraData.url}">Mở Camera</a>`);
         marker.on("click", () => marker.openPopup());
       })();
     </script>

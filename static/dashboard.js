@@ -6,7 +6,12 @@ function formatTime(iso) {
   if (!iso) return "—";
   const dt = new Date(iso);
   if (Number.isNaN(dt.getTime())) return iso;
-  return dt.toLocaleString();
+  // Dùng định dạng 24h tiếng Việt, không hiện AM/PM
+  return dt.toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
 }
 
 function eventLabel(eventType, source) {

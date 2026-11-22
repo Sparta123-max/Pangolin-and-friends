@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta charset="utf-8" />
     <meta http-equiv="pragma" content="no-cache" />
-    <title>Mini Game Tê Tê - TeTe Ranger Monitor</title>
+    <title>Mini Game Tê Tê – Ranger Monitor AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
@@ -322,6 +322,147 @@
             color: #ffffff;
         }
 
+        /* ── Player Guide Panel ── */
+        .guide-panel {
+            position: relative;
+            z-index: 2;
+            width: 540px;
+            max-width: 92vw;
+            background: linear-gradient(145deg, rgba(12, 34, 17, 0.88), rgba(6, 20, 10, 0.95));
+            border: 1px solid rgba(129, 199, 132, 0.22);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+            transition: width 0.25s ease;
+        }
+
+        .guide-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid rgba(129,199,132,0.10);
+            transition: background 0.2s ease;
+        }
+        .guide-header:hover { background: rgba(129,199,132,0.07); }
+
+        .guide-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .guide-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            background: rgba(46,125,50,0.5);
+            border: 1px solid rgba(129,199,132,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .guide-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #c8e6c9;
+            letter-spacing: 0.2px;
+        }
+        .guide-badge {
+            font-size: 10.5px;
+            color: rgba(143,174,146,0.8);
+            margin-left: 4px;
+            font-weight: 400;
+        }
+        .guide-toggle {
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: transform 0.25s ease;
+            line-height: 1;
+        }
+        .guide-toggle.open { transform: rotate(180deg); }
+
+        .guide-body {
+            display: none;
+            padding: 16px 18px 18px;
+            gap: 10px;
+            flex-direction: column;
+        }
+        .guide-body.open { display: flex; }
+
+        /* Controls Grid */
+        .ctrl-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .ctrl-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(129,199,132,0.10);
+            border-radius: 9px;
+            padding: 9px 12px;
+        }
+        .ctrl-keys {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 24px;
+            padding: 0 6px;
+            background: rgba(46,125,50,0.35);
+            border: 1px solid rgba(129,199,132,0.30);
+            border-bottom-width: 2px;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            color: #c8e6c9;
+            white-space: nowrap;
+        }
+        .ctrl-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Tips */
+        .guide-tips {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(129,199,132,0.10);
+        }
+        .guide-tips-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: rgba(129,199,132,0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .tip-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(129,199,132,0.55);
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
         /* Runner Dialog Styles */
         div.gm4html5_login {
             padding: 20px;
@@ -365,8 +506,8 @@
                 <!-- Centered Loading Overlay (In the middle of the game screen) -->
                 <div class="game-loading-overlay" id="game-loading-overlay">
                     <div class="game-loading-spinner"></div>
-                    <div class="game-loading-title">Đang Tải Mini Game Tê Tê...</div>
-                    <div class="game-loading-sub">Vui lòng chờ trong giây lát</div>
+                    <div class="game-loading-title">Đang tải Mini Game Tê Tê...</div>
+                    <div class="game-loading-sub">Vui lòng chờ một chút</div>
                 </div>
 
                 <canvas id="canvas" width="720" height="640">
@@ -377,11 +518,46 @@
 
         <!-- Controls & Screen Size Toggle Bar -->
         <div class="game-controls-bar" id="game-controls-bar">
-            <div class="game-hint">Phím mũi tên / WASD: di chuyển • Phím cách: tương tác</div>
+            <div class="game-hint">Phím mũi tên · Phím cách để tương tác</div>
             <div class="screen-size-controls">
                 <button class="size-btn active" id="btn-size-compact" onclick="setGameSize('compact')">Thu nhỏ (540×480)</button>
                 <button class="size-btn" id="btn-size-medium" onclick="setGameSize('medium')">Vừa (630×560)</button>
                 <button class="size-btn" id="btn-size-fullscreen" onclick="toggleGameFullscreen()">Toàn màn hình</button>
+            </div>
+        </div>
+
+        <!-- Player Guide Panel -->
+        <div class="guide-panel" id="guide-panel">
+            <div class="guide-header" onclick="toggleGuide()" aria-expanded="false" id="guide-header">
+                <div class="guide-header-left">
+                    <div class="guide-title">Hướng dẫn chơi</div>
+                </div>
+                <div class="guide-toggle" id="guide-toggle">▾</div>
+            </div>
+            <div class="guide-body" id="guide-body">
+
+                <!-- Controls Grid -->
+                <div class="ctrl-grid">
+                    <div class="ctrl-row">
+                        <div class="ctrl-keys">
+                            <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
+                        </div>
+                        <div class="ctrl-desc">Di chuyển (phím mũi tên)</div>
+                    </div>
+                    <div class="ctrl-row">
+                        <div class="ctrl-keys"><kbd>Space</kbd></div>
+                        <div class="ctrl-desc">Nhảy / Tương tác</div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="guide-tips">
+                    <div class="guide-tips-label">Lưu ý</div>
+                    <div class="tip-item"><div class="tip-dot"></div><span>Di chuyển và ăn kiến để ghi điểm, đồng thời giải cứu các con vật bị bẫy.</span></div>
+                    <div class="tip-item"><div class="tip-dot"></div><span>Tránh lửa. Đạt đủ 20 điểm để mở cửa thoát.</span></div>
+                    <div class="tip-item"><div class="tip-dot"></div><span>Game bị lag hoặc không tải được: nhấn F5 để tải lại, hoặc thử dùng Chrome / Edge.</span></div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -462,6 +638,7 @@
         function setGameSize(size) {
             const cont = document.getElementById('gm4html5_div_id');
             const bar = document.getElementById('game-controls-bar');
+            const guide = document.getElementById('guide-panel');
             const btnCompact = document.getElementById('btn-size-compact');
             const btnMedium = document.getElementById('btn-size-medium');
             if (!cont) return;
@@ -470,14 +647,32 @@
                 cont.style.width = '540px';
                 cont.style.height = '480px';
                 if (bar) bar.style.width = '540px';
+                if (guide) guide.style.width = '540px';
                 if (btnCompact) btnCompact.classList.add('active');
                 if (btnMedium) btnMedium.classList.remove('active');
             } else if (size === 'medium') {
                 cont.style.width = '630px';
                 cont.style.height = '560px';
                 if (bar) bar.style.width = '630px';
+                if (guide) guide.style.width = '630px';
                 if (btnMedium) btnMedium.classList.add('active');
                 if (btnCompact) btnCompact.classList.remove('active');
+            }
+        }
+
+        function toggleGuide() {
+            const body = document.getElementById('guide-body');
+            const toggle = document.getElementById('guide-toggle');
+            const header = document.getElementById('guide-header');
+            const isOpen = body.classList.contains('open');
+            if (isOpen) {
+                body.classList.remove('open');
+                toggle.classList.remove('open');
+                header.setAttribute('aria-expanded', 'false');
+            } else {
+                body.classList.add('open');
+                toggle.classList.add('open');
+                header.setAttribute('aria-expanded', 'true');
             }
         }
 

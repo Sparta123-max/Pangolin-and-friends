@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     :root {
@@ -672,6 +675,7 @@
         </div>
         <div class="history-actions">
           <button class="btn" id="refresh-visits-btn" type="button">Làm mới</button>
+          <button class="btn primary" id="export-pdf-btn" type="button" onclick="downloadPDF()">Tải PDF</button>
           <button class="btn danger" id="clear-visits-btn" type="button">Xóa lịch sử</button>
           <div class="meta-count" id="visits-updated-at">—</div>
         </div>
@@ -850,6 +854,140 @@
       refreshVisits();
       setInterval(refreshVisits, 5000);
     });
+
+    /* ── PDF Export ── */
+
+    // Chuyển tiếng Việt có dấu → không dấu (vì jsPDF helvetica không hỗ trợ Unicode)
+    function vn(str) {
+      if (!str) return '';
+      return str
+        .replace(/[àáảãạăắặẳẵằâấầẩẫậ]/g, 'a')
+        .replace(/[ÀÁẢÃẠĂẮẶẲẴẰÂẤẦẨẪẬ]/g, 'A')
+        .replace(/[èéẻẽẹêếềểễệ]/g, 'e')
+        .replace(/[ÈÉẺẼẸÊẾỀỂỄỆ]/g, 'E')
+        .replace(/[ìíỉĩị]/g, 'i')
+        .replace(/[ÌÍỈĨỊ]/g, 'I')
+        .replace(/[òóỏõọôốồổỗộơớờởỡợ]/g, 'o')
+        .replace(/[ÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ]/g, 'O')
+        .replace(/[ùúủũụưứừửữự]/g, 'u')
+        .replace(/[ÙÚỦŨỤƯỨỪỬỮỰ]/g, 'U')
+        .replace(/[ỳýỷỹỵ]/g, 'y')
+        .replace(/[ỲÝỶỸỴ]/g, 'Y')
+        .replace(/[đ]/g, 'd')
+        .replace(/[Đ]/g, 'D')
+        .replace(/[–—]/g, '-');
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      if (!jsPDF) { alert('Thu vien PDF chua tai xong, thu lai sau.'); return; }
+
+      const btn = document.getElementById('export-pdf-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Dang xuat...'; }
+
+      try {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const now   = new Date().toLocaleString('vi-VN');
+
+        // ── Header bar ──
+        doc.setFillColor(6, 22, 9);
+        doc.rect(0, 0, pageW, 22, 'F');
+        doc.setTextColor(129, 199, 132);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ranger Monitor AI - Thong ke truy cap', 14, 14);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(160, 200, 165);
+        doc.text('Xuat: ' + vn(now), pageW - 14, 14, { align: 'right' });
+
+        // ── Stat summary ──
+        const total  = document.getElementById('stat-total-visits')?.textContent  || '0';
+        const unique = document.getElementById('stat-unique-visitors')?.textContent || '0';
+        const today  = document.getElementById('stat-today-visits')?.textContent   || '0';
+        const last   = document.getElementById('stat-last-time')?.textContent      || '-';
+
+        doc.setFontSize(9);
+        doc.setTextColor(100, 150, 105);
+        doc.text(
+          `Tong luot: ${total}   |   Nguoi dung duy nhat: ${unique}   |   Hom nay: ${today}   |   Lan cuoi: ${vn(last)}`,
+          14, 30
+        );
+
+        // ── Table ──
+        const rows = [];
+        document.querySelectorAll('#visits-tbody tr').forEach((tr, i) => {
+          const tds = tr.querySelectorAll('td');
+          rows.push([
+            String(i + 1),
+            vn(tds[1]?.textContent?.trim() || '-'),
+            vn(tds[2]?.textContent?.trim() || '-'),
+            vn(tds[3]?.textContent?.trim() || '-'),
+            vn(tds[4]?.textContent?.trim() || '-'),
+          ]);
+        });
+
+        if (rows.length === 0) {
+          doc.setFontSize(11);
+          doc.setTextColor(150, 150, 150);
+          doc.text('Chua co du lieu truy cap.', 14, 44);
+        } else {
+          doc.autoTable({
+            startY: 36,
+            head: [['STT', 'Thoi gian', 'Thiet bi', 'Trinh duyet & He dieu hanh', 'Trang truy cap']],
+            body: rows,
+            theme: 'grid',
+            styles: {
+              font: 'helvetica',
+              fontSize: 8.5,
+              cellPadding: 3.5,
+              textColor: [220, 240, 220],
+              lineColor: [40, 80, 45],
+              lineWidth: 0.25,
+            },
+            headStyles: {
+              fillColor: [14, 42, 18],
+              textColor: [129, 199, 132],
+              fontStyle: 'bold',
+              fontSize: 8,
+            },
+            alternateRowStyles: { fillColor: [8, 24, 11] },
+            bodyStyles:         { fillColor: [5, 16, 7] },
+            columnStyles: {
+              0: { cellWidth: 12, halign: 'center' },
+              1: { cellWidth: 52 },
+              2: { cellWidth: 28 },
+              3: { cellWidth: 60 },
+              4: { cellWidth: 'auto' },
+            },
+            margin: { left: 14, right: 14 },
+          });
+        }
+
+        // ── Footer ──
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= pageCount; p++) {
+          doc.setPage(p);
+          doc.setFontSize(7.5);
+          doc.setTextColor(80, 110, 85);
+          doc.text(
+            `Trang ${p}/${pageCount}  -  Ranger Monitor AI`,
+            pageW / 2,
+            doc.internal.pageSize.getHeight() - 6,
+            { align: 'center' }
+          );
+        }
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        doc.save(`visitor-log_${dateStr}.pdf`);
+      } catch (err) {
+        console.error('PDF export error:', err);
+        alert('Xuat PDF that bai: ' + err.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Tai PDF'; }
+      }
+    }
 
     /* Firefly ambient particles */
     (function () {
